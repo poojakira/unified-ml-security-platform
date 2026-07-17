@@ -1,0 +1,81 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+env.local/
+.mlsec-target/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+*.whl
+
+# Docker
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Certificates and keys
+certs/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+API_KEY.txt
+
+# Test outputs
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+*.prof
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Docker
+*.tar
+*.tar.gz
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,35 @@
+# Wireshark/tshark Capture Container
+FROM debian:bookworm-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install Wireshark/tshark and capture tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tshark \
+    wireshark-common \
+    tcpdump \
+    net-tools \
+    iproute2 \
+    iputils-ping \
+    netcat-openbsd \
+    curl \
+    jq \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create capture directory
+RUN mkdir -p /captures
+
+# Non-root user for security
+RUN groupadd -r wireshark && useradd -r -g wireshark -G wireshark wireshark
+RUN chown -R wireshark:wireshark /captures
+
+WORKDIR /captures
+
+# Copy capture script
+COPY capture.sh /capture.sh
+RUN chmod +x /capture.sh
+
+USER wireshark
+
+ENTRYPOINT ["/capture.sh"]
