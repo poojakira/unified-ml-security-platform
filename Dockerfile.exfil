@@ -1,0 +1,17 @@
+# Exfiltration Server Container
+FROM python:3.12-slim
+
+WORKDIR /exfil
+
+# Install dependencies
+RUN pip3 install --no-cache-dir aiohttp
+
+# Copy exfiltration server
+COPY exfil_server.py /exfil/exfil_server.py
+
+# Create exfiltration directory
+RUN mkdir -p /exfil/data
+
+EXPOSE 9999
+
+CMD ["python3", "/exfil/exfil_server.py"]
