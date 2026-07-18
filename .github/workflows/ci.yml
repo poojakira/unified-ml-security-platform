@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main, develop]
   schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+    - cron: '0 2 * * *'
 
 env:
   REGISTRY: ghcr.io
@@ -85,13 +85,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       
-      - name: Build images
+      - name: Build production images only
         run: |
-          docker compose build --parallel
+          docker compose -f docker-compose.prod.yml build --parallel
       
-      - name: Start services
+      - name: Start production services
         run: |
-          docker compose up -d
+          docker compose -f docker-compose.prod.yml up -d
           sleep 30
       
       - name: Run integration tests
@@ -101,7 +101,7 @@ jobs:
       - name: Collect logs on failure
         if: failure()
         run: |
-          docker compose logs --tail=100 > integration-logs.txt
+          docker compose -f docker-compose.prod.yml logs --tail=100 > integration-logs.txt
       
       - name: Upload logs
         if: failure()
@@ -187,18 +187,23 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      
+
       - name: Build and push products
         run: |
           for product in hf_scanner mcp_gateway adv_ml llm_redteam dataset_poison model_privacy pulsenet; do
-            docker build -f Dockerfile.$product -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$product:${{ steps.meta.outputs.tags }} .
+            docker build -f products/$product/Dockerfile -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$product:${{ steps.meta.outputs.tags }} .
             docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$product:${{ steps.meta.outputs.tags }}
           done
+
+      - name: Sign images with Cosign
+        if: env.COSIGN_PRIVATE_KEY != ''
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'latest'
       
-      - name: Build and push attacker
+      - name: Sign and attest
         run: |
-          docker build -f Dockerfile.kali -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-kali:${{ steps.meta.outputs.tags }} .
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-kali:${{ steps.meta.outputs.tags }}
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}
 
   deploy-staging:
     name: Deploy to Staging
@@ -208,12 +213,10 @@ jobs:
     environment: staging
     steps:
       - uses: actions/checkout@v4
-      
       - name: Deploy to staging
         run: |
           echo "Deploying to staging environment..."
           # kubectl apply -f k8s/staging/
-          echo "Staging deployment complete"
 
   deploy-production:
     name: Deploy to Production
@@ -223,12 +226,10 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
-      
       - name: Deploy to production
         run: |
           echo "Deploying to production environment..."
           # kubectl apply -f k8s/production/
-          echo "Production deployment complete"
       
       - name: Create release
         uses: softprops/action-gh-release@v1
