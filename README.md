@@ -1,7 +1,7 @@
 # MLSec Platform - Unified ML Security Platform
 
-[![CI/CD](https://github.com/poojakira/mlsec-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/poojakira/mlsec-platform/actions/workflows/ci.yml)
-[![Security](https://img.shields.io/badge/Security-Production%20Ready-brightgreen)](https://github.com/poojakira/mlsec-platform/security)
+[![CI/CD](https://github.com/poojakira/unified-ml-security-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/poojakira/unified-ml-security-platform/actions/workflows/ci.yml)
+[![Security](https://img.shields.io/badge/Security-Production%20Ready-brightgreen)](https://github.com/poojakira/unified-ml-security-platform/security)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.12-blue)](https://python.org)
 
@@ -44,7 +44,7 @@
 
 ### Deploy All Products (Single Command)
 ```bash
-git clone https://github.com/poojakira/mlsec-platform.git
+git clone https://github.com/poojakira/unified-ml-security-platform.git
 cd mlsec-platform
 docker-compose up -d
 ```
@@ -64,7 +64,7 @@ curl http://localhost:8002/health  # MCP Gateway
 
 ```bash
 # Clone attack client
-git clone https://github.com/poojakira/mlsec-platform.git
+git clone https://github.com/poojakira/unified-ml-security-platform.git
 cd mlsec-platform/attacks
 
 # Install deps
@@ -203,7 +203,7 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 ## 📁 Repository Structure
 
 ```
-mlsec-platform/
+unified-ml-security-platform/
 ├── docker-compose.yml              # Main deployment
 ├── docker-compose.prod.yml         # Production overrides
 ├── docker-compose.monitoring.yml   # Prometheus/Grafana
@@ -330,7 +330,7 @@ docker-compose -f docker-compose.monitoring.yml up -d
 
 ```bash
 # Development setup
-git clone https://github.com/poojakira/mlsec-platform.git
+git clone https://github.com/poojakira/unified-ml-security-platform.git
 cd mlsec-platform
 python -m venv .venv && source .venv/bin/activate
 pip install -e .[dev]
