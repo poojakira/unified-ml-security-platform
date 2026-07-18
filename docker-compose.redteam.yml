@@ -1,0 +1,47 @@
+# docker-compose.redteam.yml - RED TEAM TESTING ONLY
+# NEVER deploy this to production networks!
+services:
+  kali-attacker:
+    build:
+      context: .
+      dockerfile: Dockerfile.kali
+    environment:
+      - TARGET_HOST=gateway
+      - TARGET_PORT=8000
+    networks:
+      - mlsec-internal
+      - attack-net
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    security_opt:
+      - seccomp:unconfined
+
+  wireshark:
+    build:
+      context: .
+      dockerfile: Dockerfile.wireshark
+    networks:
+      - attack-net
+    volumes:
+      - ./captures:/captures
+
+  exfil-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.exfil
+    networks:
+      - attack-net
+    ports:
+      - "8080:8080"
+
+networks:
+  mlsec-internal:
+    external: true
+  attack-net:
+    driver: bridge

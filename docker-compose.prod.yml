@@ -1,0 +1,140 @@
+# docker-compose.prod.yml - Production deployment ONLY
+# DOES NOT include kali, wireshark, exfil containers
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+    environment:
+      - API_KEY=${API_KEY}
+      - LOG_LEVEL=INFO
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    networks:
+      - mlsec-internal
+    restart: unless-stopped
+
+  hf-scanner:
+    build:
+      context: .
+      dockerfile: products/hf_scanner/Dockerfile
+    environment:
+      - API_KEY=${API_KEY}
+    networks:
+      - mlsec-internal
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    restart: unless-stopped
+
+  mcp-gateway:
+    build:
+      context: .
+      dockerfile: products/mcp_gateway/Dockerfile
+    environment:
+      - API_KEY=${API_KEY}
+    networks:
+      - mlsec-internal
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    restart: unless-stopped
+
+  adv-ml:
+    build:
+      context: .
+      dockerfile: products/adv_ml/Dockerfile
+    environment:
+      - API_KEY=${API_KEY}
+    networks:
+      - mlsec-internal
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+    restart: unless-stopped
+
+  llm-redteam:
+    build:
+      context: .
+      dockerfile: products/llm_redteam/Dockerfile
+    environment:
+      - API_KEY=${API_KEY}
+    networks:
+      - mlsec-internal
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+    restart: unless-stopped
+
+  dataset-poison:
+    build:
+      context: .
+      dockerfile: products/dataset_poison/Dockerfile
+    environment:
+      - API_KEY=${API_KEY}
+    networks:
+      - mlsec-internal
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    restart: unless-stopped
+
+  model-privacy:
+    build:
+      context: .
+      dockerfile: products/model_privacy/Dockerfile
+    environment:
+      - API_KEY=${API_KEY}
+    networks:
+      - mlsec-internal
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    restart: unless-stopped
+
+  pulsenet:
+    build:
+      context: .
+      dockerfile: products/pulsenet/Dockerfile
+    environment:
+      - API_KEY=${API_KEY}
+      - PULSENET_JWT_SECRET=${PULSENET_JWT_SECRET}
+    networks:
+      - mlsec-internal
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    restart: unless-stopped
+
+networks:
+  mlsec-internal:
+    driver: bridge
+    internal: true  # No external access except through gateway
