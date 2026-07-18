@@ -7,6 +7,9 @@
 
 **Production-grade ML Security Platform** protecting AI/ML systems across the entire lifecycle: supply chain, inference, training data, model privacy, and predictive maintenance.
 
+> [!WARNING]
+> **Limitations & Reality Check**: This repository is fundamentally an empty scaffold and monorepo wrapper. The 7 "production-grade" ML security products mentioned below do not exist within this repository. The Dockerfiles expect the source code of these products to reside in adjacent sibling directories on the host machine. Furthermore, there are no tests provided, and the codebase cannot be natively built or run as-is.
+
 ## 🎯 Products (7 Integrated Security Services)
 
 | # | Product | Port | Protection | Status |
