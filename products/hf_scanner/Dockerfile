@@ -1,17 +1,12 @@
-# Multi-stage build for production
+# HF Model Provenance Scanner - Production Dockerfile
 FROM python:3.12-slim as builder
 
 WORKDIR /app
 
-# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    g++ \
-    libffi-dev \
-    libssl-dev \
+    gcc g++ libffi-dev libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
@@ -20,30 +15,27 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libffi8 \
-    libssl3 \
-    curl \
+    libffi8 libssl3 curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy installed packages from builder
 COPY --from=builder /install /usr/local
 
-# Copy application code
-COPY gateway_server.py .
+# Copy scanner source
+COPY ../../hf-model-provenance-scanner/scanner ./scanner
+COPY ../../hf-model-provenance-scanner/pyproject.toml .
+COPY ../../hf-model-provenance-scanner/README.md .
 
-# Create non-root user
+RUN pip install --no-cache-dir -e .
+
+# Non-root user
 RUN groupadd -r mlsec && useradd -r -g mlsec mlsec
 RUN chown -R mlsec:mlsec /app
 USER mlsec
 
-# Expose ports
-EXPOSE 8000 8443
+EXPOSE 8001
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:8001/health || exit 1
 
-# Run gateway
-CMD ["python", "gateway_server.py"]
+CMD ["hf-scanner", "--help"]
