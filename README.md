@@ -15,3 +15,7 @@ Use the linked implementation repositories for runnable software:
 | 7 | `poojakira/PulseNet-RUL-Forecasting` | Secure predictive-maintenance reference project |
 
 See `ARCHITECTURE.md`, `STATUS.md`, `INTEGRATION_MAP.md`, `docs/PORTFOLIO_HONESTY_REPORT.md`, `docs/INDUSTRY_RESEARCH_BENCHMARK.md`, and `docs/MEASUREMENT_REPORT_2026-07-21.md` for the intended design boundaries, verified results, graphs, glossary, industry comparison bar, claim policy, focused measurements, and skeptical limitations.
+
+## Attacker and User Runbook
+
+See [ATTACKER_AND_USER_RUNBOOK.md](ATTACKER_AND_USER_RUNBOOK.md) for normal user/operator commands and safe [TEST-ONLY] adversarial regression commands.
