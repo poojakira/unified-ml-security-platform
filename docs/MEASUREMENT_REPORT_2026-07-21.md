@@ -1,6 +1,6 @@
 # Portfolio Measurement Report
 
-Generated UTC: 2026-07-21T22:31:43+00:00
+Generated UTC: 2026-07-21T22:39:44+00:00
 
 ## Scope
 
@@ -17,15 +17,15 @@ This report measures focused security and correctness checks against the local P
 
 | Repo/check | Status | Duration ms | Pytest summary | Purpose |
 |---|---:|---:|---|---|
-| repo1-mcp-security-gateway-monitor | PASS | 3215 | 20 passed in 0.12s | Prompt-injection normalization and BCC header bypass regression tests. |
-| repo2-hf-model-provenance-scanner | PASS | 3750 | 15 passed in 0.60s | Pickle magic-byte and scanner regression tests for renamed payload coverage. |
-| repo3-PulseNet-RUL-Forecasting | PASS | 5654 | 7 passed in 0.67s | JWT secret hardening and audit-log integrity regression tests. |
-| repo4-dataset-poisoning-detector | PASS | 12812 | 7 passed in 9.23s | False-positive budget and slow-drift poisoning detection regression tests. |
-| repo5-llm-redteam-framework | PASS | 6605 | 4 passed in 3.09s | LLM classifier false-positive budget enforcement tests. |
-| repo6-model-privacy-attacks | PASS | 10205 | 9 passed in 6.87s | Privacy attack implementation and probability-fidelity regression tests. |
-| repo7-adversarial-ml-lab | PASS | 11518 | 30 passed in 5.62s | Benchmark signing and verification integrity tests. |
-| repo8-unified-ml-security-platform | PASS | 137 | n/a | Architecture-spec service compile validation. |
-| repo8-unified-ml-security-platform-compose | PASS | 409 | n/a | Self-contained docker-compose syntax/config validation. |
+| repo1-mcp-security-gateway-monitor | PASS | 4220 | 20 passed in 0.14s | Prompt-injection normalization and BCC header bypass regression tests. |
+| repo2-hf-model-provenance-scanner | PASS | 4399 | 15 passed in 0.67s | Pickle magic-byte and scanner regression tests for renamed payload coverage. |
+| repo3-PulseNet-RUL-Forecasting | PASS | 5348 | 7 passed in 0.63s | JWT secret hardening and audit-log integrity regression tests. |
+| repo4-dataset-poisoning-detector | PASS | 12661 | 7 passed in 9.09s | False-positive budget and slow-drift poisoning detection regression tests. |
+| repo5-llm-redteam-framework | PASS | 6963 | 4 passed in 3.35s | LLM classifier false-positive budget enforcement tests. |
+| repo6-model-privacy-attacks | PASS | 10819 | 9 passed in 7.26s | Privacy attack implementation and probability-fidelity regression tests. |
+| repo7-adversarial-ml-lab | PASS | 11713 | 30 passed in 5.61s | Benchmark signing and verification integrity tests. |
+| repo8-unified-ml-security-platform | PASS | 198 | n/a | Architecture-spec service compile validation. |
+| repo8-unified-ml-security-platform-compose | PASS | 404 | n/a | Self-contained docker-compose syntax/config validation. |
 
 ## Commands Executed
 
@@ -43,7 +43,7 @@ Stdout tail:
 
 ```text
 ....................                                                     [100%]
-20 passed in 0.12s
+20 passed in 0.14s
 ```
 
 ### repo2-hf-model-provenance-scanner
@@ -60,7 +60,7 @@ Stdout tail:
 
 ```text
 ...............                                                          [100%]
-15 passed in 0.60s
+15 passed in 0.67s
 ```
 
 Stderr tail:
@@ -86,7 +86,7 @@ Stdout tail:
 
 ```text
 .......                                                                  [100%]
-7 passed in 0.67s
+7 passed in 0.63s
 ```
 
 ### repo4-dataset-poisoning-detector
@@ -103,7 +103,7 @@ Stdout tail:
 
 ```text
 .......                                                                  [100%]
-7 passed in 9.23s
+7 passed in 9.09s
 ```
 
 Stderr tail:
@@ -129,7 +129,7 @@ Stdout tail:
 
 ```text
 ....                                                                     [100%]
-4 passed in 3.09s
+4 passed in 3.35s
 ```
 
 ### repo6-model-privacy-attacks
@@ -155,7 +155,7 @@ collected 9 items
 
 tests\test_privacy_attacks.py .........                                  [100%]
 
-============================== 9 passed in 6.87s ==============================
+============================== 9 passed in 7.26s ==============================
 ```
 
 Stderr tail:
@@ -181,7 +181,7 @@ Stdout tail:
 
 ```text
 ..............................                                           [100%]
-30 passed in 5.62s
+30 passed in 5.61s
 ```
 
 ### repo8-unified-ml-security-platform
