@@ -1,10 +1,10 @@
 # Portfolio Measurement Report
 
-Generated UTC: 2026-07-21T22:39:44+00:00
+Generated UTC: 2026-07-21T22:47:03+00:00
 
 ## Scope
 
-This report measures focused security and correctness checks against the local PR branches. It does not measure market superiority, production scale, customer telemetry, or independent commercial benchmarks.
+This report measures focused security and correctness checks against the local checked-out branches. It does not measure market superiority, production scale, customer telemetry, or independent commercial benchmarks.
 
 ## Summary
 
@@ -17,15 +17,15 @@ This report measures focused security and correctness checks against the local P
 
 | Repo/check | Status | Duration ms | Pytest summary | Purpose |
 |---|---:|---:|---|---|
-| repo1-mcp-security-gateway-monitor | PASS | 4220 | 20 passed in 0.14s | Prompt-injection normalization and BCC header bypass regression tests. |
-| repo2-hf-model-provenance-scanner | PASS | 4399 | 15 passed in 0.67s | Pickle magic-byte and scanner regression tests for renamed payload coverage. |
-| repo3-PulseNet-RUL-Forecasting | PASS | 5348 | 7 passed in 0.63s | JWT secret hardening and audit-log integrity regression tests. |
-| repo4-dataset-poisoning-detector | PASS | 12661 | 7 passed in 9.09s | False-positive budget and slow-drift poisoning detection regression tests. |
-| repo5-llm-redteam-framework | PASS | 6963 | 4 passed in 3.35s | LLM classifier false-positive budget enforcement tests. |
-| repo6-model-privacy-attacks | PASS | 10819 | 9 passed in 7.26s | Privacy attack implementation and probability-fidelity regression tests. |
-| repo7-adversarial-ml-lab | PASS | 11713 | 30 passed in 5.61s | Benchmark signing and verification integrity tests. |
-| repo8-unified-ml-security-platform | PASS | 198 | n/a | Architecture-spec service compile validation. |
-| repo8-unified-ml-security-platform-compose | PASS | 404 | n/a | Self-contained docker-compose syntax/config validation. |
+| repo1-mcp-security-gateway-monitor | PASS | 3448 | 20 passed in 0.11s | Prompt-injection normalization and BCC header bypass regression tests. |
+| repo2-hf-model-provenance-scanner | PASS | 4564 | 15 passed in 0.82s | Pickle magic-byte and scanner regression tests for renamed payload coverage. |
+| repo3-PulseNet-RUL-Forecasting | PASS | 5610 | 7 passed in 0.70s | JWT secret hardening and audit-log integrity regression tests. |
+| repo4-dataset-poisoning-detector | PASS | 13607 | 7 passed in 9.73s | False-positive budget and slow-drift poisoning detection regression tests. |
+| repo5-llm-redteam-framework | PASS | 6619 | 4 passed in 3.11s | LLM classifier false-positive budget enforcement tests. |
+| repo6-model-privacy-attacks | PASS | 10479 | 9 passed in 6.98s | Privacy attack implementation and probability-fidelity regression tests. |
+| repo7-adversarial-ml-lab | PASS | 11399 | 30 passed in 5.62s | Benchmark signing and verification integrity tests. |
+| repo8-unified-ml-security-platform | PASS | 168 | n/a | Architecture-spec service compile validation. |
+| repo8-unified-ml-security-platform-compose | PASS | 382 | n/a | Self-contained docker-compose syntax/config validation. |
 
 ## Commands Executed
 
@@ -43,7 +43,7 @@ Stdout tail:
 
 ```text
 ....................                                                     [100%]
-20 passed in 0.14s
+20 passed in 0.11s
 ```
 
 ### repo2-hf-model-provenance-scanner
@@ -60,7 +60,7 @@ Stdout tail:
 
 ```text
 ...............                                                          [100%]
-15 passed in 0.67s
+15 passed in 0.82s
 ```
 
 Stderr tail:
@@ -86,7 +86,7 @@ Stdout tail:
 
 ```text
 .......                                                                  [100%]
-7 passed in 0.63s
+7 passed in 0.70s
 ```
 
 ### repo4-dataset-poisoning-detector
@@ -103,7 +103,7 @@ Stdout tail:
 
 ```text
 .......                                                                  [100%]
-7 passed in 9.09s
+7 passed in 9.73s
 ```
 
 Stderr tail:
@@ -129,7 +129,7 @@ Stdout tail:
 
 ```text
 ....                                                                     [100%]
-4 passed in 3.35s
+4 passed in 3.11s
 ```
 
 ### repo6-model-privacy-attacks
@@ -155,7 +155,7 @@ collected 9 items
 
 tests\test_privacy_attacks.py .........                                  [100%]
 
-============================== 9 passed in 7.26s ==============================
+============================== 9 passed in 6.98s ==============================
 ```
 
 Stderr tail:
@@ -181,7 +181,7 @@ Stdout tail:
 
 ```text
 ..............................                                           [100%]
-30 passed in 5.61s
+30 passed in 5.62s
 ```
 
 ### repo8-unified-ml-security-platform
