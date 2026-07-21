@@ -1,0 +1,198 @@
+{
+  "generated_utc": "2026-07-21T22:31:43+00:00",
+  "results": [
+    {
+      "command": [
+        "py",
+        "-3.12",
+        "-m",
+        "pytest",
+        "tests/test_normalization_pipeline.py",
+        "tests/test_bcc_normalization.py",
+        "-q"
+      ],
+      "duration_ms": 3215,
+      "purpose": "Prompt-injection normalization and BCC header bypass regression tests.",
+      "pytest_summary": "20 passed in 0.12s",
+      "repo_dir": "repo1-mcp",
+      "repo_id": "repo1-mcp-security-gateway-monitor",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "....................                                                     [100%]\n20 passed in 0.12s",
+      "timed_out": false,
+      "timeout_s": 240
+    },
+    {
+      "command": [
+        "py",
+        "-3.12",
+        "-m",
+        "pytest",
+        "tests/test_pickle_scanner.py",
+        "-q"
+      ],
+      "duration_ms": 3750,
+      "purpose": "Pickle magic-byte and scanner regression tests for renamed payload coverage.",
+      "pytest_summary": "15 passed in 0.60s",
+      "repo_dir": "repo2-hf",
+      "repo_id": "repo2-hf-model-provenance-scanner",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr_tail": "C:\\Users\\pooja\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:207: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
+      "stdout_tail": "...............                                                          [100%]\n15 passed in 0.60s",
+      "timed_out": false,
+      "timeout_s": 240
+    },
+    {
+      "command": [
+        "py",
+        "-3.12",
+        "-m",
+        "pytest",
+        "tests/test_auth_secret.py",
+        "tests/test_extra_coverage.py::TestAuditLogger",
+        "-q"
+      ],
+      "duration_ms": 5654,
+      "purpose": "JWT secret hardening and audit-log integrity regression tests.",
+      "pytest_summary": "7 passed in 0.67s",
+      "repo_dir": "repo3-pulsenet",
+      "repo_id": "repo3-PulseNet-RUL-Forecasting",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": ".......                                                                  [100%]\n7 passed in 0.67s",
+      "timed_out": false,
+      "timeout_s": 240
+    },
+    {
+      "command": [
+        "py",
+        "-3.12",
+        "-m",
+        "pytest",
+        "tests/test_drift.py",
+        "tests/test_fp_budget.py",
+        "-q"
+      ],
+      "duration_ms": 12812,
+      "purpose": "False-positive budget and slow-drift poisoning detection regression tests.",
+      "pytest_summary": "7 passed in 9.23s",
+      "repo_dir": "repo4-poison",
+      "repo_id": "repo4-dataset-poisoning-detector",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr_tail": "C:\\Users\\pooja\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:207: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
+      "stdout_tail": ".......                                                                  [100%]\n7 passed in 9.23s",
+      "timed_out": false,
+      "timeout_s": 240
+    },
+    {
+      "command": [
+        "py",
+        "-3.12",
+        "-m",
+        "pytest",
+        "tests/test_fp_budget.py"
+      ],
+      "duration_ms": 6605,
+      "purpose": "LLM classifier false-positive budget enforcement tests.",
+      "pytest_summary": "4 passed in 3.09s",
+      "repo_dir": "repo5-redteam",
+      "repo_id": "repo5-llm-redteam-framework",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "....                                                                     [100%]\n4 passed in 3.09s",
+      "timed_out": false,
+      "timeout_s": 240
+    },
+    {
+      "command": [
+        "py",
+        "-3.12",
+        "-m",
+        "pytest",
+        "tests/test_privacy_attacks.py",
+        "-q"
+      ],
+      "duration_ms": 10205,
+      "purpose": "Privacy attack implementation and probability-fidelity regression tests.",
+      "pytest_summary": "9 passed in 6.87s",
+      "repo_dir": "repo6-privacy",
+      "repo_id": "repo6-model-privacy-attacks",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr_tail": "C:\\Users\\pooja\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pytest_asyncio\\plugin.py:207: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
+      "stdout_tail": "============================= test session starts =============================\nplatform win32 -- Python 3.12.10, pytest-8.3.4, pluggy-1.6.0\nrootdir: C:\\tmp\\mlsec-dual-audit-20260721\\repo6-privacy\nconfigfile: pyproject.toml\nplugins: anyio-4.12.1, Faker-37.12.0, langsmith-0.9.3, asyncio-0.25.3, cov-6.0.0, mock-3.15.1, zarr-3.1.5\nasyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None\ncollected 9 items\n\ntests\\test_privacy_attacks.py .........                                  [100%]\n\n============================== 9 passed in 6.87s ==============================",
+      "timed_out": false,
+      "timeout_s": 240
+    },
+    {
+      "command": [
+        "py",
+        "-3.12",
+        "-m",
+        "pytest",
+        "tests/test_ci_signing.py",
+        "tests/test_benchmark_verify.py",
+        "-q"
+      ],
+      "duration_ms": 11518,
+      "purpose": "Benchmark signing and verification integrity tests.",
+      "pytest_summary": "30 passed in 5.62s",
+      "repo_dir": "repo7-adv",
+      "repo_id": "repo7-adversarial-ml-lab",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "..............................                                           [100%]\n30 passed in 5.62s",
+      "timed_out": false,
+      "timeout_s": 240
+    },
+    {
+      "command": [
+        "py",
+        "-3.12",
+        "-m",
+        "py_compile",
+        "spec_service.py",
+        "gateway_server.py"
+      ],
+      "duration_ms": 137,
+      "purpose": "Architecture-spec service compile validation.",
+      "pytest_summary": "n/a",
+      "repo_dir": "repo8-platform",
+      "repo_id": "repo8-unified-ml-security-platform",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "",
+      "timed_out": false,
+      "timeout_s": 240
+    },
+    {
+      "command": [
+        "docker",
+        "compose",
+        "-f",
+        "docker-compose.yml",
+        "config"
+      ],
+      "duration_ms": 409,
+      "purpose": "Self-contained docker-compose syntax/config validation.",
+      "pytest_summary": "n/a",
+      "repo_dir": "repo8-platform",
+      "repo_id": "repo8-unified-ml-security-platform-compose",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "  pulsenet:\n    build:\n      context: C:\\tmp\\mlsec-dual-audit-20260721\\repo8-platform\n      dockerfile: products/pulsenet/Dockerfile\n    deploy:\n      resources:\n        limits:\n          cpus: 1\n          memory: \"1073741824\"\n    environment:\n      API_KEY: \"\"\n      PULSENET_JWT_SECRET: \"\"\n    networks:\n      mlsec-internal: null\n    restart: unless-stopped\nnetworks:\n  mlsec-internal:\n    name: repo8-platform_mlsec-internal\n    driver: bridge\n    internal: true",
+      "timed_out": false,
+      "timeout_s": 120
+    }
+  ],
+  "root": "C:\\tmp\\mlsec-dual-audit-20260721",
+  "scope": "Focused local PR-branch security and correctness measurements; not market-superiority proof."
+}
