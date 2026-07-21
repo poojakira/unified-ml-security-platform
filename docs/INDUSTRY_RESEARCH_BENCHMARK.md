@@ -10,6 +10,8 @@ The current portfolio does not honestly beat all mature commercial/security plat
 
 The legitimate goal is narrower and stronger: define exact product benchmarks that would let each repository outperform a specific slice of the market, then build and verify against those benchmarks. This document is the bar that must be passed before making external claims.
 
+Current focused measurement evidence is published in `docs/MEASUREMENT_REPORT_2026-07-21.md` with raw JSON at `evidence/portfolio_measurement_2026-07-21.json`. That evidence covers selected local regression checks only; it does not satisfy the independent benchmark requirement for commercial-platform superiority claims.
+
 ## Research Sources and Evidence Quality
 
 | Platform | Source | What the source says | Evidence quality |
