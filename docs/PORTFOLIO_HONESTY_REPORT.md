@@ -13,6 +13,8 @@ The honest conclusion is: these repos are stronger than typical portfolio demos 
 
 Related control document: `docs/INDUSTRY_RESEARCH_BENCHMARK.md` defines the researched commercial/security platform bar and the claim policy for any "better than industry" statement.
 
+Measured evidence document: `docs/MEASUREMENT_REPORT_2026-07-21.md` records the focused local checks that passed in this remediation branch, with raw JSON evidence at `evidence/portfolio_measurement_2026-07-21.json`.
+
 ## Remediation PRs Reviewed
 
 | Repo | PR | Current purpose |
