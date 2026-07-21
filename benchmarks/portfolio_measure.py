@@ -153,7 +153,7 @@ def write_report(results: list[dict[str, object]], report_path: Path, json_path:
         "",
         "## Scope",
         "",
-        "This report measures focused security and correctness checks against the local PR branches. It does not measure market superiority, production scale, customer telemetry, or independent commercial benchmarks.",
+        "This report measures focused security and correctness checks against the local checked-out branches. It does not measure market superiority, production scale, customer telemetry, or independent commercial benchmarks.",
         "",
         "## Summary",
         "",
@@ -230,7 +230,7 @@ def main() -> int:
     payload = {
         "generated_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
         "root": str(args.root.resolve()),
-        "scope": "Focused local PR-branch security and correctness measurements; not market-superiority proof.",
+        "scope": "Focused local checked-out branch security and correctness measurements; not market-superiority proof.",
         "results": results,
     }
     json_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
@@ -245,4 +245,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
