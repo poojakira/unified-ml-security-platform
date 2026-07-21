@@ -14,4 +14,4 @@ Use the linked implementation repositories for runnable software:
 | 6 | `poojakira/model-privacy-attacks` | Privacy-attack evaluation |
 | 7 | `poojakira/PulseNet-RUL-Forecasting` | Secure predictive-maintenance reference project |
 
-See `ARCHITECTURE.md`, `STATUS.md`, and `INTEGRATION_MAP.md` for the intended design boundaries.
+See `ARCHITECTURE.md`, `STATUS.md`, `INTEGRATION_MAP.md`, and `docs/PORTFOLIO_HONESTY_REPORT.md` for the intended design boundaries, verified results, graphs, glossary, and skeptical limitations.
