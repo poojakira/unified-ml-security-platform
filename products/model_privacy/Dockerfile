@@ -1,41 +1,17 @@
-# Model Privacy Attacks - Production Dockerfile
-FROM python:3.12-slim as builder
-
-WORKDIR /app
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ libffi-dev libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
-
-# Production stage
 FROM python:3.12-slim
 
 WORKDIR /app
+COPY spec_service.py ./spec_service.py
+COPY products/model_privacy/README.md ./README.md
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libffi8 libssl3 curl \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /install /usr/local
-
-# Copy privacy attacks source code
-COPY ../../model-privacy-attacks/src/privacy_attacks ./privacy_attacks
-COPY ../../model-privacy-attacks/pyproject.toml .
-COPY ../../model-privacy-attacks/README.md .
-
-RUN pip install --no-cache-dir -e .
-
-# Non-root user
 RUN groupadd -r mlsec && useradd -r -g mlsec mlsec
-RUN chown -R mlsec:mlsec /app
 USER mlsec
 
+ENV SERVICE_NAME=model_privacy
+ENV PORT=8006
 EXPOSE 8006
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8006/health || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8006/health', timeout=5).read()" || exit 1
 
-CMD ["python", "-m", "privacy_attacks.mia.direct_mia", "--help"]
+CMD ["python", "spec_service.py"]

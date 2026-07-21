@@ -1,41 +1,17 @@
-# Adversarial ML Lab - Production Dockerfile
-FROM python:3.12-slim as builder
-
-WORKDIR /app
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ libffi-dev libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
-
-# Production stage
 FROM python:3.12-slim
 
 WORKDIR /app
+COPY spec_service.py ./spec_service.py
+COPY products/adv_ml/README.md ./README.md
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libffi8 libssl3 curl \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /install /usr/local
-
-# Copy adv_lab source
-COPY ../../adversarial-ml-lab/src/adv_lab ./adv_lab
-COPY ../../adversarial-ml-lab/pyproject.toml .
-COPY ../../adversarial-ml-lab/README.md .
-
-RUN pip install --no-cache-dir -e .
-
-# Non-root user
 RUN groupadd -r mlsec && useradd -r -g mlsec mlsec
-RUN chown -R mlsec:mlsec /app
 USER mlsec
 
+ENV SERVICE_NAME=adv_ml
+ENV PORT=8003
 EXPOSE 8003
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8003/health || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8003/health', timeout=5).read()" || exit 1
 
-CMD ["python", "-m", "adv_lab.eval.harness", "--help"]
+CMD ["python", "spec_service.py"]
