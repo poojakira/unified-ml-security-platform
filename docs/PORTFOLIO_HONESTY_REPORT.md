@@ -11,6 +11,8 @@ This portfolio is a set of ML security products, research tools, and architectur
 
 The honest conclusion is: these repos are stronger than typical portfolio demos because they include threat models, tests, reproducible PoCs, CI/security controls, and explicit limitations. They are not stronger than mature commercial security platforms such as Snyk, Wiz, Datadog, Protect AI, Garak, Robust Intelligence, Lakera, or enterprise Hugging Face security workflows. The credible comparison is narrower: they demonstrate product-oriented ML security thinking beyond toy examples, but they still need production hardening before operational deployment.
 
+Related control document: `docs/INDUSTRY_RESEARCH_BENCHMARK.md` defines the researched commercial/security platform bar and the claim policy for any "better than industry" statement.
+
 ## Remediation PRs Reviewed
 
 | Repo | PR | Current purpose |
