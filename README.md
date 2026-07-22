@@ -15,6 +15,13 @@ Use the linked implementation repositories for runnable software:
 | 7 | `poojakira/PulseNet-RUL-Forecasting` | Secure predictive-maintenance reference project |
 
 See `ARCHITECTURE.md`, `STATUS.md`, `INTEGRATION_MAP.md`, `docs/PORTFOLIO_HONESTY_REPORT.md`, `docs/INDUSTRY_RESEARCH_BENCHMARK.md`, and `docs/MEASUREMENT_REPORT_2026-07-21.md` for the intended design boundaries, verified results, graphs, glossary, industry comparison bar, claim policy, focused measurements, and skeptical limitations.
+
+## ATT&CK v19 Detection Contract
+
+This repo now includes a shared MITRE ATT&CK v19 detection contract for Enterprise, Mobile, and ICS scope in `docs/ATTACK_V19_DETECTION_CONTRACT.md`, plus a dependency-free seed detector in `attacks/attack_v19_detector.py`.
+
+This is a rule/contract baseline for the seven products. It must not be described as a fully trained ATT&CK model until official MITRE CTI ingestion and validation against all applicable techniques/sub-techniques are implemented.
+
 ## Real-World Boundary
 
 This repository can be real-world useful as an architecture, measurement, and integration-spec hub. It is **not** a real-time unified commercial platform by itself. Real-time protection exists only in implementation repos that are deployed inline, especially `poojakira/mcp-security-gateway-monitor` for MCP tool-call inspection. Claims such as "unhackable", "100 layers block every attacker", or "beats all mature commercial platforms" are not legitimate without production traffic, latency, false-positive, incident-response, and independent benchmark evidence.
