@@ -1,6 +1,6 @@
 # Portfolio Measurement Report
 
-Generated UTC: 2026-07-21T23:07:36+00:00
+Generated UTC: 2026-07-22T01:01:29+00:00
 
 ## Scope
 
@@ -17,15 +17,15 @@ This report measures focused security and correctness checks against the local c
 
 | Repo/check | Status | Duration ms | Pytest summary | Purpose |
 |---|---:|---:|---|---|
-| repo1-mcp-security-gateway-monitor | PASS | 3164 | 20 passed in 0.12s | Prompt-injection normalization and BCC header bypass regression tests. |
-| repo2-hf-model-provenance-scanner | PASS | 3563 | 15 passed in 0.60s | Pickle magic-byte and scanner regression tests for renamed payload coverage. |
-| repo3-PulseNet-RUL-Forecasting | PASS | 4655 | 7 passed in 0.60s | JWT secret hardening and audit-log integrity regression tests. |
-| repo4-dataset-poisoning-detector | PASS | 13007 | 7 passed in 9.07s | False-positive budget and slow-drift poisoning detection regression tests. |
-| repo5-llm-redteam-framework | PASS | 6271 | 4 passed in 3.03s | LLM classifier false-positive budget enforcement tests. |
-| repo6-model-privacy-attacks | PASS | 10123 | 9 passed in 6.86s | Privacy attack implementation and probability-fidelity regression tests. |
-| repo7-adversarial-ml-lab | PASS | 11310 | 32 passed in 5.64s | Benchmark signing and verification integrity tests. |
-| repo8-unified-ml-security-platform | PASS | 170 | n/a | Architecture-spec service compile validation. |
-| repo8-unified-ml-security-platform-compose | PASS | 410 | n/a | Self-contained docker-compose syntax/config validation. |
+| repo1-mcp-security-gateway-monitor | PASS | 23205 | 20 passed in 1.02s | Prompt-injection normalization and BCC header bypass regression tests. |
+| repo2-hf-model-provenance-scanner | PASS | 25340 | 15 passed in 3.92s | Pickle magic-byte and scanner regression tests for renamed payload coverage. |
+| repo3-PulseNet-RUL-Forecasting | PASS | 7448 | 7 passed in 0.95s | JWT secret hardening and audit-log integrity regression tests. |
+| repo4-dataset-poisoning-detector | PASS | 10354 | 7 passed in 5.83s | False-positive budget and slow-drift poisoning detection regression tests. |
+| repo5-llm-redteam-framework | PASS | 10535 | 4 passed in 4.68s | LLM classifier false-positive budget enforcement tests. |
+| repo6-model-privacy-attacks | PASS | 25264 | 9 passed in 12.19s | Privacy attack implementation and probability-fidelity regression tests. |
+| repo7-adversarial-ml-lab | PASS | 22484 | 32 passed in 9.94s | Benchmark signing and verification integrity tests. |
+| repo8-unified-ml-security-platform | PASS | 232 | n/a | Architecture-spec service compile validation. |
+| repo8-unified-ml-security-platform-compose | PASS | 562 | n/a | Self-contained docker-compose syntax/config validation. |
 
 ## Commands Executed
 
@@ -43,7 +43,7 @@ Stdout tail:
 
 ```text
 ....................                                                     [100%]
-20 passed in 0.12s
+20 passed in 1.02s
 ```
 
 ### repo2-hf-model-provenance-scanner
@@ -60,16 +60,7 @@ Stdout tail:
 
 ```text
 ...............                                                          [100%]
-15 passed in 0.60s
-```
-
-Stderr tail:
-
-```text
-C:\Users\pooja\AppData\Local\Programs\Python\Python312\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
-The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
-
-  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+15 passed in 3.92s
 ```
 
 ### repo3-PulseNet-RUL-Forecasting
@@ -86,7 +77,7 @@ Stdout tail:
 
 ```text
 .......                                                                  [100%]
-7 passed in 0.60s
+7 passed in 0.95s
 ```
 
 ### repo4-dataset-poisoning-detector
@@ -103,16 +94,7 @@ Stdout tail:
 
 ```text
 .......                                                                  [100%]
-7 passed in 9.07s
-```
-
-Stderr tail:
-
-```text
-C:\Users\pooja\AppData\Local\Programs\Python\Python312\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
-The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
-
-  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+7 passed in 5.83s
 ```
 
 ### repo5-llm-redteam-framework
@@ -129,7 +111,7 @@ Stdout tail:
 
 ```text
 ....                                                                     [100%]
-4 passed in 3.03s
+4 passed in 4.68s
 ```
 
 ### repo6-model-privacy-attacks
@@ -146,25 +128,16 @@ Stdout tail:
 
 ```text
 ============================= test session starts =============================
-platform win32 -- Python 3.12.10, pytest-8.3.4, pluggy-1.6.0
+platform win32 -- Python 3.12.10, pytest-8.3.5, pluggy-1.6.0
 rootdir: C:\tmp\mlsec-dual-audit-20260721\repo6-privacy
 configfile: pyproject.toml
 plugins: anyio-4.12.1, Faker-37.12.0, langsmith-0.9.3, asyncio-0.25.3, cov-6.0.0, mock-3.15.1, zarr-3.1.5
-asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=function
 collected 9 items
 
 tests\test_privacy_attacks.py .........                                  [100%]
 
-============================== 9 passed in 6.86s ==============================
-```
-
-Stderr tail:
-
-```text
-C:\Users\pooja\AppData\Local\Programs\Python\Python312\Lib\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
-The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
-
-  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= 9 passed in 12.19s ==============================
 ```
 
 ### repo7-adversarial-ml-lab
@@ -181,7 +154,7 @@ Stdout tail:
 
 ```text
 ................................                                         [100%]
-32 passed in 5.64s
+32 passed in 9.94s
 ```
 
 ### repo8-unified-ml-security-platform
