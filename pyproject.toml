@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unified-ml-security-platform"
+version = "0.1.0"
+description = "Architecture spec and ATT&CK detection contract for ML security products."
+requires-python = ">=3.11"
+
+[project.optional-dependencies]
+dev = []
+
+[tool.setuptools]
+py-modules = ["gateway_server", "spec_service"]
+packages = ["attacks"]
+
+[tool.coverage.run]
+omit = [
+    "attacks/attack_catalog.py",
+    "attacks/attack_client.py",
+    "gateway_server.py",
+    "spec_service.py",
+    "tests/*",
+]
+
+[tool.pyright]
+include = ["attacks/attack_v19_detector.py", "tests/test_attack_v19_detector.py"]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "function"
+[tool.ruff]
+include = ["attacks/attack_v19_detector.py", "tests/test_attack_v19_detector.py"]
+
