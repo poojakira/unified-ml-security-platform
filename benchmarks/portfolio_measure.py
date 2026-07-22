@@ -89,6 +89,27 @@ CHECKS: tuple[Check, ...] = (
 PYTEST_RE = re.compile(r"(?P<summary>(?:\d+\s+passed|\d+\s+failed|\d+\s+skipped|\d+\s+warnings?)[^\n]*)", re.IGNORECASE)
 
 
+def repo_python_command(repo_path: Path, command: list[str]) -> list[str]:
+    """Use the repo-local virtualenv for Python checks when it exists."""
+    if command[:2] != ["py", "-3.12"]:
+        return command
+    windows_python = repo_path / ".venv" / "Scripts" / "python.exe"
+    posix_python = repo_path / ".venv" / "bin" / "python"
+    if windows_python.exists():
+        return [str(windows_python), *command[2:]]
+    if posix_python.exists():
+        return [str(posix_python), *command[2:]]
+    return command
+
+
+def prepend_venv_path(repo_path: Path, env: dict[str, str]) -> None:
+    scripts = repo_path / ".venv" / "Scripts"
+    bin_dir = repo_path / ".venv" / "bin"
+    path_dir = scripts if scripts.exists() else bin_dir if bin_dir.exists() else None
+    if path_dir:
+        env["PATH"] = str(path_dir) + os.pathsep + env.get("PATH", "")
+
+
 def run_check(root: Path, check: Check) -> dict[str, object]:
     repo_path = root / check.repo_dir
     env = os.environ.copy()
@@ -99,11 +120,13 @@ def run_check(root: Path, check: Check) -> dict[str, object]:
     env["PYTHONPATH"] = os.pathsep.join(pythonpath_parts)
     if check.env:
         env.update(check.env)
+    prepend_venv_path(repo_path, env)
+    command = repo_python_command(repo_path, check.command)
 
     started = time.perf_counter()
     try:
         proc = subprocess.run(
-            check.command,
+            command,
             cwd=repo_path,
             env=env,
             text=True,
@@ -129,7 +152,7 @@ def run_check(root: Path, check: Check) -> dict[str, object]:
         "repo_id": check.repo_id,
         "repo_dir": check.repo_dir,
         "purpose": check.purpose,
-        "command": check.command,
+        "command": command,
         "timeout_s": check.timeout_s,
         "returncode": returncode,
         "status": "PASS" if returncode == 0 and not timed_out else "FAIL",
@@ -245,3 +268,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
