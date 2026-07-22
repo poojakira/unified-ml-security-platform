@@ -1,6 +1,12 @@
+import io
+import os
+import json
+import tempfile
 import unittest
+from contextlib import redirect_stdout
+from unittest.mock import patch
 
-from attacks.attack_v19_detector import analyze_attack_v19, render_text
+from attacks.attack_v19_detector import analyze_attack_v19, main, render_text
 
 
 class AttackV19DetectorTests(unittest.TestCase):
@@ -45,6 +51,30 @@ class AttackV19DetectorTests(unittest.TestCase):
         self.assertIn("Enterprise", output)
         self.assertIn("Mobile", output)
         self.assertIn("ICS", output)
+
+    def test_main_json_reads_stdin(self):
+        stdout = io.StringIO()
+        with patch("sys.stdin", io.StringIO("nmap port scan from 10.0.0.5")), redirect_stdout(stdout):
+            exit_code = main(["--format", "json"])
+
+        self.assertEqual(0, exit_code)
+        result = json.loads(stdout.getvalue())
+        self.assertEqual("Network Service Discovery T1046", result["detections"][0]["technique"])
+
+    def test_main_text_reads_file(self):
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
+            handle.write("disable defender with Set-MpPreference")
+            path = handle.name
+
+        try:
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main([path])
+
+            self.assertEqual(0, exit_code)
+            self.assertIn("Defense Impairment TA0112", stdout.getvalue())
+        finally:
+            os.unlink(path)
 
 
 if __name__ == "__main__":
