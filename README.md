@@ -30,3 +30,15 @@ This repository can be real-world useful as an architecture, measurement, and in
 
 See [ATTACKER_AND_USER_RUNBOOK.md](ATTACKER_AND_USER_RUNBOOK.md) for normal user/operator commands and safe [TEST-ONLY] adversarial regression commands.
 
+## Operational Runbook
+
+Verified architecture-hub path uses [ATTACKER_AND_USER_RUNBOOK.md](ATTACKER_AND_USER_RUNBOOK.md). Minimal validation:
+
+```powershell
+py -3.12 -m pip install -r requirements.txt
+py -3.12 -m py_compile spec_service.py gateway_server.py attacks\attack_v19_detector.py
+py -3.12 -m pytest tests -q
+```
+
+Scope note: this repository is an architecture/spec hub. It now includes an ATT&CK v19 detection contract and seed detector, not a fully trained production model.
+
