@@ -3,9 +3,9 @@
 **Real-time MCP Tool Call Security Gateway**
 
 ## Overview
-Production-grade security gateway for Model Context Protocol (MCP) tool calls. Implements 5-layer defense-in-depth with real-time blocking of C2, exfiltration, shadow servers, and kernel-level attacks.
+Architecture stub for a Model Context Protocol (MCP) gateway slot in the unified platform. The runnable implementation lives in `poojakira/mcp-security-gateway-monitor`; this scaffold must not be represented as a standalone production gateway.
 
-## 5-Layer Defense
+## 5-Layer Target Design
 
 | Layer | Component | Threats Blocked |
 |-------|-----------|-----------------|
@@ -15,9 +15,9 @@ Production-grade security gateway for Model Context Protocol (MCP) tool calls. I
 | **L5** | Network Egress Policy | Suspicious TLDs, raw IPs, oversized payloads |
 | **L6** | ML Classifier (BETA) | TF-IDF + LR supplementary signal |
 
-## Real-World Attacks Blocked
+## Real-World Attack Coverage Targets
 
-| Attack | Reference | Layer |
+| Attack | Reference | Intended layer |
 |--------|-----------|-------|
 | Postmark BCC Exfiltration (2024) | OX Security | L4 |
 | MCP Tool Poisoning (2026) | OWASP Stockholm | L2 |
@@ -25,6 +25,11 @@ Production-grade security gateway for Model Context Protocol (MCP) tool calls. I
 | Cross-Server Shadowing | General Analysis | L4 |
 | SkillCloak Obfuscation | arxiv 2607.02357 | L4 |
 | MCP-ITP Implicit Poisoning | arxiv 2601.07395 | L2 |
+
+
+## Honest Boundary
+
+This directory is an integration scaffold, not independent working gateway software. Real-time enforcement is only valid when the implementation repository is deployed inline and all MCP calls, outputs, and egress signals are routed through it. Do not claim this scaffold blocks every attacker or provides 100 independent layers.
 
 ## API
 
@@ -196,3 +201,4 @@ watchdog==4.0.0
 ## License
 
 Apache 2.0
+

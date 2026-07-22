@@ -36,6 +36,14 @@ Validate the red-team Compose file syntax without starting services:
 docker compose -f docker-compose.redteam.yml config
 ```
 
+
+Validate MCP missed-attack coverage in the implementation checkout:
+
+```powershell
+cd C:\tmp\mlsec-dual-audit-20260721\repo1-mcp
+$env:PYTHONPATH = "src"
+py -3.12 -m pytest tests/test_advanced_correlation.py tests/test_pii_detector.py tests/test_prompt_injection.py tests/test_shadow_server.py tests/test_exfiltration.py -q
+```
 ## Pass Condition
 
 All selected checks exit `0`; the generated measurement report must show `9` checks run, `9` passed, and `0` failed.
@@ -43,3 +51,4 @@ All selected checks exit `0`; the generated measurement report must show `9` che
 ## Honest Limit
 
 These commands prove local architecture and regression checks only. This repository remains an architecture/specification and measurement hub, not a finished unified commercial platform.
+
