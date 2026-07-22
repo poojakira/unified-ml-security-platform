@@ -12,7 +12,7 @@ import json
 import re
 import sys
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Iterable, NotRequired, TypedDict
 
 ATTACK_VERSION = "ATT&CK v19 (April 28, 2026)"
 
@@ -76,6 +76,24 @@ class DetectionRule:
     recommended_action: str
 
 
+class Detection(TypedDict):
+    tactic: str
+    technique: str
+    sub_technique: str | None
+    matrix: str
+    confidence: str
+    evidence: list[str]
+    recommended_action: str
+
+
+class AnalysisResult(TypedDict):
+    version: str
+    scope_covered: dict[str, list[str]]
+    detections: list[Detection]
+    technique_chaining: NotRequired[list[str]]
+    status: NotRequired[str]
+
+
 RULES: tuple[DetectionRule, ...] = (
     DetectionRule("Enterprise", "Initial Access TA0001", "Phishing T1566", None, "Medium", (r"\bphishing\b", r"\bspearphish", r"\bcredential harvest"), "Quarantine the message, preserve headers, and block sender infrastructure."),
     DetectionRule("Enterprise", "Execution TA0002", "Command and Scripting Interpreter T1059", "PowerShell T1059.001", "High", (r"\bpowershell(\.exe)?\b", r"\b-enc(odedcommand)?\b", r"\bfrombase64string\b"), "Terminate the process, collect command line telemetry, and isolate the host if unauthorized."),
@@ -113,15 +131,15 @@ def _matching_evidence(text: str, patterns: Iterable[str]) -> list[str]:
     return evidence
 
 
-def analyze_attack_v19(text: str) -> dict[str, object]:
+def analyze_attack_v19(text: str) -> AnalysisResult:
     """Analyze text and return ATT&CK-formatted detections."""
-    detections: list[dict[str, object]] = []
+    detections: list[Detection] = []
     for rule in RULES:
         evidence = _matching_evidence(text, rule.patterns)
         if evidence:
             detections.append({"tactic": rule.tactic, "technique": rule.technique, "sub_technique": rule.sub_technique, "matrix": rule.matrix, "confidence": rule.confidence, "evidence": evidence, "recommended_action": rule.recommended_action})
 
-    result: dict[str, object] = {"version": ATTACK_VERSION, "scope_covered": {"Enterprise": ENTERPRISE_TACTICS, "Mobile": MOBILE_TACTICS, "ICS": ICS_TACTICS}, "detections": detections}
+    result: AnalysisResult = {"version": ATTACK_VERSION, "scope_covered": {"Enterprise": ENTERPRISE_TACTICS, "Mobile": MOBILE_TACTICS, "ICS": ICS_TACTICS}, "detections": detections}
     if detections:
         result["technique_chaining"] = [f"{item['technique']}" + (f" -> {item['sub_technique']}" if item["sub_technique"] else "") for item in detections]
     else:
@@ -129,8 +147,8 @@ def analyze_attack_v19(text: str) -> dict[str, object]:
     return result
 
 
-def render_text(result: dict[str, object]) -> str:
-    detections = result.get("detections", [])
+def render_text(result: AnalysisResult) -> str:
+    detections = result["detections"]
     if not detections:
         scope = result["scope_covered"]
         return "No ATT&CK techniques detected. Scope covered: " + "; ".join(f"{matrix}: {', '.join(tactics)}" for matrix, tactics in scope.items())
@@ -138,7 +156,7 @@ def render_text(result: dict[str, object]) -> str:
     blocks: list[str] = []
     for item in detections:
         blocks.append("\n".join([f"Tactic: {item['tactic']}", f"Technique: {item['technique']}", f"Sub-technique: {item['sub_technique'] or 'None'}", f"Matrix: {item['matrix']}", f"Confidence: {item['confidence']}", "Evidence: " + " | ".join(f'"{quote}"' for quote in item["evidence"]), f"Recommended action: {item['recommended_action']}"]))
-    chain = result.get("technique_chaining", [])
+    chain = result.get("technique_chaining")
     if chain:
         blocks.append("Technique chaining: " + " -> ".join(chain))
     return "\n\n".join(blocks)

@@ -7,10 +7,8 @@ import json
 import time
 import sys
 import os
-import base64
 import argparse
-from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, List
 import httpx
 import ssl
 
@@ -109,7 +107,7 @@ class AttackClient:
                         data = r.json()
                         result["blocked_by"] = data.get("blocked_by", "unknown")
                         result["findings"] = data.get("findings", [])
-                    except:
+                    except ValueError:
                         result["blocked_by"] = "http_403"
                 elif r.status_code == 200:
                     try:
@@ -121,7 +119,7 @@ class AttackClient:
                                 result["findings"] = data.get("findings", [])
                             if "blocked_by" in data:
                                 result["blocked_by"] = data["blocked_by"]
-                    except:
+                    except ValueError:
                         pass
                 
         except Exception as e:
@@ -147,7 +145,7 @@ class AttackClient:
                     try:
                         data = r.json()
                         findings = data.get("findings", [])
-                    except:
+                    except ValueError:
                         findings = []
                     break
                 resp = r.json()
