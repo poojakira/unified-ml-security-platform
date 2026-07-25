@@ -114,6 +114,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Install integration test dependencies
+        run: |
+          pip install pytest pytest-asyncio httpx docker
+
       - name: Build production images only
         run: |
           docker compose -f docker-compose.prod.yml build --parallel
@@ -176,7 +180,7 @@ jobs:
     name: Build & Push Images
     runs-on: ubuntu-latest
     needs: [integration-tests, security-scan]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     permissions:
       contents: read
       packages: write
@@ -225,19 +229,22 @@ jobs:
           done
 
       - name: Sign images with Cosign
-        if: env.COSIGN_PRIVATE_KEY != ''
+        if: ${{ secrets.COSIGN_PRIVATE_KEY != '' }}
         uses: sigstore/cosign-installer@v3
         with:
           cosign-release: 'latest'
 
       - name: Sign and attest
+        if: ${{ secrets.COSIGN_PRIVATE_KEY != '' }}
         run: |
-          cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}
+          for tag in ${{ steps.meta.outputs.tags }}; do
+            cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
+          done
 
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    needs: build-and-push
+    needs: [integration-tests, security-scan]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     environment: staging
     steps:
@@ -260,8 +267,17 @@ jobs:
           echo "Deploying to production environment..."
           # kubectl apply -f k8s/production/
 
-      - name: Create release
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [lint-and-typecheck, unit-tests, security-scan]
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           generate_release_notes: true
