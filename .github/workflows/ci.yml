@@ -230,13 +230,13 @@ jobs:
           done
 
       - name: Sign images with Cosign
-        if: ${{ secrets.COSIGN_PRIVATE_KEY != '' }}
+        if: secrets.COSIGN_PRIVATE_KEY != ''
         uses: sigstore/cosign-installer@v3
         with:
           cosign-release: 'latest'
 
       - name: Sign and attest
-        if: ${{ secrets.COSIGN_PRIVATE_KEY != '' }}
+        if: secrets.COSIGN_PRIVATE_KEY != ''
         run: |
           for tag in ${{ steps.meta.outputs.tags }}; do
             cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
