@@ -95,6 +95,7 @@ jobs:
       - name: Install test deps only
         run: |
           pip install fastapi uvicorn[standard] httpx pytest pytest-cov
+          pip install -e .
 
       - name: Test health endpoint
         env:
