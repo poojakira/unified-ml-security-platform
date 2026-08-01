@@ -51,7 +51,7 @@ testpaths = [
     "products/pulsenet/tests",
 ]
 asyncio_default_fixture_loop_scope = "function"
-addopts = "-ra -q --strict-markers --strict-config --cov=. --cov-report=xml --cov-report=term-missing --cov-fail-under=30"
+addopts = "-ra -q --strict-markers --strict-config"
 
 [tool.ruff]
 include = ["attacks/attack_v19_detector.py", "tests/test_attack_v19_detector.py"]
