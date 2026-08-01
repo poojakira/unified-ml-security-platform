@@ -130,7 +130,10 @@ jobs:
           PULSENET_JWT_SECRET: ci-test-jwt-secret-32-bytes-minimum
         run: |
           docker compose -f docker-compose.prod.yml up -d
-          sleep 30
+
+      - name: Wait for gateway health
+        run: |
+          curl --fail --retry 30 --retry-all-errors --retry-delay 2 http://localhost:8000/health
 
       - name: Run integration tests
         run: |
@@ -172,11 +175,12 @@ jobs:
           sarif_file: 'trivy-results.sarif'
 
       - name: Run Grype scanner
-        uses: anchore/scan-action@v3
+        uses: anchore/scan-action@v7.4.0
         with:
           path: '.'
-          format: 'json'
-          output: 'grype-results.json'
+          fail-build: true
+          output-format: sarif
+          severity-cutoff: high
 
       - name: Run Syft for SBOM
         uses: anchore/sbom-action@v0.24.0
