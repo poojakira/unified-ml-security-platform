@@ -430,7 +430,7 @@ Allowed now:
 Not allowed now:
 
 - "Beats all mature commercial platforms."
-- "Production-grade unified platform."
+- "Finished commercial unified platform."
 - "Unhackable."
 - "Better than Lakera/Snyk/Wiz/Datadog/Protect AI/Robust Intelligence/Hugging Face/garak" without an independent scoped benchmark.
 
