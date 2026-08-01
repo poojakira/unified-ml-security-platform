@@ -55,7 +55,7 @@ Interpretation: this graph is a target architecture. The repos do not yet share 
 quadrantChart
     title Repository maturity vs production integration
     x-axis Low integration --> High integration
-    y-axis Proof-of-concept --> Production-ready signals
+    y-axis Proof-of-concept --> Operational evidence signals
     quadrant-1 Product candidate
     quadrant-2 Strong standalone tool
     quadrant-3 Research artifact
@@ -451,7 +451,7 @@ docker compose -f docker-compose.yml config
 docker compose -f docker-compose.prod.yml config
 ```
 
-## Current Portfolio Grade
+## Current Evidence Summary
 
 | Repo | Honest grade | Reason |
 |---|---|---|
