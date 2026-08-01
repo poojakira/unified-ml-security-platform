@@ -125,6 +125,9 @@ jobs:
           docker compose -f docker-compose.prod.yml build --parallel
 
       - name: Start production services
+        env:
+          API_KEY: ci-test-api-key-32-bytes-minimum-value
+          PULSENET_JWT_SECRET: ci-test-jwt-secret-32-bytes-minimum
         run: |
           docker compose -f docker-compose.prod.yml up -d
           sleep 30
@@ -173,7 +176,7 @@ jobs:
           output: 'grype-results.json'
 
       - name: Run Syft for SBOM
-        uses: anchore/syft-action@v3
+        uses: anchore/sbom-action@v0.24.0
         with:
           format: 'spdx-json'
           output-file: 'sbom.spdx.json'
