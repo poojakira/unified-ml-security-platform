@@ -1,6 +1,6 @@
 import io
-import os
 import json
+import os
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -75,4 +75,5 @@ class AttackV19DetectorTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
 
