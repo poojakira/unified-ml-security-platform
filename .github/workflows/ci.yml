@@ -236,10 +236,20 @@ jobs:
       - name: Build and push products
         run: |
           for product in hf_scanner mcp_gateway adv_ml llm_redteam dataset_poison model_privacy pulsenet; do
-            docker build -f products/$product/Dockerfile -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$product:${{ steps.meta.outputs.tags }} .
-            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$product:${{ steps.meta.outputs.tags }}
-          done
+            image="${REGISTRY}/${IMAGE_NAME}-${product}"
+            tag_args=()
+            while IFS= read -r tag_name; do
+              [ -n "$tag_name" ] || continue
+              tag_args+=("-t" "${image}:${tag_name}")
+            done <<< "$DOCKER_METADATA_OUTPUT_TAG_NAMES"
 
+            docker build -f "products/${product}/Dockerfile" "${tag_args[@]}" .
+
+            while IFS= read -r tag_name; do
+              [ -n "$tag_name" ] || continue
+              docker push "${image}:${tag_name}"
+            done <<< "$DOCKER_METADATA_OUTPUT_TAG_NAMES"
+          done
       - name: Sign images with Cosign
         if: env.COSIGN_PRIVATE_KEY != ''
         uses: sigstore/cosign-installer@v3
@@ -295,3 +305,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           generate_release_notes: true
+
