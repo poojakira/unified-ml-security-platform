@@ -25,6 +25,7 @@ services:
           cpus: '1'
           memory: 1G
     networks:
+      - mlsec-public
       - mlsec-internal
     restart: unless-stopped
 
@@ -135,6 +136,8 @@ services:
     restart: unless-stopped
 
 networks:
+  mlsec-public:
+    driver: bridge
   mlsec-internal:
     driver: bridge
-    internal: true  # No external access except through gateway
+    internal: true  # Product services are isolated from host access
