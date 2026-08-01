@@ -65,10 +65,10 @@ jobs:
       - name: Run tests
         run: |
           pytest tests/ -v --tb=short \
-            --cov=. \
+            --cov=attacks \
             --cov-report=xml \
             --cov-report=term-missing \
-            --cov-fail-under=80
+            --cov-fail-under=90
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
@@ -94,7 +94,7 @@ jobs:
 
       - name: Install test deps only
         run: |
-          pip install fastapi uvicorn[standard] httpx pytest pytest-cov
+          pip install fastapi uvicorn[standard] httpx pytest pytest-cov pytest-asyncio
           pip install -e .
 
       - name: Test health endpoint
