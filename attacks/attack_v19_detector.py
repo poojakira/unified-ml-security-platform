@@ -11,8 +11,9 @@ import argparse
 import json
 import re
 import sys
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, NotRequired, TypedDict
+from typing import NotRequired, TypedDict
 
 ATTACK_VERSION = "ATT&CK v19 (April 28, 2026)"
 
@@ -184,3 +185,4 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
