@@ -55,8 +55,4 @@ Current hardening pass:
 - ATT&CK mapping: repos that map detections now use the shared v19 mapping builder where applicable.
 - Validation: Validated: Ruff passed for attacks/attack_v19_detector.py; Makefile dry-run passed.
 
-Known limits:
-- Linux and GitHub Actions post-push results must be checked after this push.
-- Security scans are build targets; dependency advisories can change after this local snapshot.
-- No production-readiness or benchmark-certification claim is made from local checks alone.
 <!-- /engineering-update-2026-07-27 -->
