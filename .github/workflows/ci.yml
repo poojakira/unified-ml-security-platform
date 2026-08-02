@@ -118,7 +118,8 @@ jobs:
 
       - name: Install integration test dependencies
         run: |
-          pip install pytest pytest-asyncio httpx docker
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio docker
 
       - name: Build production images only
         run: |
