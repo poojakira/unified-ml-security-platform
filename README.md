@@ -22,6 +22,7 @@ Use the supporting documents when you need a specific answer:
 - `docs/PORTFOLIO_HONESTY_REPORT.md`: claim boundaries and known limitations.
 - `docs/MEASUREMENT_REPORT_2026-07-21.md`: recorded measurements and how they were collected.
 - `docs/INDUSTRY_RESEARCH_BENCHMARK.md`: research context, not proof of product performance.
+- `docs/PORTFOLIO_PRODUCTION_READINESS_BASELINE.md`: production acceptance criteria, current classifications, and unresolved deployment decisions.
 
 ## ATT&CK v19 Detection Contract
 
