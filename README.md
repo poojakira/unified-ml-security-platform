@@ -14,7 +14,14 @@ Use the linked implementation repositories for runnable software:
 | 6 | `poojakira/model-privacy-attacks` | Privacy-attack evaluation |
 | 7 | `poojakira/PulseNet-RUL-Forecasting` | Secure predictive-maintenance reference project |
 
-See `ARCHITECTURE.md`, `STATUS.md`, `INTEGRATION_MAP.md`, `docs/PORTFOLIO_HONESTY_REPORT.md`, `docs/INDUSTRY_RESEARCH_BENCHMARK.md`, and `docs/MEASUREMENT_REPORT_2026-07-21.md` for the intended design boundaries, verified results, graphs, glossary, industry comparison bar, claim policy, focused measurements, and skeptical limitations.
+Use the supporting documents when you need a specific answer:
+
+- `ARCHITECTURE.md`: the proposed system design.
+- `STATUS.md`: what is implemented here and what is only planned.
+- `INTEGRATION_MAP.md`: how the implementation repositories fit together.
+- `docs/PORTFOLIO_HONESTY_REPORT.md`: claim boundaries and known limitations.
+- `docs/MEASUREMENT_REPORT_2026-07-21.md`: recorded measurements and how they were collected.
+- `docs/INDUSTRY_RESEARCH_BENCHMARK.md`: research context, not proof of product performance.
 
 ## ATT&CK v19 Detection Contract
 
