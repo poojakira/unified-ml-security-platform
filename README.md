@@ -1,5 +1,7 @@
 # Unified ML Security Platform (Architecture Spec)
 
+[![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-View-blue)](https://poojakira.github.io/mlsec-dashboards/unified-ml-security-platform/)
+
 This repository is an architecture specification and integration hub. It defines how 7 separate ML security repositories fit together. It is **not** a running platform — the actual implementations live in the linked repos below.
 
 ## What This Repo Contains
