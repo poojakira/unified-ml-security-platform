@@ -13,6 +13,16 @@ This repository is an architecture specification and integration hub. It defines
 - A benchmark script for running local checks across sibling repo checkouts
 - Stub product directories under `products/` (wiring, not implementations)
 
+## ⚠️ Red-Team Files (docker-compose.redteam.yml, Dockerfile.kali, Dockerfile.exfil)
+
+These files exist for **local development testing only** — they simulate attacker infrastructure to validate the defensive layers. In a real deployment:
+
+- Attack tooling MUST be deployed in a **separate AWS account** (isolated from production)
+- Red-team infrastructure MUST NOT share VPC, IAM roles, or deployment pipelines with defensive services
+- This co-location is acceptable for a local Docker Compose development environment but violates AWS Well-Architected (SEC-5) and NIST 800-53 (CA-8) for production deployments
+
+If deploying to AWS, separate these into an isolated red-team account with cross-account trust only for authorized pen-test roles.
+
 ## Linked Repositories (Actual Implementations)
 
 | # | Repository | What it does |
