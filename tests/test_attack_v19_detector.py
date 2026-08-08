@@ -50,12 +50,17 @@ class AttackV19DetectorTests(unittest.TestCase):
 
     def test_main_json_reads_stdin(self):
         stdout = io.StringIO()
-        with patch("sys.stdin", io.StringIO("nmap port scan from 10.0.0.5")), redirect_stdout(stdout):
+        with (
+            patch("sys.stdin", io.StringIO("nmap port scan from 10.0.0.5")),
+            redirect_stdout(stdout),
+        ):
             exit_code = main(["--format", "json"])
 
         self.assertEqual(0, exit_code)
         result = json.loads(stdout.getvalue())
-        self.assertEqual("Network Service Discovery T1046", result["detections"][0]["technique"])
+        self.assertEqual(
+            "Network Service Discovery T1046", result["detections"][0]["technique"]
+        )
 
     def test_main_text_reads_file(self):
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
@@ -75,5 +80,3 @@ class AttackV19DetectorTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-
