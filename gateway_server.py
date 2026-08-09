@@ -23,13 +23,18 @@ import uvicorn
 # Auth
 # ---------------------------------------------------------------------------
 
-API_KEY = os.environ.get("API_KEY")
+# Accept GATEWAY_API_KEY (the name used in the RUNBOOK/README) and fall back
+# to API_KEY for backward compatibility. Either works.
+API_KEY = os.environ.get("GATEWAY_API_KEY") or os.environ.get("API_KEY")
 if not API_KEY:
-    print("FATAL: API_KEY environment variable is required", file=sys.stderr)
+    print(
+        "FATAL: GATEWAY_API_KEY environment variable is required",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 if len(API_KEY) < 32:
-    print("FATAL: API_KEY must be at least 32 characters", file=sys.stderr)
+    print("FATAL: GATEWAY_API_KEY must be at least 32 characters", file=sys.stderr)
     sys.exit(1)
 
 API_KEY_NAME = "X-API-Key"
