@@ -14,7 +14,7 @@ import sys
 import traceback
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 import uvicorn
@@ -57,6 +57,7 @@ _adv_lab_available = False
 
 try:
     from aws_agent_identity_guard import scan_policy_document, Finding as IAMFinding
+
     _iam_available = True
 except ImportError:
     pass
@@ -66,12 +67,14 @@ try:
     from scanner.models import ScanResult, Finding as HFinding, Severity
     from scanner.config import load_config as _hf_load_config
     from scanner.risk import compute_risk as _hf_compute_risk
+
     _hf_scanner_available = True
 except ImportError:
     pass
 
 try:
     from adv_lab.eval.harness import run_benchmark, BenchmarkResult
+
     _adv_lab_available = True
 except ImportError:
     pass
@@ -95,11 +98,13 @@ app = FastAPI(
 
 class IAMScanRequest(BaseModel):
     """IAM policy document to scan."""
+
     policy_document: dict[str, Any]
 
 
 class ModelScanRequest(BaseModel):
     """Path to a local model directory or file."""
+
     path: str
 
 
@@ -192,12 +197,16 @@ async def scan_model(request: ModelScanRequest):
 
         findings_out = []
         for f in result.findings:
-            findings_out.append({
-                "rule_id": f.rule_id,
-                "severity": f.severity.value if isinstance(f.severity, Severity) else str(f.severity),
-                "message": f.message,
-                "file": f.file_path,
-            })
+            findings_out.append(
+                {
+                    "rule_id": f.rule_id,
+                    "severity": f.severity.value
+                    if isinstance(f.severity, Severity)
+                    else str(f.severity),
+                    "message": f.message,
+                    "file": f.file_path,
+                }
+            )
 
         return {
             "target": target,
