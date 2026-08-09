@@ -69,12 +69,12 @@ The gateway requires an API key for authentication.
 
 **Windows (PowerShell):**
 ```powershell
-$env:GATEWAY_API_KEY = "your-secret-key-here"
+$env:GATEWAY_API_KEY = "change-me-to-a-32-char-min-secret-key"
 ```
 
 **Linux/macOS:**
 ```bash
-export GATEWAY_API_KEY="your-secret-key-here"
+export GATEWAY_API_KEY="change-me-to-a-32-char-min-secret-key"
 ```
 
 > **Note:** For local development, any non-empty string works. For production, use a strong random key (32+ characters).
@@ -110,16 +110,16 @@ INFO:     Uvicorn running on http://127.0.0.1:8080 (Press CTRL+C to quit)
 # Submit an IAM policy for scanning
 curl -X POST http://localhost:8080/api/scan `
   -H "Content-Type: application/json" `
-  -H "X-API-Key: your-secret-key-here" `
-  -d '{\"policy\": {\"Version\": \"2012-10-17\", \"Statement\": [{\"Effect\": \"Allow\", \"Action\": \"bedrock:*\", \"Resource\": \"*\"}]}}'
+  -H "X-API-Key: change-me-to-a-32-char-min-secret-key" `
+  -d '{\"policy_document\": {\"Version\": \"2012-10-17\", \"Statement\": [{\"Effect\": \"Allow\", \"Action\": \"bedrock:*\", \"Resource\": \"*\"}]}}'
 ```
 
 **Linux/macOS:**
 ```bash
 curl -X POST http://localhost:8080/api/scan \
   -H "Content-Type: application/json" \
-  -H "X-API-Key: your-secret-key-here" \
-  -d '{"policy": {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "bedrock:*", "Resource": "*"}]}}'
+  -H "X-API-Key: change-me-to-a-32-char-min-secret-key" \
+  -d '{"policy_document": {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "bedrock:*", "Resource": "*"}]}}'
 ```
 
 Expected response — list of findings/violations:
@@ -240,7 +240,7 @@ netstat -ano | findstr :8080
    ```
 2. Ensure your curl includes the correct header:
    ```powershell
-   -H "X-API-Key: your-secret-key-here"
+   -H "X-API-Key: change-me-to-a-32-char-min-secret-key"
    ```
 3. Key in the header must match `GATEWAY_API_KEY` exactly.
 
