@@ -56,7 +56,7 @@ _hf_scanner_available = False
 _adv_lab_available = False
 
 try:
-    from aws_agent_identity_guard import scan_policy_document, Finding as IAMFinding
+    from aws_agent_identity_guard import scan_policy_document
 
     _iam_available = True
 except ImportError:
@@ -64,8 +64,8 @@ except ImportError:
 
 try:
     from scanner.cli import scan_local as _hf_scan_local
-    from scanner.models import ScanResult, Finding as HFinding, Severity
     from scanner.config import load_config as _hf_load_config
+    from scanner.models import ScanResult, Severity
     from scanner.risk import compute_risk as _hf_compute_risk
 
     _hf_scanner_available = True
@@ -73,7 +73,7 @@ except ImportError:
     pass
 
 try:
-    from adv_lab.eval.harness import run_benchmark, BenchmarkResult
+    from adv_lab.eval.harness import run_benchmark  # noqa: F401
 
     _adv_lab_available = True
 except ImportError:
