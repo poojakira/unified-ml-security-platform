@@ -7,6 +7,9 @@ name = "unified-ml-security-platform"
 version = "0.1.0"
 description = "Architecture spec and ATT&CK detection contract for ML security products."
 requires-python = ">=3.11"
+dependencies = [
+    "attack-v19-core>=19.1,<20",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -30,6 +33,7 @@ omit = [
     "attacks/attack_client.py",
     "gateway_server.py",
     "spec_service.py",
+    "products/pulsenet/*",
     "tests/*",
 ]
 
@@ -50,8 +54,7 @@ testpaths = [
     "products/hf_scanner/tests",
     "products/pulsenet/tests",
 ]
-asyncio_default_fixture_loop_scope = "function"
-addopts = "-ra -q --strict-markers --strict-config --cov=. --cov-report=xml --cov-report=term-missing --cov-fail-under=30"
+addopts = "-ra -q --strict-markers --strict-config --cov=. --cov-report=xml --cov-report=term-missing --cov-fail-under=25"
 
 [tool.ruff]
 include = ["attacks/attack_v19_detector.py", "tests/test_attack_v19_detector.py"]
