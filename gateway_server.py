@@ -35,7 +35,7 @@ SERVICES = {
     "llm_redteam": "http://llm-redteam:8004",
     "dataset_poison": "http://dataset-poison:8005",
     "model_privacy": "http://model-privacy:8006",
-    "pulsenet": "http://pulsenet:8007",
+    # "pulsenet" removed — archived project; not an active service
 }
 
 async def verify_api_key(api_key: str = Depends(api_key_header)):
@@ -45,8 +45,12 @@ async def verify_api_key(api_key: str = Depends(api_key_header)):
 
 @app.get("/health")
 async def health():
-    """Health check - no auth required for load balancer"""
-    return {"status": "healthy", "services": list(SERVICES.keys())}
+    """Health check — no auth required for load balancer.
+
+    NOTE: Does not expose service inventory to unauthenticated callers.
+    Service list is internal operational information.
+    """
+    return {"status": "healthy"}
 
 @app.api_route("/{service}/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy(service: str, path: str, request: Request, api_key: str = Depends(verify_api_key)):
@@ -78,7 +82,17 @@ async def proxy(service: str, path: str, request: Request, api_key: str = Depend
         except httpx.TimeoutException:
             raise HTTPException(status_code=504, detail="Service timeout")
         except Exception as e:
-            raise HTTPException(status_code=502, detail=f"Service error: {str(e)}")
+            # Do not expose internal exception details to clients.
+            # Log server-side with request ID for debugging.
+            import logging, uuid
+            req_id = str(uuid.uuid4())[:8]
+            logging.getLogger("gateway").error(
+                "Service error [req=%s service=%s]: %s", req_id, service, str(e)
+            )
+            raise HTTPException(
+                status_code=502,
+                detail={"error": "upstream_service_error", "request_id": req_id}
+            )
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

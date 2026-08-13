@@ -37,10 +37,25 @@ jobs:
         run: pyright
 
       - name: Security scan with Bandit
-        run: bandit -r . -f json -o bandit-report.json || true
+        # bandit is now blocking — || true removed.
+        # If Bandit finds HIGH/MEDIUM severity issues, this job fails.
+        # SARIF upload in "if: always()" ensures results are visible even on failure.
+        run: |
+          bandit -r . -f json -o bandit-report.json -ll
+          python -c "
+import json, sys
+data = json.load(open("bandit-report.json"))
+high_med = [r for r in data.get("results",[]) if r["issue_severity"] in ("HIGH","MEDIUM")]
+if high_med:
+    print(f"FAIL: {len(high_med)} HIGH/MEDIUM bandit findings")
+    sys.exit(1)
+print("PASS: No HIGH/MEDIUM Bandit findings")
+"
 
       - name: Dependency audit with Safety
-        run: safety check --json --output safety-report.json || true
+        # safety check is now blocking — || true removed.
+        # Known CVEs in dependencies will fail this job.
+        run: safety check --json --output safety-report.json
 
   unit-tests:
     name: Unit Tests
@@ -82,7 +97,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        product: [hf_scanner, mcp_gateway, adv_ml, llm_redteam, dataset_poison, model_privacy, pulsenet]
+        # pulsenet removed — archived project not built in active platform
+        product: [hf_scanner, mcp_gateway, adv_ml, llm_redteam, dataset_poison, model_privacy]
     steps:
       - uses: actions/checkout@v4
 
@@ -225,7 +241,8 @@ jobs:
 
       - name: Build and push products
         run: |
-          for product in hf_scanner mcp_gateway adv_ml llm_redteam dataset_poison model_privacy pulsenet; do
+          # pulsenet removed from deployment loop — archived project
+          for product in hf_scanner mcp_gateway adv_ml llm_redteam dataset_poison model_privacy; do
             docker build -f products/$product/Dockerfile -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$product:${{ steps.meta.outputs.tags }} .
             docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$product:${{ steps.meta.outputs.tags }}
           done
