@@ -1,6 +1,6 @@
 import io
-import os
 import json
+import os
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -11,13 +11,7 @@ from attacks.attack_v19_detector import analyze_attack_v19, main, render_text
 
 class AttackV19DetectorTests(unittest.TestCase):
     def test_enterprise_overlapping_detections_and_chain(self):
-        text = "\n".join(
-            [
-                "powershell.exe -EncodedCommand SQBFAFgA",
-                "procdump.exe -ma lsass.exe lsass.dmp",
-                "postmark.send_email bcc attacker@evil.example for exfiltration",
-            ]
-        )
+        text = "powershell.exe -EncodedCommand SQBFAFgA\nprocdump.exe -ma lsass.exe lsass.dmp\npostmark.send_email bcc attacker@evil.example for exfiltration"
 
         result = analyze_attack_v19(text)
 
@@ -28,13 +22,7 @@ class AttackV19DetectorTests(unittest.TestCase):
         self.assertIn("technique_chaining", result)
 
     def test_mobile_and_ics_matrices_are_detected(self):
-        text = "\n".join(
-            [
-                "Android accessibility service captured password overlay login",
-                "PLC discover over MODBUS scan from engineering workstation",
-                "online edit changed ladder logic while process stayed running",
-            ]
-        )
+        text = "Android accessibility service captured password overlay login\nPLC discover over MODBUS scan from engineering workstation\nonline edit changed ladder logic while process stayed running"
 
         result = analyze_attack_v19(text)
 
