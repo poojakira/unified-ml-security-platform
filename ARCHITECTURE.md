@@ -11,7 +11,7 @@ The intended platform boundary is a thin gateway that routes authenticated reque
 | Route | Target service | Repository |
 |-------|----------------|------------|
 | `/scan` | HF model scanner | `poojakira/hf-model-provenance-scanner` |
-| `/monitor` | MCP security gateway | `poojakira/mcp-security-gateway-monitor` |
+| `/monitor` | MCP security gateway | `poojakira/mcp-agent-security-gateway` |
 | `/robustness` | Adversarial ML lab | `poojakira/adversarial-ml-lab` |
 | `/redteam` | LLM redteam framework | `poojakira/llm-redteam-framework` |
 | `/poisoning` | Dataset poisoning detector | `poojakira/dataset-poisoning-detector` |

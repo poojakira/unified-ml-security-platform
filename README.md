@@ -7,7 +7,7 @@ Use the linked implementation repositories for runnable software:
 | Slot | Implementation repository | Role |
 |------|---------------------------|------|
 | 1 | `poojakira/hf-model-provenance-scanner` | Model supply-chain scanning and pickle-risk analysis |
-| 2 | `poojakira/mcp-security-gateway-monitor` | MCP tool-call monitoring and exfiltration detection |
+| 2 | `poojakira/mcp-agent-security-gateway` | MCP tool-call monitoring and exfiltration detection |
 | 3 | `poojakira/adversarial-ml-lab` | Adversarial robustness evaluation |
 | 4 | `poojakira/llm-redteam-framework` | LLM prompt-risk experiments |
 | 5 | `poojakira/dataset-poisoning-detector` | Dataset poisoning and anomaly checks |
@@ -24,7 +24,7 @@ This is a rule/contract baseline for the seven products. It must not be describe
 
 ## Real-World Boundary
 
-This repository can be real-world useful as an architecture, measurement, and integration-spec hub. It is **not** a real-time unified commercial platform by itself. Real-time protection exists only in implementation repos that are deployed inline, especially `poojakira/mcp-security-gateway-monitor` for MCP tool-call inspection. Claims such as "unhackable", "100 layers block every attacker", or "beats all mature commercial platforms" are not legitimate without production traffic, latency, false-positive, incident-response, and independent benchmark evidence.
+This repository can be real-world useful as an architecture, measurement, and integration-spec hub. It is **not** a real-time unified commercial platform by itself. Real-time protection exists only in implementation repos that are deployed inline, especially `poojakira/mcp-agent-security-gateway` for MCP tool-call inspection. Claims such as "unhackable", "100 layers block every attacker", or "beats all mature commercial platforms" are not legitimate without production traffic, latency, false-positive, incident-response, and independent benchmark evidence.
 
 ## Attacker and User Runbook
 
