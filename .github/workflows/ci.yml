@@ -193,11 +193,15 @@ jobs:
           sarif_file: 'trivy-results.sarif'
 
       - name: Run Grype scanner
-        uses: anchore/scan-action@v3
+        uses: anchore/scan-action@v7
+        env:
+          GRYPE_DB_CACHE_DIR: ${{ runner.temp }}/grype-db
         with:
           path: '.'
-          format: 'json'
-          output: 'grype-results.json'
+          fail-build: true
+          output-format: sarif
+          severity-cutoff: medium
+          cache-db: false
 
       - name: Run Syft for SBOM
         uses: anchore/sbom-action@v0
