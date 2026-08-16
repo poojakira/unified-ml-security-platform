@@ -42,16 +42,22 @@ jobs:
         # SARIF upload in "if: always()" ensures results are visible even on failure.
         run: |
           bandit -r . -f json -o bandit-report.json -ll
-          python -c "
-import json, sys
-data = json.load(open("bandit-report.json"))
-high_med = [r for r in data.get("results",[]) if r["issue_severity"] in ("HIGH","MEDIUM")]
-if high_med:
-    print(f"FAIL: {len(high_med)} HIGH/MEDIUM bandit findings")
-    sys.exit(1)
-print("PASS: No HIGH/MEDIUM Bandit findings")
-"
+          python <<'PY'
+          import json
+          import sys
 
+          with open("bandit-report.json", encoding="utf-8") as fh:
+              data = json.load(fh)
+          high_med = [
+              r
+              for r in data.get("results", [])
+              if r["issue_severity"] in ("HIGH", "MEDIUM")
+          ]
+          if high_med:
+              print(f"FAIL: {len(high_med)} HIGH/MEDIUM bandit findings")
+              sys.exit(1)
+          print("PASS: No HIGH/MEDIUM Bandit findings")
+          PY
       - name: Dependency audit with Safety
         # safety check is now blocking — || true removed.
         # Known CVEs in dependencies will fail this job.
