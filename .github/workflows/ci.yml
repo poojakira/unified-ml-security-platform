@@ -149,10 +149,16 @@ jobs:
           pip install -r requirements.txt
 
       - name: Build production images only
+        env:
+          API_KEY: integration-test-api-key-32-bytes-minimum
+          PULSENET_JWT_SECRET: integration-test-pulsenet-secret-32-bytes-minimum
         run: |
           docker compose -f docker-compose.prod.yml build --parallel
 
       - name: Start production services
+        env:
+          API_KEY: integration-test-api-key-32-bytes-minimum
+          PULSENET_JWT_SECRET: integration-test-pulsenet-secret-32-bytes-minimum
         run: |
           docker compose -f docker-compose.prod.yml up -d
           sleep 30
@@ -284,31 +290,27 @@ jobs:
             cosign sign --yes "$image"
           done
 
-  deploy-staging:
-    name: Deploy to Staging
+  validate-staging-deployment-plan:
+    name: Validate Staging Deployment Plan
     runs-on: ubuntu-latest
     needs: [integration-tests, security-scan]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-    environment: staging
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy to staging
+      - name: Validate staging deployment placeholder
         run: |
-          echo "Deploying to staging environment..."
-          # kubectl apply -f k8s/staging/
+          echo "No staging deployment is configured in this repository. Add reviewed manifests before enabling deploy."
 
-  deploy-production:
-    name: Deploy to Production
+  validate-production-deployment-plan:
+    name: Validate Production Deployment Plan
     runs-on: ubuntu-latest
     needs: build-and-push
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    environment: production
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy to production
+      - name: Validate production deployment placeholder
         run: |
-          echo "Deploying to production environment..."
-          # kubectl apply -f k8s/production/
+          echo "No production deployment is configured in this repository. Add reviewed manifests before enabling deploy."
 
   release:
     name: Release

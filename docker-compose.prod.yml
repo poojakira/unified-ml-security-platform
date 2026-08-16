@@ -9,7 +9,7 @@ services:
       - "8000:8000"
       - "8443:8443"
     environment:
-      - API_KEY=${API_KEY:-}
+      - API_KEY=${API_KEY:?API_KEY is required}
       - LOG_LEVEL=INFO
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -33,7 +33,7 @@ services:
       context: .
       dockerfile: products/hf_scanner/Dockerfile
     environment:
-      - API_KEY=${API_KEY:-}
+      - API_KEY=${API_KEY:?API_KEY is required}
     networks:
       - mlsec-internal
     deploy:
@@ -48,7 +48,7 @@ services:
       context: .
       dockerfile: products/mcp_gateway/Dockerfile
     environment:
-      - API_KEY=${API_KEY:-}
+      - API_KEY=${API_KEY:?API_KEY is required}
     networks:
       - mlsec-internal
     deploy:
@@ -63,7 +63,7 @@ services:
       context: .
       dockerfile: products/adv_ml/Dockerfile
     environment:
-      - API_KEY=${API_KEY:-}
+      - API_KEY=${API_KEY:?API_KEY is required}
     networks:
       - mlsec-internal
     deploy:
@@ -78,7 +78,7 @@ services:
       context: .
       dockerfile: products/llm_redteam/Dockerfile
     environment:
-      - API_KEY=${API_KEY:-}
+      - API_KEY=${API_KEY:?API_KEY is required}
     networks:
       - mlsec-internal
     deploy:
@@ -93,7 +93,7 @@ services:
       context: .
       dockerfile: products/dataset_poison/Dockerfile
     environment:
-      - API_KEY=${API_KEY:-}
+      - API_KEY=${API_KEY:?API_KEY is required}
     networks:
       - mlsec-internal
     deploy:
@@ -108,7 +108,7 @@ services:
       context: .
       dockerfile: products/model_privacy/Dockerfile
     environment:
-      - API_KEY=${API_KEY:-}
+      - API_KEY=${API_KEY:?API_KEY is required}
     networks:
       - mlsec-internal
     deploy:
@@ -123,8 +123,8 @@ services:
       context: .
       dockerfile: products/pulsenet/Dockerfile
     environment:
-      - API_KEY=${API_KEY:-}
-      - PULSENET_JWT_SECRET=${PULSENET_JWT_SECRET:-}
+      - API_KEY=${API_KEY:?API_KEY is required}
+      - PULSENET_JWT_SECRET=${PULSENET_JWT_SECRET:?PULSENET_JWT_SECRET is required}
     networks:
       - mlsec-internal
     deploy:
