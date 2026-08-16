@@ -158,7 +158,7 @@ jobs:
 
       - name: Run integration tests
         run: |
-          pytest tests/integration/ -v --tb=short
+          pytest -o addopts="" tests/integration/ -v --tb=short
 
       - name: Collect logs on failure
         if: failure()
