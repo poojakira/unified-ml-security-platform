@@ -267,14 +267,10 @@ jobs:
           for product in hf_scanner mcp_gateway adv_ml llm_redteam dataset_poison model_privacy; do
             tag_args=()
             for tag in $DOCKER_METADATA_OUTPUT_TAG_NAMES; do
-              tag_args+=("-t" "${REGISTRY}/${IMAGE_NAME}-${product}:${tag}")
+              tag_args+=("--tag" "${REGISTRY}/${IMAGE_NAME}-${product}:${tag}")
             done
-            docker build -f "products/${product}/Dockerfile" "${tag_args[@]}" .
-            for tag in $DOCKER_METADATA_OUTPUT_TAG_NAMES; do
-              docker push "${REGISTRY}/${IMAGE_NAME}-${product}:${tag}"
-            done
+            docker buildx build --file "products/${product}/Dockerfile" --push "${tag_args[@]}" .
           done
-
       - name: Sign images with Cosign
         if: env.COSIGN_PRIVATE_KEY != ''
         uses: sigstore/cosign-installer@v3
