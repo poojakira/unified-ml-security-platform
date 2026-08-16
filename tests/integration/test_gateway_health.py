@@ -44,10 +44,10 @@ def test_gateway_status_with_auth(client) -> None:
     payload = response.json()
     assert payload["status"] == "operational"
     assert "services" in payload
-    assert "iam_scanner" in payload["services"]
+    assert "mcp_gateway" in payload["services"]
     assert "hf_scanner" in payload["services"]
     assert "adv_ml" in payload["services"]
-    assert payload["total"] == 3
+    assert payload["total"] == 6
 
 
 def test_scan_iam_requires_auth(client) -> None:
@@ -84,7 +84,7 @@ def test_scan_iam_with_valid_policy(client) -> None:
 
 def test_scan_model_requires_auth(client) -> None:
     """Model scan endpoint requires API key."""
-    response = client.post("/scan/model", json={"path": "/tmp/test"})
+    response = client.post("/scan/model", json={"path": "/tmp/test"})  # nosec B108
     assert response.status_code == 401
 
 
@@ -92,7 +92,7 @@ def test_scan_model_bad_path(client) -> None:
     """Model scan rejects nonexistent paths."""
     response = client.post(
         "/scan/model",
-        json={"path": "/nonexistent/path/12345"},
+        json={"path": "/nonexistent/path/12345"},  # nosec B108
         headers={"X-API-Key": "test-key-for-health-check-only-123456"},
     )
     # 400 if scanner available, 503 if not installed

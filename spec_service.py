@@ -21,13 +21,22 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         if self.path == "/health":
-            self._send(200, {"status": "ok", "service": SERVICE_NAME, "implementation": "architecture-spec-stub"})
+            self._send(
+                200,
+                {
+                    "status": "ok",
+                    "service": SERVICE_NAME,
+                    "implementation": "architecture-spec-stub",
+                },
+            )
             return
-        self._send(501, {"error": "implementation_not_bundled", "service": SERVICE_NAME})
+        self._send(
+            501, {"error": "implementation_not_bundled", "service": SERVICE_NAME}
+        )
 
     def log_message(self, format: str, *args: object) -> None:
         return
 
 
 if __name__ == "__main__":
-    ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+    ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()  # nosec B104
