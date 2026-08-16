@@ -61,7 +61,7 @@ jobs:
       - name: Dependency audit with Safety
         # safety check is now blocking — || true removed.
         # Known CVEs in dependencies will fail this job.
-        run: safety check --json --output safety-report.json
+        run: safety check --output json > safety-report.json
 
   unit-tests:
     name: Unit Tests
