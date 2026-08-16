@@ -29,7 +29,7 @@ class Check:
 
 CHECKS: tuple[Check, ...] = (
     Check(
-        repo_id="repo1-mcp-security-gateway-monitor",
+        repo_id="repo1-mcp-agent-security-gateway",
         repo_dir="repo1-mcp",
         purpose="Prompt-injection normalization and BCC header bypass regression tests.",
         command=["py", "-3.12", "-m", "pytest", "tests/test_normalization_pipeline.py", "tests/test_bcc_normalization.py", "-q"],

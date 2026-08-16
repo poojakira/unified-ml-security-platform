@@ -62,7 +62,7 @@ Use this detector contract as the shared interface for all seven products:
 | Product | ATT&CK mapping use |
 |---------|--------------------|
 | `hf-model-provenance-scanner` | Model artifact execution and software supply-chain signals |
-| `mcp-security-gateway-monitor` | Prompt/tool exfiltration, C2-like callbacks, defense bypass attempts |
+| `mcp-agent-security-gateway` | Prompt/tool exfiltration, C2-like callbacks, defense bypass attempts |
 | `adversarial-ml-lab` | ML attack behavior labeling and evaluation reports |
 | `llm-redteam-framework` | Prompt attack evidence and technique chaining |
 | `dataset-poisoning-detector` | Poisoning campaign indicators and impact context |

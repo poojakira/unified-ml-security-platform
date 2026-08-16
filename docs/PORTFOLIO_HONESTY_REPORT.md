@@ -19,7 +19,7 @@ Measured evidence document: `docs/MEASUREMENT_REPORT_2026-07-21.md` records the 
 
 | Repo | PR | Current purpose |
 |---|---|---|
-| mcp-security-gateway-monitor | https://github.com/poojakira/mcp-security-gateway-monitor/pull/13 | MCP tool-call monitoring, exfiltration and prompt-injection detection |
+| mcp-agent-security-gateway | https://github.com/poojakira/mcp-agent-security-gateway/pull/13 | MCP tool-call monitoring, exfiltration and prompt-injection detection |
 | hf-model-provenance-scanner | https://github.com/poojakira/hf-model-provenance-scanner/pull/4 | Static model repository scanner for pickle/source/provenance risks |
 | PulseNet-RUL-Forecasting | https://github.com/poojakira/PulseNet-RUL-Forecasting/pull/23 | Secure predictive-maintenance API with auth and audit controls |
 | dataset-poisoning-detector | https://github.com/poojakira/dataset-poisoning-detector/pull/11 | Statistical and streaming dataset poisoning detection |
@@ -42,7 +42,7 @@ flowchart LR
     G --> I[Deployment decision]
     H --> I
     I --> J[PulseNet secure serving example]
-    J --> K[mcp-security-gateway-monitor]
+    J --> K[mcp-agent-security-gateway]
     K --> L[LLM redteam framework feedback]
     L --> C
 ```
@@ -153,7 +153,7 @@ This document separates verified facts from interpretation. It lists exact tests
 | TracIn | Influence approximation method for identifying training samples with high effect on model loss. |
 | Welford algorithm | Numerically stable online mean/variance algorithm. |
 
-## Repo 1: mcp-security-gateway-monitor
+## Repo 1: mcp-agent-security-gateway
 
 ### What it is
 

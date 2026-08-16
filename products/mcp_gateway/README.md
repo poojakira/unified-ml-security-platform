@@ -3,7 +3,7 @@
 **Real-time MCP Tool Call Security Gateway**
 
 ## Overview
-Architecture stub for a Model Context Protocol (MCP) gateway slot in the unified platform. The runnable implementation lives in `poojakira/mcp-security-gateway-monitor`; this scaffold must not be represented as a standalone production gateway.
+Architecture stub for a Model Context Protocol (MCP) gateway slot in the unified platform. The runnable implementation lives in `poojakira/mcp-agent-security-gateway`; this scaffold must not be represented as a standalone production gateway.
 
 ## 5-Layer Target Design
 

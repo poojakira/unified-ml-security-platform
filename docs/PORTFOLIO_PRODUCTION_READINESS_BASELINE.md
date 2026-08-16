@@ -22,7 +22,7 @@ Passing a unit test suite, generating an SBOM, or having a Dockerfile is useful 
 
 | Repository | Current role | Readiness classification | Highest remaining gap |
 |---|---|---|---|
-| `mcp-security-gateway-monitor` | Agent tool-call security control plane | Prototype / pre-production candidate | Inline deployment, real workload evaluation, operational ownership |
+| `mcp-agent-security-gateway` | Agent tool-call security control plane | Prototype / pre-production candidate | Inline deployment, real workload evaluation, operational ownership |
 | `hf-model-provenance-scanner` | Model supply-chain scanner | Prototype / pre-production candidate | Real artifact corpus and downloaded-model performance evidence |
 | `llm-redteam-framework` | Offline LLM evaluation research tool | Research | External benchmark datasets and deployment interface |
 | `dataset-poisoning-detector` | Dataset anomaly research service | Research | Representative datasets and calibrated false-positive policy |

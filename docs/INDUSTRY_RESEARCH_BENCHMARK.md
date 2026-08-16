@@ -50,7 +50,7 @@ flowchart TD
 
 | Product | Current strongest differentiator | Current market gap | Can claim market leadership today? |
 |---|---|---|---|
-| mcp-security-gateway-monitor | Concrete MCP/tool-call and BCC bypass regression coverage | No 100+ language benchmark, no production latency/FP corpus, limited semantic/stateful detection | No |
+| mcp-agent-security-gateway | Concrete MCP/tool-call and BCC bypass regression coverage | No 100+ language benchmark, no production latency/FP corpus, limited semantic/stateful detection | No |
 | hf-model-provenance-scanner | Offline content-aware pickle/source scanning and renamed-file bypass tests | No Hub-scale integration, no malware engine, no trust portal, no registry policy engine | No |
 | PulseNet-RUL-Forecasting | Secure ML serving reference with JWT, RBAC, tenant validation, audit chain | Not a general platform; local audit chain lacks WORM/SIEM anchoring | No |
 | dataset-poisoning-detector | Streaming drift alarm and FP budget concepts | Clean-label and adaptive poisoning remain hard; no large real pipeline validation | No |
@@ -76,7 +76,7 @@ Honest win condition:
 
 Current products involved:
 
-- `mcp-security-gateway-monitor`
+- `mcp-agent-security-gateway`
 - `llm-redteam-framework`
 - `unified-ml-security-platform`
 
