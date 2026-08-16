@@ -257,10 +257,16 @@ jobs:
 
       - name: Build and push products
         run: |
-          # pulsenet removed from deployment loop — archived project
+          # pulsenet removed from deployment loop because it is archived.
           for product in hf_scanner mcp_gateway adv_ml llm_redteam dataset_poison model_privacy; do
-            docker build -f products/$product/Dockerfile -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$product:${{ steps.meta.outputs.tags }} .
-            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$product:${{ steps.meta.outputs.tags }}
+            tag_args=()
+            for tag in $DOCKER_METADATA_OUTPUT_TAG_NAMES; do
+              tag_args+=("-t" "${REGISTRY}/${IMAGE_NAME}-${product}:${tag}")
+            done
+            docker build -f "products/${product}/Dockerfile" "${tag_args[@]}" .
+            for tag in $DOCKER_METADATA_OUTPUT_TAG_NAMES; do
+              docker push "${REGISTRY}/${IMAGE_NAME}-${product}:${tag}"
+            done
           done
 
       - name: Sign images with Cosign
@@ -274,8 +280,8 @@ jobs:
       - name: Sign and attest
         if: env.COSIGN_PRIVATE_KEY != ''
         run: |
-          for tag in ${{ steps.meta.outputs.tags }}; do
-            cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$tag
+          for image in ${{ steps.meta.outputs.tags }}; do
+            cosign sign --yes "$image"
           done
 
   deploy-staging:
