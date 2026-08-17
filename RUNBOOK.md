@@ -39,13 +39,28 @@ Each product `server.py` exposes only a `/health` endpoint returning `{"status":
 
 ---
 
+## Clone
+
+**Windows (PowerShell):**
+```powershell
+git clone https://github.com/poojakira/unified-ml-security-platform.git
+cd unified-ml-security-platform
+```
+
+**Linux/macOS:**
+```bash
+git clone https://github.com/poojakira/unified-ml-security-platform.git
+cd unified-ml-security-platform
+```
+
+---
+
 ## Installation
 
 ### Linux / macOS
 
 ```bash
-cd unified-ml-security-platform
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 ```
@@ -53,10 +68,9 @@ pip install -e ".[dev]"
 ### Windows (PowerShell)
 
 ```powershell
-cd unified-ml-security-platform
-python -m venv .venv
+py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -e ".[dev]"
+py -m pip install -e ".[dev]"
 ```
 
 The `[dev]` extra installs: pytest, pytest-cov, pytest-asyncio, httpx, fastapi, uvicorn, ruff, pyright.
