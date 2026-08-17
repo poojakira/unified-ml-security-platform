@@ -1,300 +1,243 @@
 # Runbook: unified-ml-security-platform
 
-**Repository:** https://github.com/poojakira/unified-ml-security-platform  
-**Description:** Integration workspace for ML security services with CI, compose validation, scans, and health checks  
-**License:** Apache-2.0  
-**Default Branch:** main
+## What This Repo Is
+
+This is an **integration test workspace** and architecture specification hub for an ML security product portfolio. It is **not** a deployed microservices platform.
+
+The repo contains:
+
+- **Product stubs** under `products/` — each has a minimal `server.py` (health-check endpoint only) and a `Dockerfile`
+- **A gateway server** (`gateway_server.py`) — FastAPI proxy that routes to product services (used in Docker Compose)
+- **An ATT&CK v19 detection contract** (`attacks/`) — shared MITRE ATT&CK detection logic
+- **Integration and unit tests** — in `tests/` and `products/*/tests/`
+- **Docker Compose files** — for building/validating the full service topology
+- **Architecture & measurement docs** — in `docs/`
+
+### Products (stubs)
+
+| Directory | Description |
+|-----------|-------------|
+| `products/adv_ml` | Adversarial ML evaluation |
+| `products/dataset_poison` | Dataset poisoning detection |
+| `products/hf_scanner` | HuggingFace model scanning |
+| `products/llm_redteam` | LLM red-team framework |
+| `products/mcp_gateway` | MCP agent security gateway |
+| `products/model_privacy` | Model privacy attacks |
+| `products/pulsenet` | Predictive maintenance (archived) |
+
+Each product `server.py` exposes only a `/health` endpoint returning `{"status": "ok", "product": "<name>"}`.
 
 ---
 
 ## Prerequisites
 
-- Python 3.10+
-- Docker & Docker Compose
-- Git
-- Make (optional)
-- 4GB+ RAM for Docker services
+- **Python 3.10+** (3.11+ recommended; 3.12 tested)
+- **pip** (bundled with Python)
+- **Git**
+- **Docker & Docker Compose** (optional — only for container validation)
+- **Make** (optional — convenience targets)
 
 ---
 
-## Quick Start
+## Installation
+
+### Linux / macOS
 
 ```bash
-# Clone the repository
-git clone https://github.com/poojakira/unified-ml-security-platform.git
 cd unified-ml-security-platform
-
-# Start all services with Docker Compose
-docker-compose up -d
-
-# Verify health checks
-docker-compose ps
-
-# Run validation script
-python scripts/validate.py
-```
-
----
-
-## Detailed Setup
-
-### 1. Environment Setup
-
-```bash
-# Create virtual environment
 python -m venv .venv
-source .venv/bin/activate  # Linux/macOS
-
-# Install Python dependencies
-pip install --upgrade pip
-pip install -r requirements.txt
+source .venv/bin/activate
+pip install -e ".[dev]"
 ```
 
-### 2. Configuration
+### Windows (PowerShell)
 
-```bash
-# Copy example config
-cp config.example.yaml config.yaml
-
-# Edit config.yaml with your settings:
-# - Service ports
-# - Database connections
-# - API keys
-# - Scan policies
+```powershell
+cd unified-ml-security-platform
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -e ".[dev]"
 ```
 
-Required environment variables:
-- `POSTGRES_PASSWORD` - Database password
-- `REDIS_PASSWORD` - Redis password
-- `JWT_SECRET` - JWT signing secret
-- `GITHUB_TOKEN` - For GitHub API integration
-
-### 3. Start Services
-
-```bash
-# Start all services
-docker-compose up -d
-
-# Check service status
-docker-compose ps
-
-# View logs
-docker-compose logs -f
-
-# Run health checks
-curl http://localhost:8000/health
-curl http://localhost:8001/health
-```
+The `[dev]` extra installs: pytest, pytest-cov, pytest-asyncio, httpx, fastapi, uvicorn, ruff, pyright.
 
 ---
 
-## Service Architecture
+## Running Tests
 
-| Service | Port | Description |
-|---------|------|-------------|
-| API Gateway | 8000 | Main entry point |
-| Scanner Service | 8001 | ML model scanning |
-| Auth Service | 8002 | Authentication/Authorization |
-| Database | 5432 | PostgreSQL |
-| Cache | 6379 | Redis |
-| Message Queue | 5672 | RabbitMQ |
+Tests live in `tests/` (gateway integration tests, ATT&CK detector tests) and `products/*/tests/`.
 
----
-
-## Available Commands
-
-### Using Makefile
+### Using pytest directly
 
 ```bash
-# Show all targets
-make help
+# Run all configured test paths
+pytest
 
-# Start services
-make up
+# Or explicitly
+pytest tests/ products/
+```
 
-# Stop services
-make down
+### Using Make
 
-# Restart services
-make restart
-
-# Run tests
+```bash
 make test
+```
 
-# Run linting
+The pytest configuration in `pyproject.toml` already includes all product test directories and enables coverage reporting with a 25% minimum threshold.
+
+---
+
+## Linting & Formatting
+
+Ruff is configured (via `pyproject.toml`) to check `attacks/attack_v19_detector.py` and `tests/test_attack_v19_detector.py`.
+
+### Lint
+
+```bash
+# Direct
+ruff check .
+
+# Via Make
 make lint
-
-# Security scan
-make security
-
-# Generate SBOM
-make sbom
-
-# View logs
-make logs
 ```
 
-### Docker Compose Direct
+### Format
 
 ```bash
-# Start in background
-docker-compose up -d
+# Direct
+ruff format .
 
-# Start with build
-docker-compose up -d --build
-
-# Stop and remove volumes
-docker-compose down -v
-
-# Scale services
-docker-compose up -d --scale scanner=3
+# Via Make
+make format
 ```
 
 ---
 
-## Testing
+## Docker Compose
+
+Three compose files exist for different purposes:
+
+| File | Purpose |
+|------|---------|
+| `docker-compose.yml` | Main service topology (gateway + all product stubs) |
+| `docker-compose.prod.yml` | Production variant (requires `API_KEY`) |
+| `docker-compose.redteam.yml` | Red-team testing containers (Kali, Wireshark, exfil server) |
+
+### Validate compose syntax
 
 ```bash
-# Run unit tests
-pytest tests/unit/ -v
+docker compose config -q
+docker compose -f docker-compose.prod.yml config -q
+```
 
-# Run integration tests
-pytest tests/integration/ -v
+### Start services (development)
 
-# Run all tests with coverage
-pytest tests/ --cov=src --cov-report=html --cov-fail-under=80
+#### Linux / macOS
 
-# Run specific test
-pytest tests/unit/test_scanner.py::test_scan_model -v
+```bash
+export API_KEY="your-api-key-at-least-32-chars-long"
+docker compose up -d
+docker compose ps
+curl http://localhost:8000/health
+```
+
+#### Windows (PowerShell)
+
+```powershell
+$env:API_KEY = "your-api-key-at-least-32-chars-long"
+docker compose up -d
+docker compose ps
+Invoke-RestMethod http://localhost:8000/health
+```
+
+### Stop services
+
+```bash
+docker compose down
+```
+
+### Red-team environment (testing only)
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.redteam.yml up -d
+```
+
+> **Warning:** The red-team compose file adds Kali Linux, Wireshark, and an exfiltration server. Never use on production networks.
+
+---
+
+## Makefile Targets
+
+```
+make install    # pip install requirements + editable install + dev tools
+make lint       # ruff check
+make format     # ruff format
+make test       # pytest tests/ -q
+make build      # python -m build (sdist + wheel)
+make security   # bandit + pip-audit
+make verify     # lint + test + build + security
 ```
 
 ---
 
-## Validation & Health Checks
+## Project Structure (actual)
 
-```bash
-# Run validation script
-python scripts/validate.py
-
-# Check all service health endpoints
-for port in 8000 8001 8002; do
-  echo "Service on port $port:"
-  curl -s http://localhost:$port/health | jq .
-done
-
-# Verify scanner functionality
-python scripts/test_scanner.py --model-path ./test-models/sample.pt
 ```
-
----
-
-## CI/CD Pipeline
-
-GitHub Actions workflow (`.github/workflows/ci.yml`):
-
-- **Compose Validation:** Validates docker-compose.yml syntax
-- **Service Health:** Starts services and verifies health endpoints
-- **Security Scans:** Runs Trivy, Bandit, and pip-audit
-- **Integration Tests:** Runs full test suite against running services
-- **SBOM Generation:** Creates Software Bill of Materials
-- **SARIF Upload:** Uploads security findings to GitHub Security
+unified-ml-security-platform/
+├── .github/workflows/ci.yml   # GitHub Actions CI
+├── attacks/                   # ATT&CK v19 detection contract & catalog
+├── benchmarks/                # Portfolio measurement scripts
+├── dashboard/                 # HTML dashboard
+├── docs/                      # Architecture & measurement reports
+├── evidence/                  # Measurement JSON artifacts
+├── products/                  # Product stub directories
+│   ├── adv_ml/
+│   ├── dataset_poison/
+│   ├── hf_scanner/
+│   ├── llm_redteam/
+│   ├── mcp_gateway/
+│   ├── model_privacy/
+│   └── pulsenet/
+├── tests/                     # Integration & unit tests
+│   ├── integration/           # Gateway health tests
+│   └── test_attack_v19_detector.py
+├── docker-compose.yml         # Main compose (all services)
+├── docker-compose.prod.yml    # Production compose
+├── docker-compose.redteam.yml # Red-team testing compose
+├── Dockerfile.gateway         # Gateway container
+├── Dockerfile.kali            # Kali attacker container
+├── Dockerfile.wireshark       # Traffic capture container
+├── gateway_server.py          # FastAPI gateway (proxy to products)
+├── spec_service.py            # Spec service stub
+├── Makefile                   # Build/test/lint targets
+├── pyproject.toml             # Project metadata & tool config
+├── requirements.txt           # Minimal runtime dependencies
+└── README.md                  # Project overview
+```
 
 ---
 
 ## Troubleshooting
 
-### Common Issues
-
-| Issue | Solution |
-|-------|----------|
-| Port already in use | Check `docker-compose ps` and stop conflicting services |
-| Database connection failed | Ensure PostgreSQL is healthy: `docker-compose logs postgres` |
-| Redis connection refused | Check Redis service: `docker-compose logs redis` |
-| Scanner service fails | Check scanner logs: `docker-compose logs scanner` |
-| Out of memory | Increase Docker memory limit to 4GB+ |
-
-### Service Debugging
-
-```bash
-# Access service shell
-docker-compose exec scanner bash
-docker-compose exec api bash
-
-# View service logs
-docker-compose logs -f scanner
-docker-compose logs -f api
-
-# Restart single service
-docker-compose restart scanner
-
-# Rebuild single service
-docker-compose up -d --build scanner
-```
-
-### Database Issues
-
-```bash
-# Access PostgreSQL
-docker-compose exec postgres psql -U postgres -d mlsec
-
-# Run migrations
-docker-compose exec api python -m alembic upgrade head
-
-# Backup database
-docker-compose exec postgres pg_dump -U postgres mlsec > backup.sql
-```
+| Issue | Fix |
+|-------|-----|
+| `API_KEY environment variable is required` | Set `API_KEY` env var (≥32 chars) before running gateway or compose |
+| `MLSEC_API_KEY env var not set` | Product servers need `MLSEC_API_KEY` — set it or use Docker Compose which passes `API_KEY` |
+| pytest import errors | Run `pip install -e ".[dev]"` to install the package in editable mode |
+| Docker build fails | Ensure Docker daemon is running; check individual `products/*/Dockerfile` |
+| ruff finds no files | ruff config in `pyproject.toml` is scoped to specific files; use `ruff check .` to override |
 
 ---
 
-## Repository Structure
+## CI/CD
 
-```
-unified-ml-security-platform/
-├── .github/workflows/     # CI/CD pipelines
-├── config/                # Configuration files
-├── deploy/                # Deployment manifests
-├── docs/                  # Documentation
-├── scripts/               # Utility scripts
-├── src/                   # Source code
-│   ├── api/               # API gateway
-│   ├── scanner/           # Scanning services
-│   ├── auth/              # Authentication
-│   └── common/            # Shared utilities
-├── tests/                 # Test suite
-├── .env.example
-├── config.example.yaml
-├── docker-compose.yml
-├── Dockerfile
-├── Makefile
-├── README.md
-├── requirements.txt
-└── pyproject.toml
-```
+GitHub Actions (`.github/workflows/ci.yml`) runs on push/PR and includes:
+
+- Compose config validation
+- Lint (ruff)
+- Tests (pytest with coverage)
+- Security scans (bandit, pip-audit)
 
 ---
 
-## Links
-
-- **Repository:** https://github.com/poojakira/unified-ml-security-platform
-- **Documentation:** See `docs/` directory
-- **API Docs:** http://localhost:8000/docs (when running)
-
----
-
-## Verification Checklist
-
-- [ ] Repository clones successfully
-- [ ] Docker Compose starts all services
-- [ ] All health endpoints return 200 OK
-- [ ] `pytest tests/` passes
-- [ ] `make test` passes
-- [ ] Scanner can process a test model
-- [ ] API authentication works
-- [ ] Database migrations apply cleanly
-- [ ] SBOM generates without errors
-- [ ] Security scans complete
-
----
-
-*Last updated: 2026-08-16*  
-*Tested on: Ubuntu 22.04, Docker 24.0, Python 3.12*
+*Last updated: 2026-08-17*
