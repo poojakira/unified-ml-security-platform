@@ -13,8 +13,8 @@ See the implementation repos for actual tools:
 
 ## Contents
 
-- `ARCHITECTURE.md` — target integration architecture
-- `docs/ATTACK_V19_DETECTION_CONTRACT.md` — shared finding schema all tools conform to
-- `INTEGRATION_MAP.md` — how tools compose
-- `docker-compose.yml` — inter-service communication validation
-- `attacks/attack_v19_detector.py` — seed detector implementing the contract baseline
+- `ARCHITECTURE.md`  -  target integration architecture
+- `docs/ATTACK_V19_DETECTION_CONTRACT.md`  -  shared finding schema all tools conform to
+- `INTEGRATION_MAP.md`  -  how tools compose
+- `docker-compose.yml`  -  inter-service communication validation
+- `attacks/attack_v19_detector.py`  -  seed detector implementing the contract baseline
