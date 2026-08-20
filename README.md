@@ -1,6 +1,6 @@
 # unified-ml-security-platform
 
-Docker Compose integration workspace that orchestrates 8 ML security microservices behind a FastAPI gateway on an internal bridge network. Provides compose validation, health checks, resource limits, and a shared ATT&CK v19 detection module.
+Docker Compose integration workspace that orchestrates 7 ML security microservices behind a FastAPI gateway (8 services total) on an internal bridge network. Provides compose validation, health checks, resource limits, and a shared ATT&CK v19 detection module.
 
 ## Architecture
 
@@ -66,4 +66,4 @@ This workspace composes services from: [mcp-agent-security-gateway](https://gith
 
 ## License
 
-MIT
+Apache License 2.0
