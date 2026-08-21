@@ -7,6 +7,14 @@
 - 8 GB RAM minimum (16 GB recommended)
 - Ports 8000-8010 available
 
+## Local Development
+
+```bash
+python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -e ".[dev]"
+pytest
+```
+
 ## Bring Up Services
 
 ```bash
