@@ -1,5 +1,5 @@
 """
-Attack Catalog - 147 Attack Definitions Mapped to 7 Products
+Attack Catalog - 78 Attack Definitions Mapped to 7 Products
 """
 from typing import List, Dict, Any
 

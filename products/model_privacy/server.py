@@ -1,3 +1,4 @@
+# DEPRECATED: This file is not used. Containers run spec_service.py instead. See Dockerfile.
 """Thin FastAPI wrapper around model_privacy."""
 from __future__ import annotations
 import os

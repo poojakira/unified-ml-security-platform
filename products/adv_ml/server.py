@@ -1,3 +1,4 @@
+# DEPRECATED: This file is not used. Containers run spec_service.py instead. See Dockerfile.
 """Thin FastAPI wrapper around adv_ml."""
 from __future__ import annotations
 import os

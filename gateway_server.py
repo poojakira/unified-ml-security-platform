@@ -6,6 +6,10 @@ Requires API_KEY environment variable. Fails fast if missing.
 
 import os
 import sys
+import logging
+import uuid
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request, HTTPException, Depends, Body
 from fastapi.security import APIKeyHeader
 from fastapi.responses import JSONResponse
@@ -27,8 +31,6 @@ api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 GATEWAY_VERSION = "1.0.0"
 
-app = FastAPI(title="MLSec Platform Gateway", version=GATEWAY_VERSION)
-
 # Product service URLs (internal Docker network)
 SERVICES = {
     "hf_scanner": "http://hf-scanner:8001",
@@ -39,6 +41,17 @@ SERVICES = {
     "model_privacy": "http://model-privacy:8006",
     # "pulsenet" removed — archived project; not an active service
 }
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage a shared httpx.AsyncClient across the application lifetime."""
+    app.state.http_client = httpx.AsyncClient(timeout=30.0)
+    yield
+    await app.state.http_client.aclose()
+
+
+app = FastAPI(title="MLSec Platform Gateway", version=GATEWAY_VERSION, lifespan=lifespan)
 
 
 async def verify_api_key(api_key: str = Depends(api_key_header)):
@@ -95,44 +108,42 @@ async def proxy(
         raise HTTPException(status_code=404, detail=f"Unknown service: {service}")
 
     target_url = f"{SERVICES[service]}/{path}"
+    client: httpx.AsyncClient = request.app.state.http_client
 
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        try:
-            body = await request.body()
-            headers = dict(request.headers)
-            headers.pop("host", None)
-            headers.pop("content-length", None)
+    try:
+        body = await request.body()
+        headers = dict(request.headers)
+        headers.pop("host", None)
+        headers.pop("content-length", None)
 
-            resp = await client.request(
-                method=request.method,
-                url=target_url,
-                headers=headers,
-                content=body,
-                params=request.query_params,
-            )
+        resp = await client.request(
+            method=request.method,
+            url=target_url,
+            headers=headers,
+            content=body,
+            params=request.query_params,
+        )
 
-            return JSONResponse(
-                content=resp.json()
-                if resp.headers.get("content-type", "").startswith("application/json")
-                else resp.text,
-                status_code=resp.status_code,
-                headers=dict(resp.headers),
-            )
-        except httpx.TimeoutException:
-            raise HTTPException(status_code=504, detail="Service timeout")
-        except Exception as e:
-            # Do not expose internal exception details to clients.
-            # Log server-side with request ID for debugging.
-            import logging, uuid
-
-            req_id = str(uuid.uuid4())[:8]
-            logging.getLogger("gateway").error(
-                "Service error [req=%s service=%s]: %s", req_id, service, str(e)
-            )
-            raise HTTPException(
-                status_code=502,
-                detail={"error": "upstream_service_error", "request_id": req_id},
-            )
+        return JSONResponse(
+            content=resp.json()
+            if resp.headers.get("content-type", "").startswith("application/json")
+            else resp.text,
+            status_code=resp.status_code,
+            headers=dict(resp.headers),
+        )
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Service timeout")
+    except Exception as e:
+        # Do not expose internal exception details to clients.
+        # Log server-side with request ID for debugging.
+        req_id = str(uuid.uuid4())[:8]
+        logging.getLogger("gateway").error(
+            "Service error [req=%s service=%s]: %s", req_id, service, str(e)
+        )
+        raise HTTPException(
+            status_code=502,
+            detail={"error": "upstream_service_error", "request_id": req_id},
+        )
 
 
 if __name__ == "__main__":

@@ -59,7 +59,7 @@ But operators need them to behave as one system. This repository exists to answe
 | dataset-poison | Dataset poisoning detection (clean-label, distributed, label flip, drift) | `poojakira/dataset-poisoning-detector` |
 | model-privacy | Privacy attack evaluation (membership inference, model extraction, Min-K%) | `poojakira/model-privacy-attacks` |
 | pulsenet | Remaining Useful Life forecasting with FDIA detection | `poojakira/PulseNet-RUL-Forecasting` |
-| attacks/ | Shared ATT&CK v19 detection module, attack catalog (147 attacks across 7 products) | This repo |
+| attacks/ | Shared ATT&CK v19 detection module, attack catalog (78 attacks across 7 products) | This repo |
 
 ## End-to-End Workflow
 
@@ -224,7 +224,7 @@ Total: 10 CPU cores, 13 GB memory for the full stack.
 
 ### Attack Catalog Coverage
 
-The `attacks/attack_catalog.py` defines 147 attack scenarios across 7 products:
+The `attacks/attack_catalog.py` defines 78 attack scenarios across 7 products:
 
 | Product | Attack Count | Categories |
 |---------|-------------|------------|
