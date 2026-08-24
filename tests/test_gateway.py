@@ -14,7 +14,7 @@ import sys
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 # Set required env vars BEFORE importing the gateway module
 os.environ.setdefault("API_KEY", "test-api-key-that-is-at-least-32-characters-long")
@@ -39,8 +39,9 @@ INVALID_API_KEY = "invalid-key-definitely-wrong-and-short"
 
 @pytest.fixture
 def client():
-    """Synchronous test client for the gateway."""
-    return TestClient(app)
+    """Synchronous test client for the gateway (triggers lifespan events)."""
+    with TestClient(app) as c:
+        yield c
 
 
 @pytest.fixture
@@ -172,7 +173,8 @@ class TestProxyBehavior:
 @pytest.mark.asyncio
 async def test_health_async():
     """Verify health endpoint works with httpx AsyncClient."""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         response = await ac.get("/health")
         assert response.status_code == 200
         assert response.json()["status"] == "healthy"
@@ -181,7 +183,8 @@ async def test_health_async():
 @pytest.mark.asyncio
 async def test_auth_rejection_async():
     """Verify invalid API key is rejected via async client."""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         response = await ac.get(
             "/status", headers={"X-API-Key": "bad-key-not-valid"}
         )
@@ -191,7 +194,8 @@ async def test_auth_rejection_async():
 @pytest.mark.asyncio
 async def test_status_with_valid_key_async():
     """Verify authenticated status endpoint via async client."""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         response = await ac.get(
             "/status", headers={"X-API-Key": VALID_API_KEY}
         )

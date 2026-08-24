@@ -254,7 +254,7 @@ It provides 22 seed detection rules with regex patterns, covering techniques fro
 
 ## Production Readiness Assessment
 
-**Honest status**: The gateway authenticates requests (API key), routes traffic to the correct backend service based on URL path prefix, and exposes an unauthenticated `/health` endpoint for load balancer probes. All product services respond to `GET /health` with `{"status": "healthy", "service": "<name>"}`. However, **individual product functionality is stub-only** — non-health routes return 501 (not implemented). Full business logic (model scanning, adversarial evaluation, privacy attacks, etc.) requires deploying each product from its own source repository. This platform validates integration topology, not product functionality.
+**Honest status**: The gateway authenticates requests (API key), routes traffic to the correct backend service based on URL path prefix, and exposes an unauthenticated `/health` endpoint for load balancer probes. All product services respond to `GET /health` with `{"status": "healthy", "service": "<name>"}`. However, **individual product functionality is stub-only** - non-health routes return 501 (not implemented). Full business logic (model scanning, adversarial evaluation, privacy attacks, etc.) requires deploying each product from its own source repository. This platform validates integration topology, not product functionality.
 
 | Criterion | Status | Notes |
 |-----------|--------|-------|
