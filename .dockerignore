@@ -1,0 +1,66 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.egg-info
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv
+venv
+env
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Testing & Coverage
+.pytest_cache
+.coverage
+coverage.xml
+htmlcov/
+.mypy_cache
+
+# CI/CD
+.github
+
+# Documentation (not needed in container images)
+docs/
+*.md
+!README.md
+
+# Security scan artifacts
+bandit-report.json
+safety-report.json
+trivy-results.sarif
+sbom.spdx.json
+.secrets.baseline
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Pre-commit
+.pre-commit-config.yaml
+
+# Benchmarks and attacks (not deployed)
+benchmarks/
+attacks/
+
+# Dashboard (served separately)
+dashboard/
