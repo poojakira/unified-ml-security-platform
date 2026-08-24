@@ -24,9 +24,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send(
                 200,
                 {
-                    "status": "ok",
+                    "status": "healthy",
                     "service": SERVICE_NAME,
-                    "implementation": "architecture-spec-stub",
                 },
             )
             return

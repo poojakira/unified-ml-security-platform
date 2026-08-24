@@ -254,23 +254,28 @@ It provides 22 seed detection rules with regex patterns, covering techniques fro
 
 ## Production Readiness Assessment
 
+**Honest status**: The gateway authenticates requests (API key), routes traffic to the correct backend service based on URL path prefix, and exposes an unauthenticated `/health` endpoint for load balancer probes. All product services respond to `GET /health` with `{"status": "healthy", "service": "<name>"}`. However, **individual product functionality is stub-only** — non-health routes return 501 (not implemented). Full business logic (model scanning, adversarial evaluation, privacy attacks, etc.) requires deploying each product from its own source repository. This platform validates integration topology, not product functionality.
+
 | Criterion | Status | Notes |
 |-----------|--------|-------|
-| Health checks | Yes | Gateway has Docker HEALTHCHECK and `/health` endpoint |
-| Resource limits | Yes | CPU and memory limits on all services |
-| Restart policy | Yes | `unless-stopped` on all services |
-| Non-root container | Yes | Gateway runs as `mlsec` user |
-| Network isolation | Yes | Internal bridge, no egress |
-| CI/CD pipeline | Yes | Lint, type check, test, security scan, build, push |
-| Secret management | Partial | Env vars with required syntax, but no vault integration |
-| Logging | Partial | Structured error logging in gateway, but no centralized aggregation |
-| Monitoring/alerting | No | No Prometheus metrics, no alerting rules |
-| Multi-host deployment | No | Single docker-compose host only |
-| TLS termination | Partial | Port 8443 exposed but TLS cert provisioning not automated |
-| Rate limiting | No | No request rate limiting on the gateway |
-| Horizontal scaling | No | Single instance per service |
-| Backup/recovery | No | No persistent volumes, no backup strategy |
-| Incident runbook | Yes | `RUNBOOK.md` with troubleshooting table |
+| Health checks | ✅ Working | Gateway and all services respond 200 on `/health` |
+| API key authentication | ✅ Working | Gateway enforces X-API-Key on all non-health routes |
+| Service routing | ✅ Working | Gateway proxies `/{service}/{path}` to correct internal host |
+| Product business logic | ❌ Stub only | All non-health routes return 501; full implementations live in separate repos |
+| Resource limits | ✅ Configured | CPU and memory limits on all services in prod compose |
+| Restart policy | ✅ Configured | `unless-stopped` on all services |
+| Non-root container | ✅ Configured | Gateway runs as `mlsec` user |
+| Network isolation | ✅ Configured | Internal bridge, no egress |
+| CI/CD pipeline | ✅ Working | Lint, type check, test, security scan, build, push |
+| Secret management | ⚠️ Partial | Env vars with required syntax, but no vault integration |
+| Logging | ⚠️ Partial | Structured error logging in gateway, no centralized aggregation |
+| Monitoring/alerting | ❌ Missing | No Prometheus metrics, no alerting rules |
+| Multi-host deployment | ❌ Missing | Single docker-compose host only |
+| TLS termination | ⚠️ Partial | Port 8443 exposed but TLS cert provisioning not automated |
+| Rate limiting | ❌ Missing | No request rate limiting on the gateway |
+| Horizontal scaling | ❌ Missing | Single instance per service |
+| Backup/recovery | ❌ Missing | No persistent volumes, no backup strategy |
+| Incident runbook | ✅ Available | `RUNBOOK.md` with troubleshooting table |
 
 ## Roadmap and Future Improvements
 
