@@ -89,6 +89,8 @@ jobs:
           pip install -e .[dev] -q 2>&1 | tail -5
 
       - name: Run tests
+        env:
+          API_KEY: test-api-key-that-is-at-least-32-characters-long
         run: |
           pytest tests/ -v --tb=short \
             --cov=. \
