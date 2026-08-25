@@ -33,7 +33,7 @@ from gateway_server import app, SERVICES, API_KEY  # noqa: E402
 
 from fastapi.testclient import TestClient
 
-VALID_API_KEY = os.environ["API_KEY"]
+VALID_API_KEY = API_KEY  # Use the actual key the gateway loaded
 INVALID_API_KEY = "invalid-key-definitely-wrong-and-short"
 
 
