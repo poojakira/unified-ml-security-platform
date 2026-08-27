@@ -311,6 +311,13 @@ Based on the architecture docs and current gaps:
 | [model-privacy-attacks](https://github.com/poojakira/model-privacy-attacks) | Privacy attack simulation |
 | [PulseNet-RUL-Forecasting](https://github.com/poojakira/PulseNet-RUL-Forecasting) | Secure RUL prediction |
 
+
+## Additional Documentation
+
+- [INCIDENT_RUNBOOK.md](INCIDENT_RUNBOOK.md) - gateway operational incident response
+- [enchmarks/gateway_perf.py](benchmarks/gateway_perf.py) - gateway performance gate (p95 < 20ms)
+- [	ests/test_gateway_comprehensive.py](tests/test_gateway_comprehensive.py) - 64 comprehensive gateway tests
+
 ## License and Author
 
 **License**: Apache License 2.0
