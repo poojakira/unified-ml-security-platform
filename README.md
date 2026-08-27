@@ -315,8 +315,6 @@ Based on the architecture docs and current gaps:
 ## Additional Documentation
 
 - [INCIDENT_RUNBOOK.md](INCIDENT_RUNBOOK.md) - gateway operational incident response
-- [enchmarks/gateway_perf.py](benchmarks/gateway_perf.py) - gateway performance gate (p95 < 20ms)
-- [	ests/test_gateway_comprehensive.py](tests/test_gateway_comprehensive.py) - 64 comprehensive gateway tests
 
 ## License and Author
 

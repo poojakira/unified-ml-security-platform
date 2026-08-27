@@ -343,7 +343,7 @@ iostat -x 1 3
    ```
 
 ### Post-incident
-- Run `benchmarks/gateway_perf.py` to validate recovery
+- Run `pytest tests/test_gateway.py` to validate the gateway after recovery
 - Update capacity planning if load has grown
 - Consider adding auto-scaling rules
 
