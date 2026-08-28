@@ -295,9 +295,8 @@ Every service must implement:
 ```json
 GET /health → 200 OK
 {
-  "status": "ok",
-  "product": "<service_name>",
-  "port": <port_number>
+  "status": "healthy",
+  "product": "<service_name>"
 }
 ```
 

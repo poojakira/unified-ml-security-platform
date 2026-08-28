@@ -110,9 +110,8 @@ Response: 200 OK
 Content-Type: application/json
 
 {
-  "status": "ok",
-  "product": "<service_name>",
-  "port": <assigned_port>
+  "status": "healthy",
+  "product": "<service_name>"
 }
 ```
 
@@ -135,7 +134,7 @@ app = FastAPI(title="your_service", version="1.0.0")
 
 @app.get("/health")
 async def health() -> dict:
-    return {"status": "ok", "product": "your_service", "port": 8010}
+    return {"status": "healthy", "product": "your_service"}
 ```
 
 ### 3.4 Docker Health Check
@@ -391,11 +390,11 @@ def client(monkeypatch):
     from products.your_service.server import app
     return TestClient(app)
 
-def test_health_returns_ok(client):
+def test_health_returns_healthy(client):
     response = client.get("/health")
     assert response.status_code == 200
     data = response.json()
-    assert data["status"] == "ok"
+    assert data["status"] == "healthy"
     assert data["product"] == "your_service"
 ```
 

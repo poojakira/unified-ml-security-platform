@@ -1,5 +1,21 @@
 # PulseNet RUL Forecasting
 
+> **⚠️ ARCHIVED HEALTH-CHECK STUB — READ FIRST**
+>
+> This product slot in the unified platform is an **archived stub**. It contains
+> only `__init__.py`, a `Dockerfile`, `requirements.txt`, and `tests/` — there is
+> **no `server.py` and no running service here.** `pulsenet` has also been removed
+> from the gateway's active `SERVICES` map in `gateway_server.py`.
+>
+> Everything documented below (the `/predict`, `/predict/batch`,
+> `/test/adversarial` endpoints, the security/MLOps modules, config, metrics,
+> and benchmarks) describes the **external, standalone PulseNet repository**, not
+> this stub. Do not expect any of these endpoints or modules to exist in this
+> directory. Refer to the external PulseNet-RUL-Forecasting project for the real
+> implementation.
+
+---
+
 **Adversarially-Robust Remaining Useful Life Prediction for Aerospace Turbofan Engines**
 
 ## Overview
