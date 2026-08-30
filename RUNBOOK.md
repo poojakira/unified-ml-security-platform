@@ -37,7 +37,7 @@ pytest
 | Model Privacy | 8006 | `model-privacy` | Privacy attack evaluation |
 | PulseNet | 8007 | `pulsenet` | RUL forecasting with FDIA detection (archived) |
 
-All product services run `spec_service.py` (a stdlib HTTP stub that responds to `/health` with 200 and all other routes with 501). They do NOT run the `products/*/server.py` FastAPI wrappers — those are dead code.
+In the Docker Compose deployment, all product services run `spec_service.py` (a stdlib HTTP stub that responds to `/health` with 200 and all other routes with 501). The `products/*/server.py` files are minimal FastAPI health-check wrappers (one per product, each exposing `/health`) used by the per-product unit tests (`products/*/tests/test_*_health.py`); they are not the containers' entrypoint in the compose files but are covered by the test suite.
 
 ## Network Architecture
 

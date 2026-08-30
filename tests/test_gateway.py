@@ -9,36 +9,53 @@ Covers:
 
 from __future__ import annotations
 
+import importlib
 import os
-import sys
-from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import AsyncClient, ASGITransport
 
-# Set required env vars BEFORE importing the gateway module
-os.environ.setdefault("API_KEY", "test-api-key-that-is-at-least-32-characters-long")
-
-# Patch sys.exit so the gateway module doesn't kill the test process during import
-# if API_KEY validation was already handled above, this is belt-and-suspenders.
-_original_exit = sys.exit
-
-
-def _no_exit(code=0):
-    raise SystemExit(code)
-
-
-# Now safe to import gateway
-from gateway_server import app, SERVICES, API_KEY  # noqa: E402
-
-from fastapi.testclient import TestClient
-
-VALID_API_KEY = API_KEY  # Use the actual key the gateway loaded
+# A known, valid API key used consistently across this module's fixtures.
+# We reload the gateway module under this key in every fixture so the tests are
+# robust to other test modules (e.g. tests/integration/*) that reload
+# gateway_server with a different key. Relying on a value captured at import
+# time is fragile because importlib.reload mutates the shared module globals
+# that the app's auth dependency reads at request time.
+VALID_API_KEY = "test-api-key-that-is-at-least-32-characters-long"
 INVALID_API_KEY = "invalid-key-definitely-wrong-and-short"
 
 
+def _load_gateway(monkeypatch):
+    """(Re)load gateway_server bound to VALID_API_KEY and return the module."""
+    monkeypatch.setenv("API_KEY", VALID_API_KEY)
+    import gateway_server
+
+    return importlib.reload(gateway_server)
+
+
 @pytest.fixture
-def client():
+def gateway(monkeypatch):
+    """The gateway_server module, freshly reloaded under a known API key."""
+    return _load_gateway(monkeypatch)
+
+
+@pytest.fixture
+def app(gateway):
+    """The FastAPI app whose auth dependency reads the known API key."""
+    return gateway.app
+
+
+@pytest.fixture
+def SERVICES(gateway):
+    """The service map from the freshly loaded gateway module."""
+    return gateway.SERVICES
+
+
+from fastapi.testclient import TestClient  # noqa: E402
+
+
+@pytest.fixture
+def client(app):
     """Synchronous test client for the gateway (triggers lifespan events)."""
     with TestClient(app) as c:
         yield c
@@ -117,7 +134,7 @@ class TestServiceRouting:
         assert response.status_code == 404
         assert "Unknown service" in response.json()["detail"]
 
-    def test_known_services_are_routable(self, client, auth_headers):
+    def test_known_services_are_routable(self, client, auth_headers, SERVICES):
         """All configured services should be recognized (not 404).
         They may return 502/504 since backends aren't running, but not 404."""
         for service_name in SERVICES:
@@ -131,7 +148,7 @@ class TestServiceRouting:
         response = client.get("/hf_scanner/health")
         assert response.status_code == 401
 
-    def test_status_endpoint_lists_services(self, client, auth_headers):
+    def test_status_endpoint_lists_services(self, client, auth_headers, SERVICES):
         response = client.get("/status", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
@@ -171,7 +188,7 @@ class TestProxyBehavior:
 
 
 @pytest.mark.asyncio
-async def test_health_async():
+async def test_health_async(app):
     """Verify health endpoint works with httpx AsyncClient."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
@@ -181,7 +198,7 @@ async def test_health_async():
 
 
 @pytest.mark.asyncio
-async def test_auth_rejection_async():
+async def test_auth_rejection_async(app):
     """Verify invalid API key is rejected via async client."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
@@ -192,7 +209,7 @@ async def test_auth_rejection_async():
 
 
 @pytest.mark.asyncio
-async def test_status_with_valid_key_async():
+async def test_status_with_valid_key_async(app):
     """Verify authenticated status endpoint via async client."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
