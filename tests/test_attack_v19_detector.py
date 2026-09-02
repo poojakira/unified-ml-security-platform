@@ -92,7 +92,7 @@ class AttackV19DetectorTests(unittest.TestCase):
     def test_empty_input_is_handled(self):
         result = analyze_attack_v19("")
         self.assertEqual([], result["detections"])
-        self.assertEqual("No ATT&CK techniques detected.", result["status"])
+        self.assertEqual("No ATT&CK techniques detected.", result.get("status"))
 
     def test_rule_and_scope_counts_are_pinned(self):
         from attacks.attack_v19_detector import RULES
