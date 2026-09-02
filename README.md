@@ -116,7 +116,7 @@ But operators need them to behave as one system. This repository exists to answe
 - Docker 20.10+ and Docker Compose v2
 - Python 3.11+ (for local development)
 - 8 GB RAM minimum (16 GB recommended for all services)
-- Ports 8000-8010 available
+- Ports 8000 and 8443 available (only the gateway binds to the host; all product services are internal-only on the `mlsec-internal` network)
 
 ### Production Deployment
 

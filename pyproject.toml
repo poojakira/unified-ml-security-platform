@@ -23,7 +23,7 @@ dev = [
 
 [tool.setuptools]
 py-modules = ["gateway_server", "spec_service"]
-packages = ["attacks", "products", "products.dataset_poison", "products.mcp_gateway", "products.adv_ml", "products.llm_redteam", "products.dataset_poison", "products.model_privacy", "products.hf_scanner", "products.pulsenet"]
+packages = ["attacks", "products", "products.dataset_poison", "products.mcp_gateway", "products.adv_ml", "products.llm_redteam", "products.model_privacy", "products.hf_scanner", "products.pulsenet"]
 
 [tool.coverage.run]
 omit = [
