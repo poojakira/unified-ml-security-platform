@@ -55,6 +55,14 @@ py -3.12 attacks\attack_v19_detector.py sample.log --format json
 Get-Content sample.log | py -3.12 attacks\attack_v19_detector.py
 ```
 
+### Error handling
+
+The CLI fails cleanly with a message on stderr and **exit code 2** (no
+traceback) for: missing input file, a directory passed as input, permission
+errors, and non-UTF-8 input. `analyze_attack_v19()` raises `TypeError` for
+non-string input. These paths are covered by
+`tests/test_attack_v19_detector.py`.
+
 ## Product Integration
 
 Use this detector contract as the shared interface for all seven products:
