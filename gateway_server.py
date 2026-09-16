@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Unified Gateway Server - Production Entry Point
+Unified Gateway Server - Entry Point
 Requires API_KEY environment variable. Fails fast if missing.
 """
 
+import hmac
 import logging
 import os
 import sys
@@ -68,7 +69,8 @@ app = FastAPI(title="MLSec Platform Gateway", version=GATEWAY_VERSION, lifespan=
 
 
 async def verify_api_key(api_key: str = Depends(api_key_header)):
-    if not api_key or api_key != API_KEY:
+    """Authenticate the external caller without exposing key-comparison timing."""
+    if not api_key or not hmac.compare_digest(api_key, API_KEY):
         raise HTTPException(status_code=401, detail="Invalid API key")
     return api_key
 
