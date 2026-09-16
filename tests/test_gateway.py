@@ -5,22 +5,19 @@ Covers:
 - API key authentication
 - Service routing by path prefix
 - Invalid API key rejection
+- Explicit upstream header allowlisting
 """
 
 from __future__ import annotations
 
 import importlib
-import os
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import AsyncClient, ASGITransport
 
 # A known, valid API key used consistently across this module's fixtures.
-# We reload the gateway module under this key in every fixture so the tests are
-# robust to other test modules (e.g. tests/integration/*) that reload
-# gateway_server with a different key. Relying on a value captured at import
-# time is fragile because importlib.reload mutates the shared module globals
-# that the app's auth dependency reads at request time.
 VALID_API_KEY = "test-api-key-that-is-at-least-32-characters-long"
 INVALID_API_KEY = "invalid-key-definitely-wrong-and-short"
 
@@ -139,7 +136,6 @@ class TestServiceRouting:
         They may return 502/504 since backends aren't running, but not 404."""
         for service_name in SERVICES:
             response = client.get(f"/{service_name}/health", headers=auth_headers)
-            # Should NOT be 404 (unknown service) or 401 (auth failure)
             assert response.status_code != 404, f"{service_name} returned 404"
             assert response.status_code != 401, f"{service_name} returned 401"
 
@@ -172,14 +168,52 @@ class TestProxyBehavior:
             headers={**auth_headers, "Content-Type": "application/json"},
             json={"model_id": "test/model"},
         )
-        # Backend not running => 502 (upstream error) or 504 (timeout)
         assert response.status_code in (502, 504)
 
     def test_multiple_path_segments_preserved(self, client, auth_headers):
         """Path after service name is forwarded correctly."""
         response = client.get("/adv_ml/eval/status", headers=auth_headers)
-        # Should attempt to reach adv-ml service, not 404
         assert response.status_code in (502, 504)
+
+    def test_proxy_uses_explicit_header_allowlist_and_gateway_identity(
+        self, client, gateway, auth_headers
+    ):
+        """Caller-controlled Authorization/Cookie headers never cross the trust boundary."""
+        fake_response = SimpleNamespace(
+            status_code=200,
+            headers={"content-type": "application/json"},
+            json=lambda: {"ok": True},
+            text="{\"ok\":true}",
+        )
+        mock_request = AsyncMock(return_value=fake_response)
+        with patch.object(gateway.app.state.http_client, "request", mock_request):
+            response = client.post(
+                "/hf_scanner/scan",
+                headers={
+                    **auth_headers,
+                    "Authorization": "Bearer caller-controlled",
+                    "Cookie": "session=caller-controlled",
+                    "Content-Type": "application/json",
+                    "X-Request-Id": "req-123",
+                },
+                json={"model_id": "test/model"},
+            )
+
+        assert response.status_code == 200
+        forwarded = mock_request.call_args.kwargs["headers"]
+        assert forwarded["X-API-Key"] == VALID_API_KEY
+        assert forwarded["content-type"] == "application/json"
+        assert forwarded["x-request-id"] == "req-123"
+        assert "authorization" not in forwarded
+        assert "cookie" not in forwarded
+
+    def test_forwarded_header_allowlist_excludes_security_sensitive_headers(self, gateway):
+        """The static allowlist documents and enforces a deny-by-construction boundary."""
+        assert "authorization" not in gateway.FORWARDED_REQUEST_HEADERS
+        assert "cookie" not in gateway.FORWARDED_REQUEST_HEADERS
+        assert "x-api-key" not in gateway.FORWARDED_REQUEST_HEADERS
+        assert "content-type" in gateway.FORWARDED_REQUEST_HEADERS
+        assert "x-request-id" in gateway.FORWARDED_REQUEST_HEADERS
 
 
 # ---------------------------------------------------------------------------
