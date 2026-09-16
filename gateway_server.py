@@ -4,19 +4,19 @@ Unified Gateway Server - Production Entry Point
 Requires API_KEY environment variable. Fails fast if missing.
 """
 
+import logging
 import os
 import sys
-import logging
 import uuid
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, HTTPException, Depends, Body
-from fastapi.security import APIKeyHeader
-from fastapi.responses import JSONResponse
-import uvicorn
 import httpx
+import uvicorn
+from fastapi import Body, Depends, FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from fastapi.security import APIKeyHeader
 
-# Fail fast if API_KEY not set
+# Fail fast if API_KEY not set.
 API_KEY = os.environ.get("API_KEY")
 if not API_KEY:
     print("FATAL: API_KEY environment variable is required", file=sys.stderr)
@@ -31,7 +31,7 @@ api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 GATEWAY_VERSION = "1.0.0"
 
-# Product service URLs (internal Docker network)
+# Product service URLs (internal Docker network).
 SERVICES = {
     "hf_scanner": "http://hf-scanner:8001",
     "mcp_gateway": "http://mcp-gateway:8002",
@@ -39,8 +39,21 @@ SERVICES = {
     "llm_redteam": "http://llm-redteam:8004",
     "dataset_poison": "http://dataset-poison:8005",
     "model_privacy": "http://model-privacy:8006",
-    # "pulsenet" removed — archived project; not an active service
 }
+
+# Only explicitly approved request headers cross the trust boundary. The
+# gateway's own API key is never forwarded from the external caller.
+FORWARDED_REQUEST_HEADERS = frozenset(
+    {
+        "accept",
+        "accept-encoding",
+        "content-type",
+        "user-agent",
+        "x-request-id",
+        "traceparent",
+        "tracestate",
+    }
+)
 
 
 @asynccontextmanager
@@ -62,11 +75,7 @@ async def verify_api_key(api_key: str = Depends(api_key_header)):
 
 @app.get("/health")
 async def health():
-    """Health check — no auth required for load balancer.
-
-    NOTE: Does not expose service inventory to unauthenticated callers.
-    Service list is internal operational information.
-    """
+    """Health check — no auth required for load balancer."""
     return {"status": "healthy", "version": GATEWAY_VERSION}
 
 
@@ -112,9 +121,16 @@ async def proxy(
 
     try:
         body = await request.body()
-        headers = dict(request.headers)
-        headers.pop("host", None)
-        headers.pop("content-length", None)
+        headers = {
+            key: value
+            for key, value in request.headers.items()
+            if key.lower() in FORWARDED_REQUEST_HEADERS
+        }
+
+        # Propagate the authenticated gateway identity explicitly. This keeps
+        # service authentication separate from caller-supplied Authorization or
+        # Cookie headers, neither of which crosses this boundary implicitly.
+        headers[API_KEY_NAME] = API_KEY
 
         resp = await client.request(
             method=request.method,
@@ -129,13 +145,15 @@ async def proxy(
             if resp.headers.get("content-type", "").startswith("application/json")
             else resp.text,
             status_code=resp.status_code,
-            headers=dict(resp.headers),
+            headers={
+                key: value
+                for key, value in resp.headers.items()
+                if key.lower() not in {"content-length", "transfer-encoding", "connection"}
+            },
         )
     except httpx.TimeoutException:
         raise HTTPException(status_code=504, detail="Service timeout")
     except Exception as e:
-        # Do not expose internal exception details to clients.
-        # Log server-side with request ID for debugging.
         req_id = str(uuid.uuid4())[:8]
         logging.getLogger("gateway").error(
             "Service error [req=%s service=%s]: %s", req_id, service, str(e)
@@ -143,7 +161,7 @@ async def proxy(
         raise HTTPException(
             status_code=502,
             detail={"error": "upstream_service_error", "request_id": req_id},
-        )
+        ) from e
 
 
 if __name__ == "__main__":
