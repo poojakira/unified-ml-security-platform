@@ -1,5 +1,7 @@
 # Unified ML Security Platform
 
+**Repository owner & maintainer:** Pooja Kiran ([@poojakira](https://github.com/poojakira)) — I review changes, verify public claims, and maintain the repository record.
+
 A Docker Compose integration workspace that orchestrates 7 ML security microservices behind a FastAPI gateway, providing compose validation, health checks, resource limits, CI/CD pipelines, and a shared MITRE ATT&CK v19 detection module.
 
 ## The Core Problem
