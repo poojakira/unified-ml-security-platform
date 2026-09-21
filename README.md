@@ -118,7 +118,7 @@ But operators need them to behave as one system. This repository exists to answe
 - 8 GB RAM minimum (16 GB recommended for all services)
 - Ports 8000 and 8443 available (only the gateway binds to the host; all product services are internal-only on the `mlsec-internal` network)
 
-### Production Deployment
+### Compose topology demo
 
 ```bash
 # Clone the repository
@@ -183,7 +183,7 @@ python -m attacks.attack_v19_detector suspicious_log.txt --format json
 echo "PowerShell -EncodedCommand detected on host" | python -m attacks.attack_v19_detector --format text
 ```
 
-### Resource Limits (Production)
+### Configured resource limits
 
 | Service | CPU Limit | Memory Limit | Restart Policy |
 |---------|-----------|--------------|----------------|
@@ -210,11 +210,11 @@ Total: 10 CPU cores, 13 GB memory for the full stack.
 
 **Error opacity**: The gateway does not expose internal exception details to clients. Upstream errors return an opaque `request_id` for server-side correlation.
 
-**CI security gates**: Every merge requires passing Bandit (HIGH/MEDIUM findings fail the build), Safety/pip-audit (known CVEs fail the build), Trivy (filesystem vulnerability scan), and Grype (with medium severity cutoff).
+**CI security checks**: The workflow is configured to run Bandit, dependency auditing, Trivy, and Grype. Whether those checks are required for merge depends on repository branch-protection settings and is not claimed here.
 
 **SBOM generation**: The CI pipeline produces an SPDX JSON SBOM via Syft on every build.
 
-**Image signing**: When Cosign keys are configured, built images are signed via Sigstore.
+**Image signing**: The workflow contains optional image-signing support when signing credentials are configured; this repository does not treat signing as evidence of a deployed production release.
 
 **Dependabot**: Automated dependency update PRs via `.github/dependabot.yml`.
 
@@ -252,7 +252,7 @@ It provides 22 seed detection rules with regex patterns, covering techniques fro
 - **No load testing results**: Resource limits are specified but no throughput benchmarks are published.
 - **Single-region**: The compose configuration assumes a single-host deployment. No multi-region or high-availability configuration exists.
 
-## Production Readiness Assessment
+## Integration Readiness Assessment
 
 **Honest status**: The gateway authenticates requests (API key), routes traffic to the correct backend service based on URL path prefix, and exposes an unauthenticated `/health` endpoint for load balancer probes. All product services respond to `GET /health` with `{"status": "healthy", "product": "<name>"}`. However, **individual product functionality is stub-only** - non-health routes return 501 (not implemented). Full business logic (model scanning, adversarial evaluation, privacy attacks, etc.) requires deploying each product from its own source repository. This platform validates integration topology, not product functionality.
 
