@@ -31,7 +31,6 @@ services:
       - mlsec-internal
     restart: unless-stopped
 
-  hf-scanner:
     build:
       context: .
       dockerfile: products/hf_scanner/Dockerfile
@@ -61,7 +60,6 @@ services:
           memory: 1G
     restart: unless-stopped
 
-  adv-ml:
     build:
       context: .
       dockerfile: products/adv_ml/Dockerfile
@@ -106,7 +104,6 @@ services:
           memory: 1G
     restart: unless-stopped
 
-  model-privacy:
     build:
       context: .
       dockerfile: products/model_privacy/Dockerfile
@@ -121,7 +118,6 @@ services:
           memory: 1G
     restart: unless-stopped
 
-  pulsenet:
     build:
       context: .
       dockerfile: products/pulsenet/Dockerfile
