@@ -3,6 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [main, develop]
+    tags: ['v*']
   pull_request:
     branches: [main, develop]
   schedule:
@@ -104,14 +105,14 @@ jobs:
           files: ./coverage.xml
           fail_ci_if_error: false
 
-  product-health-tests:
-    name: Product Health Tests
+  contract-stub-health-tests:
+    name: Local Contract Stub Health Tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         # pulsenet removed — archived project not built in active platform
-        product: [hf_scanner, mcp_gateway, adv_ml, llm_redteam, dataset_poison, model_privacy]
+        product: [mcp_gateway, llm_redteam, dataset_poison]
     steps:
       - uses: actions/checkout@v4
 
@@ -126,7 +127,7 @@ jobs:
           pip install fastapi uvicorn[standard] httpx pytest pytest-cov
           pip install -e .
 
-      - name: Test health endpoint
+      - name: Test local stub health contract
         env:
           MLSEC_API_KEY: test-key-ci
         run: |
@@ -210,7 +211,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -218,12 +219,12 @@ jobs:
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@c4dd10e44af883a891fe31ced449bcb4a6728b9b
         with:
           sarif_file: 'trivy-results.sarif'
 
       - name: Run Grype scanner
-        uses: anchore/scan-action@v7
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2
         env:
           GRYPE_DB_CACHE_DIR: ${{ runner.temp }}/grype-db
         with:
@@ -234,7 +235,7 @@ jobs:
           cache-db: false
 
       - name: Run Syft for SBOM
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610
         with:
           format: spdx-json
           output-file: sbom.spdx.json
@@ -323,19 +324,15 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate production compose contract
         env:
-          HF_SCANNER_IMAGE: ghcr.io/example/hf@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          GATEWAY_IMAGE: ghcr.io/example/control-plane@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           MCP_GATEWAY_IMAGE: ghcr.io/example/mcp@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-          ADV_ML_IMAGE: ghcr.io/example/adv@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-          LLM_REDTEAM_IMAGE: ghcr.io/example/llm@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-          DATASET_POISON_IMAGE: ghcr.io/example/dataset@sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-          MODEL_PRIVACY_IMAGE: ghcr.io/example/privacy@sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+          LLM_REDTEAM_IMAGE: ghcr.io/example/llm@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+          DATASET_POISON_IMAGE: ghcr.io/example/dataset@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
           GATEWAY_API_KEY: validation-gateway-key-that-is-at-least-32-chars
-          HF_SCANNER_API_KEY: validation-hf-service-key-at-least-32-characters
           MCP_GATEWAY_API_KEY: validation-mcp-service-key-at-least-32-characters
-          ADV_ML_API_KEY: validation-adv-service-key-at-least-32-characters
           LLM_REDTEAM_API_KEY: validation-llm-service-key-at-least-32-characters
           DATASET_POISON_API_KEY: validation-dataset-service-key-at-least-32-chars
-          MODEL_PRIVACY_API_KEY: validation-privacy-service-key-at-least-32-chars
+          MCP_ALLOWED_SERVERS: github
         run: docker compose -f docker-compose.prod.yml config >/dev/null
 
   release:
@@ -349,6 +346,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
