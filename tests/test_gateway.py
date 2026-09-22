@@ -25,12 +25,9 @@ INVALID_API_KEY = "invalid-key-definitely-wrong-and-short"
 def _load_gateway(monkeypatch):
     """(Re)load gateway_server with distinct external and service credentials."""
     monkeypatch.setenv("GATEWAY_API_KEY", VALID_API_KEY)
-    monkeypatch.setenv("HF_SCANNER_API_KEY", "hf-scanner-service-key-at-least-32-characters")
     monkeypatch.setenv("MCP_GATEWAY_API_KEY", "mcp-gateway-service-key-at-least-32-characters")
-    monkeypatch.setenv("ADV_ML_API_KEY", "adv-ml-service-key-at-least-32-characters")
     monkeypatch.setenv("LLM_REDTEAM_API_KEY", "llm-redteam-service-key-at-least-32-chars")
     monkeypatch.setenv("DATASET_POISON_API_KEY", "dataset-poison-service-key-at-least-32-chars")
-    monkeypatch.setenv("MODEL_PRIVACY_API_KEY", "model-privacy-service-key-at-least-32-chars")
     import gateway_server
 
     return importlib.reload(gateway_server)
@@ -147,7 +144,7 @@ class TestServiceRouting:
 
     def test_routing_requires_auth(self, client):
         """Service routes require API key authentication."""
-        response = client.get("/hf_scanner/health")
+        response = client.get("/mcp_gateway/v1/health")
         assert response.status_code == 401
 
     def test_status_endpoint_lists_services(self, client, auth_headers, SERVICES):
@@ -170,15 +167,15 @@ class TestProxyBehavior:
     def test_proxy_passes_request_to_correct_service(self, client, auth_headers):
         """When a backend service is unreachable, gateway returns 502."""
         response = client.post(
-            "/hf_scanner/scan",
+            "/mcp_gateway/v1/inspect_call",
             headers={**auth_headers, "Content-Type": "application/json"},
-            json={"model_id": "test/model"},
+            json={"name": "read_file", "server_id": "github", "arguments": {}},
         )
         assert response.status_code in (502, 504)
 
     def test_multiple_path_segments_preserved(self, client, auth_headers):
         """Path after service name is forwarded correctly."""
-        response = client.get("/adv_ml/eval/status", headers=auth_headers)
+        response = client.get("/mcp_gateway/v1/health", headers=auth_headers)
         assert response.status_code in (502, 504)
 
     def test_proxy_uses_explicit_header_allowlist_and_gateway_identity(
@@ -194,7 +191,7 @@ class TestProxyBehavior:
         mock_request = AsyncMock(return_value=fake_response)
         with patch.object(gateway.app.state.http_client, "request", mock_request):
             response = client.post(
-                "/hf_scanner/scan",
+                "/mcp_gateway/v1/inspect_call",
                 headers={
                     **auth_headers,
                     "Authorization": "Bearer caller-controlled",
@@ -202,12 +199,12 @@ class TestProxyBehavior:
                     "Content-Type": "application/json",
                     "X-Request-Id": "req-123",
                 },
-                json={"model_id": "test/model"},
+                json={"name": "read_file", "server_id": "github", "arguments": {}},
             )
 
         assert response.status_code == 200
         forwarded = mock_request.call_args.kwargs["headers"]
-        assert forwarded["X-API-Key"] == "hf-scanner-service-key-at-least-32-characters"
+        assert forwarded["X-API-Key"] == "mcp-gateway-service-key-at-least-32-characters"
         assert forwarded["content-type"] == "application/json"
         assert forwarded["x-request-id"] == "req-123"
         assert "authorization" not in forwarded
