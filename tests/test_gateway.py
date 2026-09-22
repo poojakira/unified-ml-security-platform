@@ -23,8 +23,14 @@ INVALID_API_KEY = "invalid-key-definitely-wrong-and-short"
 
 
 def _load_gateway(monkeypatch):
-    """(Re)load gateway_server bound to VALID_API_KEY and return the module."""
-    monkeypatch.setenv("API_KEY", VALID_API_KEY)
+    """(Re)load gateway_server with distinct external and service credentials."""
+    monkeypatch.setenv("GATEWAY_API_KEY", VALID_API_KEY)
+    monkeypatch.setenv("HF_SCANNER_API_KEY", "hf-scanner-service-key-at-least-32-characters")
+    monkeypatch.setenv("MCP_GATEWAY_API_KEY", "mcp-gateway-service-key-at-least-32-characters")
+    monkeypatch.setenv("ADV_ML_API_KEY", "adv-ml-service-key-at-least-32-characters")
+    monkeypatch.setenv("LLM_REDTEAM_API_KEY", "llm-redteam-service-key-at-least-32-chars")
+    monkeypatch.setenv("DATASET_POISON_API_KEY", "dataset-poison-service-key-at-least-32-chars")
+    monkeypatch.setenv("MODEL_PRIVACY_API_KEY", "model-privacy-service-key-at-least-32-chars")
     import gateway_server
 
     return importlib.reload(gateway_server)
@@ -201,7 +207,7 @@ class TestProxyBehavior:
 
         assert response.status_code == 200
         forwarded = mock_request.call_args.kwargs["headers"]
-        assert forwarded["X-API-Key"] == VALID_API_KEY
+        assert forwarded["X-API-Key"] == "hf-scanner-service-key-at-least-32-characters"
         assert forwarded["content-type"] == "application/json"
         assert forwarded["x-request-id"] == "req-123"
         assert "authorization" not in forwarded
