@@ -17,6 +17,7 @@ def client(monkeypatch):
     monkeypatch.setenv("MCP_GATEWAY_API_KEY", "mcp-gateway-service-key-at-least-32-characters")
     monkeypatch.setenv("LLM_REDTEAM_API_KEY", "llm-redteam-service-key-at-least-32-chars")
     monkeypatch.setenv("DATASET_POISON_API_KEY", "dataset-poison-service-key-at-least-32-chars")
+    monkeypatch.setenv("MODEL_PRIVACY_API_KEY", "model-privacy-service-key-at-least-32-characters")
     gateway = importlib.import_module("gateway_server")
     gateway = importlib.reload(gateway)
     with TestClient(gateway.app) as c:
@@ -48,8 +49,8 @@ def test_gateway_status_with_auth(client) -> None:
     payload = response.json()
     assert payload["status"] == "operational"
     assert "services" in payload
-    assert payload["services"] == ["dataset_poison", "llm_redteam", "mcp_gateway"]
-    assert payload["total"] == 3
+    assert payload["services"] == ["dataset_poison", "llm_redteam", "mcp_gateway", "model_privacy"]
+    assert payload["total"] == 4
 
 
 def test_scan_iam_requires_auth(client) -> None:
