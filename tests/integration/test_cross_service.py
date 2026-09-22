@@ -22,7 +22,11 @@ TEST_API_KEY = "test-integration-key-32-chars-long!!"
 @pytest.fixture()
 def client(monkeypatch):
     """Create a test client with API_KEY set."""
-    monkeypatch.setenv("API_KEY", TEST_API_KEY)
+    monkeypatch.delenv("API_KEY", raising=False)
+    monkeypatch.setenv("GATEWAY_API_KEY", TEST_API_KEY)
+    monkeypatch.setenv("MCP_GATEWAY_API_KEY", "mcp-gateway-service-key-at-least-32-characters")
+    monkeypatch.setenv("LLM_REDTEAM_API_KEY", "llm-redteam-service-key-at-least-32-chars")
+    monkeypatch.setenv("DATASET_POISON_API_KEY", "dataset-poison-service-key-at-least-32-chars")
     gateway = importlib.import_module("gateway_server")
     gateway = importlib.reload(gateway)
     with TestClient(gateway.app) as c:
@@ -45,8 +49,9 @@ class TestAuthenticationEnforcement:
         ("GET", "/status"),
         ("POST", "/scan/iam"),
         ("POST", "/scan/model"),
-        ("GET", "/mcp_gateway/health"),
-        ("POST", "/hf_scanner/scan"),
+        ("GET", "/mcp_gateway/v1/health"),
+        ("POST", "/llm_redteam/scan"),
+        ("POST", "/dataset_poison/score"),
     ]
 
     @pytest.mark.parametrize("method,path", PROTECTED_ENDPOINTS)
@@ -83,12 +88,9 @@ class TestServiceRegistry:
     """Verify the gateway knows about all expected services."""
 
     EXPECTED_SERVICES = [
-        "adv_ml",
         "dataset_poison",
-        "hf_scanner",
         "llm_redteam",
         "mcp_gateway",
-        "model_privacy",
     ]
 
     def test_status_lists_all_services(self, client, auth_headers):
@@ -203,15 +205,15 @@ class TestServiceProxy:
     def test_proxy_timeout_handling(self, client, auth_headers):
         """Proxy returns 502/504 for unreachable services, not crash."""
         # All services are down in test mode — expect controlled failure
-        response = client.get("/mcp_gateway/health", headers=auth_headers)
+        response = client.get("/mcp_gateway/v1/health", headers=auth_headers)
         # 502 (upstream error) or 504 (timeout) — NOT 500 (unhandled crash)
         assert response.status_code in (502, 504)
 
     def test_proxy_preserves_method(self, client, auth_headers):
         """POST requests are proxied as POST, not converted to GET."""
         response = client.post(
-            "/hf_scanner/scan",
-            json={"model": "test-model"},
+            "/llm_redteam/scan",
+            json={"prompt": "test prompt"},
             headers=auth_headers,
         )
         # Connection refused is fine — validates routing, not backend
@@ -219,7 +221,7 @@ class TestServiceProxy:
 
     def test_proxy_does_not_expose_internal_errors(self, client, auth_headers):
         """Error responses must not contain stack traces or internal paths."""
-        response = client.get("/mcp_gateway/health", headers=auth_headers)
+        response = client.get("/mcp_gateway/v1/health", headers=auth_headers)
         if response.status_code >= 500:
             body = response.text
             assert "Traceback" not in body
