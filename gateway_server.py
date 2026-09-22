@@ -35,22 +35,19 @@ api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 GATEWAY_VERSION = "1.0.0"
 
 # Product service URLs (internal Docker network).
+# Only route repositories that expose a real long-running HTTP contract.
+# Batch evaluators (HF scanner CLI, adversarial ML, privacy assessment) are
+# intentionally excluded until they have their own durable job/service layer.
 SERVICE_URLS = {
-    "hf_scanner": "http://hf-scanner:8001",
-    "mcp_gateway": "http://mcp-gateway:8002",
-    "adv_ml": "http://adv-ml:8003",
-    "llm_redteam": "http://llm-redteam:8004",
-    "dataset_poison": "http://dataset-poison:8005",
-    "model_privacy": "http://model-privacy:8006",
+    "mcp_gateway": "http://mcp-gateway:8080",
+    "llm_redteam": "http://llm-redteam:8000",
+    "dataset_poison": "http://dataset-poison:8000",
 }
 
 SERVICE_KEY_ENV = {
-    "hf_scanner": "HF_SCANNER_API_KEY",
     "mcp_gateway": "MCP_GATEWAY_API_KEY",
-    "adv_ml": "ADV_ML_API_KEY",
     "llm_redteam": "LLM_REDTEAM_API_KEY",
     "dataset_poison": "DATASET_POISON_API_KEY",
-    "model_privacy": "MODEL_PRIVACY_API_KEY",
 }
 
 def _service_key(service: str) -> str:
