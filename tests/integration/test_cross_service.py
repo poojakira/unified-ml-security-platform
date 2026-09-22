@@ -27,6 +27,7 @@ def client(monkeypatch):
     monkeypatch.setenv("MCP_GATEWAY_API_KEY", "mcp-gateway-service-key-at-least-32-characters")
     monkeypatch.setenv("LLM_REDTEAM_API_KEY", "llm-redteam-service-key-at-least-32-chars")
     monkeypatch.setenv("DATASET_POISON_API_KEY", "dataset-poison-service-key-at-least-32-chars")
+    monkeypatch.setenv("MODEL_PRIVACY_API_KEY", "model-privacy-service-key-at-least-32-characters")
     gateway = importlib.import_module("gateway_server")
     gateway = importlib.reload(gateway)
     with TestClient(gateway.app) as c:
@@ -91,6 +92,7 @@ class TestServiceRegistry:
         "dataset_poison",
         "llm_redteam",
         "mcp_gateway",
+        "model_privacy",
     ]
 
     def test_status_lists_all_services(self, client, auth_headers):
