@@ -24,6 +24,7 @@ INVALID_API_KEY = "invalid-key-definitely-wrong-and-short"
 
 def _load_gateway(monkeypatch):
     """(Re)load gateway_server with distinct external and service credentials."""
+    monkeypatch.delenv("API_KEY", raising=False)
     monkeypatch.setenv("GATEWAY_API_KEY", VALID_API_KEY)
     monkeypatch.setenv("MCP_GATEWAY_API_KEY", "mcp-gateway-service-key-at-least-32-characters")
     monkeypatch.setenv("LLM_REDTEAM_API_KEY", "llm-redteam-service-key-at-least-32-chars")
@@ -209,6 +210,17 @@ class TestProxyBehavior:
         assert forwarded["x-request-id"] == "req-123"
         assert "authorization" not in forwarded
         assert "cookie" not in forwarded
+
+
+
+    def test_oversized_proxy_body_rejected_before_upstream(self, client, auth_headers, gateway):
+        body = b"A" * (gateway.MAX_PROXY_BODY_BYTES + 1)
+        response = client.post(
+            "/mcp_gateway/v1/inspect_call",
+            headers={**auth_headers, "Content-Type": "application/octet-stream"},
+            content=body,
+        )
+        assert response.status_code == 413
 
     def test_forwarded_header_allowlist_excludes_security_sensitive_headers(self, gateway):
         """The static allowlist documents and enforces a deny-by-construction boundary."""
