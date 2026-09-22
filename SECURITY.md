@@ -4,7 +4,7 @@
 
 Gateway authentication/routing, container topology, CI configuration, and shared contracts are in scope. Stub product services do not imply end-to-end protection.
 
-This is an open-source research/engineering project. Security claims are limited to behavior demonstrated by the repository and its CI/committed evidence; they are not a statement of production certification.
+This is an open-source production-oriented integration platform. Security claims remain limited to behavior demonstrated by the repository, its CI, and committed evidence; production orientation does not imply third-party certification or deployment history not evidenced here.
 
 ## Reporting a vulnerability
 
