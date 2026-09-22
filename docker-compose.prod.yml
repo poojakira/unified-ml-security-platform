@@ -1,13 +1,16 @@
 # Production deployment contract.
 # This file never builds local product stubs. Every service image must be supplied
-# explicitly as an immutable registry reference (preferably image@sha256:digest).
+# explicitly as an immutable registry reference (prefer image@sha256:digest).
 services:
   gateway:
     image: ${GATEWAY_IMAGE:?GATEWAY_IMAGE must reference a published gateway image}
     ports:
       - "8000:8000"
     environment:
-      API_KEY: ${API_KEY:?API_KEY is required}
+      GATEWAY_API_KEY: ${GATEWAY_API_KEY:?GATEWAY_API_KEY is required}
+      MCP_GATEWAY_API_KEY: ${MCP_GATEWAY_API_KEY:?MCP_GATEWAY_API_KEY is required}
+      LLM_REDTEAM_API_KEY: ${LLM_REDTEAM_API_KEY:?LLM_REDTEAM_API_KEY is required}
+      DATASET_POISON_API_KEY: ${DATASET_POISON_API_KEY:?DATASET_POISON_API_KEY is required}
       LOG_LEVEL: INFO
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -26,7 +29,7 @@ services:
     image: ${MCP_GATEWAY_IMAGE:?MCP_GATEWAY_IMAGE must reference the real MCP gateway image}
     environment:
       MCP_ENV: production
-      MCP_API_KEY: ${API_KEY:?API_KEY is required}
+      MCP_API_KEY: ${MCP_GATEWAY_API_KEY:?MCP_GATEWAY_API_KEY is required}
       MCP_ALLOW_ANONYMOUS: "false"
       MCP_ALLOWED_SERVERS: ${MCP_ALLOWED_SERVERS:?MCP_ALLOWED_SERVERS is required}
       MCP_WAL_PATH: /var/lib/mcp/wal.jsonl
@@ -37,16 +40,16 @@ services:
     restart: unless-stopped
 
   llm-redteam:
-    image: ${LLM_REDTEAM_IMAGE:?LLM_REDTEAM_IMAGE must reference the real LLM red-team service image}
+    image: ${LLM_REDTEAM_IMAGE:?LLM_REDTEAM_IMAGE must reference the real LLM red-team HTTP image}
     environment:
-      REDTEAM_API_KEY: ${API_KEY:?API_KEY is required}
+      REDTEAM_API_KEY: ${LLM_REDTEAM_API_KEY:?LLM_REDTEAM_API_KEY is required}
     networks: [mlsec-internal]
     restart: unless-stopped
 
   dataset-poison:
-    image: ${DATASET_POISON_IMAGE:?DATASET_POISON_IMAGE must reference the real dataset detector image}
+    image: ${DATASET_POISON_IMAGE:?DATASET_POISON_IMAGE must reference the real dataset detector HTTP image}
     environment:
-      API_KEY: ${API_KEY:?API_KEY is required}
+      API_KEY: ${DATASET_POISON_API_KEY:?DATASET_POISON_API_KEY is required}
     networks: [mlsec-internal]
     restart: unless-stopped
 
