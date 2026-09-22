@@ -29,6 +29,7 @@ def _load_gateway(monkeypatch):
     monkeypatch.setenv("MCP_GATEWAY_API_KEY", "mcp-gateway-service-key-at-least-32-characters")
     monkeypatch.setenv("LLM_REDTEAM_API_KEY", "llm-redteam-service-key-at-least-32-chars")
     monkeypatch.setenv("DATASET_POISON_API_KEY", "dataset-poison-service-key-at-least-32-chars")
+    monkeypatch.setenv("MODEL_PRIVACY_API_KEY", "model-privacy-service-key-at-least-32-characters")
     import gateway_server
 
     return importlib.reload(gateway_server)
