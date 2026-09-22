@@ -2,7 +2,7 @@
 
 **Repository owner & maintainer:** Pooja Kiran ([@poojakira](https://github.com/poojakira)) — I own and maintain this repository and drive its design, engineering, validation, documentation, and evidence-backed releases.
 
-A Docker Compose integration workspace that orchestrates 7 ML security microservices behind a FastAPI gateway, providing compose validation, health checks, resource limits, CI/CD pipelines, and a shared MITRE ATT&CK v19 detection module.
+A deployment control-plane repository with two deliberately separate modes: `docker-compose.yml` is a local contract-test topology using stub services, while `docker-compose.prod.yml` accepts only externally built product images and isolates gateway authentication from per-service credentials. The repository owns gateway routing, deployment contracts, security boundaries, and integration validation; it does not manufacture product functionality that belongs in the source repositories.
 
 ## The Core Problem
 
@@ -14,7 +14,7 @@ This repository is that integration layer. It defines how the services compose, 
 
 This platform is for ML security engineers and platform teams who operate multiple ML security tools and need them to work together as a single, observable system. It solves the problem of multi-service orchestration for ML security: instead of deploying and monitoring each tool independently, this workspace provides a single gateway, a unified authentication model, shared network isolation, resource governance, and a common threat detection contract based on MITRE ATT&CK v19.
 
-The platform composes services from 7 independent repositories into a validated, tested, deployable unit. Each product service owns its own logic, tests, and dependencies. This repo owns the integration contracts, the gateway routing, the CI validation, and the shared detection taxonomy.
+The production contract composes independently released product images. Each product repository owns its code, tests, image build, and release evidence. This repository owns gateway routing, service isolation, credential boundaries, compose validation, and cross-service integration contracts. Local stub containers are never published as product images.
 
 ## Why This Repository Exists
 
@@ -85,11 +85,11 @@ But operators need them to behave as one system. This repository exists to answe
 
 **Internal bridge network with no egress**: All services sit on `mlsec-internal` with `internal: true`. Only the gateway exposes ports 8000 and 8443. This prevents any compromised service from reaching the internet directly, but it means services cannot fetch external resources (like model registries) without explicit proxy configuration.
 
-**Single API key for all services**: Every service receives the same `$API_KEY` environment variable. This simplifies deployment but means service-to-service authentication is flat. A compromised service key compromises all services. The alternative (per-service keys with mTLS) was traded for deployment simplicity at this stage.
+**Separate external and service credentials**: The gateway authenticates external callers with `GATEWAY_API_KEY` and uses a distinct credential for each downstream service (`HF_SCANNER_API_KEY`, `MCP_GATEWAY_API_KEY`, `ADV_ML_API_KEY`, `LLM_REDTEAM_API_KEY`, `DATASET_POISON_API_KEY`, `MODEL_PRIVACY_API_KEY`). The local contract topology may reuse one development key, but the production compose contract does not.
 
 **Coverage threshold at 25% (unit) and 60% (product)**: The repository is primarily an integration spec, not a product implementation. The 25% overall threshold reflects that much of the code is stubs. Individual product test directories are held to 60%.
 
-**Pulsenet is present but archived**: The compose file includes pulsenet, and the attack catalog defines attacks for it, but the CI pipeline excludes it from health tests and the gateway code comments it out of active routing. It remains in compose for completeness but is not deployed as an active service.
+**PulseNet is not part of the active production compose contract**: its archived research repository remains independently reviewable, but it is not routed as an active platform service.
 
 **Regex-based ATT&CK detection (not ML-based)**: The shared detector uses simple regex patterns, not trained models. This makes it deterministic, dependency-free, and fast, but it will miss obfuscated or novel attack patterns. It is explicitly described as "seed rules" meant to be extended.
 
@@ -127,19 +127,32 @@ But operators need them to behave as one system. This repository exists to answe
 git clone https://github.com/poojakira/unified-ml-security-platform.git
 cd unified-ml-security-platform
 
-# Set required environment variables
-export API_KEY="your-api-key-minimum-32-characters-long"
-export PULSENET_JWT_SECRET="your-pulsenet-jwt-secret-min-32-chars"
+# Point production at immutable product images (prefer digest-pinned references)
+export HF_SCANNER_IMAGE="ghcr.io/your-org/hf-scanner@sha256:..."
+export MCP_GATEWAY_IMAGE="ghcr.io/your-org/mcp-gateway@sha256:..."
+export ADV_ML_IMAGE="ghcr.io/your-org/adv-ml@sha256:..."
+export LLM_REDTEAM_IMAGE="ghcr.io/your-org/llm-redteam@sha256:..."
+export DATASET_POISON_IMAGE="ghcr.io/your-org/dataset-poison@sha256:..."
+export MODEL_PRIVACY_IMAGE="ghcr.io/your-org/model-privacy@sha256:..."
 
-# Build and start all services
-docker compose -f docker-compose.prod.yml up --build -d
+# Configure separate credentials. Use a secrets manager in a real environment.
+export GATEWAY_API_KEY="..."
+export HF_SCANNER_API_KEY="..."
+export MCP_GATEWAY_API_KEY="..."
+export ADV_ML_API_KEY="..."
+export LLM_REDTEAM_API_KEY="..."
+export DATASET_POISON_API_KEY="..."
+export MODEL_PRIVACY_API_KEY="..."
+
+# Start the production topology; product images are not built from local stubs.
+docker compose -f docker-compose.prod.yml up -d
 
 # Verify the gateway is healthy
 curl http://localhost:8000/health
 # {"status":"healthy","version":"1.0.0"}
 
 # Check authenticated service status
-curl -H "X-API-Key: $API_KEY" http://localhost:8000/status
+curl -H "X-API-Key: $GATEWAY_API_KEY" http://localhost:8000/status
 # {"status":"operational","services":["adv_ml","dataset_poison","hf_scanner","llm_redteam","mcp_gateway","model_privacy"],"total":6}
 ```
 
@@ -168,13 +181,13 @@ make verify  # lint + test + build + security
 ```bash
 # Route a request to the HF model scanner
 curl -X POST http://localhost:8000/hf_scanner/scan \
-  -H "X-API-Key: $API_KEY" \
+  -H "X-API-Key: $GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model_id": "suspicious-org/model-name"}'
 
 # Route a request to the adversarial ML lab
 curl -X POST http://localhost:8000/adv_ml/eval/attack \
-  -H "X-API-Key: $API_KEY" \
+  -H "X-API-Key: $GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"attack": "pgd", "eps": 0.031, "steps": 20}'
 
@@ -204,7 +217,7 @@ Total: 10 CPU cores, 13 GB memory for the full stack.
 
 **Network isolation**: The `mlsec-internal` bridge network is configured with `internal: true`, preventing any container from initiating outbound connections. Only the gateway container binds to host ports.
 
-**Authentication**: All routes except `/health` require a valid `X-API-Key` header. The gateway fails fast on startup if `API_KEY` is unset or shorter than 32 characters.
+**Authentication**: All routes except `/health` require the external `GATEWAY_API_KEY`. The gateway fails fast if that key or any required per-service credential is missing/too short. Caller-controlled `Authorization`, `Cookie`, and `X-API-Key` headers are not forwarded to backends; the gateway injects the service-specific credential.
 
 **Non-root execution**: The gateway Dockerfile creates a dedicated `mlsec` user and group. The application runs as this non-root user.
 
@@ -249,14 +262,14 @@ It provides 22 seed detection rules with regex patterns, covering techniques fro
 
 ### Limitations
 
-- **Stub implementations**: Product services in this repo respond with 501 for non-health routes. Full functionality requires deploying from each product's source repository.
+- **Local contract stubs**: `docker-compose.yml` uses 501-returning stubs to test topology only. `docker-compose.prod.yml` does not use those stubs; it requires product images released by the owning repositories.
 - **No measured detection rates**: The detector rules are deterministic pattern matches, not validated against labeled corpora. No precision/recall numbers are claimed.
 - **No load testing results**: Resource limits are specified but no throughput benchmarks are published.
 - **Single-region**: The compose configuration assumes a single-host deployment. No multi-region or high-availability configuration exists.
 
 ## Integration Readiness Assessment
 
-**Honest status**: The gateway authenticates requests (API key), routes traffic to the correct backend service based on URL path prefix, and exposes an unauthenticated `/health` endpoint for load balancer probes. All product services respond to `GET /health` with `{"status": "healthy", "product": "<name>"}`. However, **individual product functionality is stub-only** - non-health routes return 501 (not implemented). Full business logic (model scanning, adversarial evaluation, privacy attacks, etc.) requires deploying each product from its own source repository. This platform validates integration topology, not product functionality.
+**Honest status**: the repository contains a real authenticated gateway plus a production deployment contract that requires real product images. The local topology still uses stubs for fast contract testing. End-to-end production readiness therefore depends on each referenced product image carrying its own successful release evidence; this repository must not treat local stub health checks as proof of product functionality.
 
 | Criterion | Status | Notes |
 |-----------|--------|-------|
