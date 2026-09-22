@@ -12,7 +12,11 @@ from fastapi.testclient import TestClient
 @pytest.fixture()
 def client(monkeypatch):
     """Create a test client with API_KEY set."""
-    monkeypatch.setenv("API_KEY", "test-key-for-health-check-only-123456")
+    monkeypatch.delenv("API_KEY", raising=False)
+    monkeypatch.setenv("GATEWAY_API_KEY", "test-key-for-health-check-only-123456")
+    monkeypatch.setenv("MCP_GATEWAY_API_KEY", "mcp-gateway-service-key-at-least-32-characters")
+    monkeypatch.setenv("LLM_REDTEAM_API_KEY", "llm-redteam-service-key-at-least-32-chars")
+    monkeypatch.setenv("DATASET_POISON_API_KEY", "dataset-poison-service-key-at-least-32-chars")
     gateway = importlib.import_module("gateway_server")
     gateway = importlib.reload(gateway)
     with TestClient(gateway.app) as c:
@@ -44,10 +48,8 @@ def test_gateway_status_with_auth(client) -> None:
     payload = response.json()
     assert payload["status"] == "operational"
     assert "services" in payload
-    assert "mcp_gateway" in payload["services"]
-    assert "hf_scanner" in payload["services"]
-    assert "adv_ml" in payload["services"]
-    assert payload["total"] == 6
+    assert payload["services"] == ["dataset_poison", "llm_redteam", "mcp_gateway"]
+    assert payload["total"] == 3
 
 
 def test_scan_iam_requires_auth(client) -> None:
