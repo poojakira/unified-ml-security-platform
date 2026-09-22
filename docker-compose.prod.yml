@@ -1,16 +1,14 @@
-# docker-compose.prod.yml - Production deployment ONLY
-# DOES NOT include kali, wireshark, exfil containers
+# Production deployment contract.
+# This file never builds local product stubs. Every service image must be supplied
+# explicitly as an immutable registry reference (preferably image@sha256:digest).
 services:
   gateway:
-    build:
-      context: .
-      dockerfile: Dockerfile.gateway
+    image: ${GATEWAY_IMAGE:?GATEWAY_IMAGE must reference a published gateway image}
     ports:
       - "8000:8000"
-      - "8443:8443"
     environment:
-      - API_KEY=${API_KEY:?API_KEY is required}
-      - LOG_LEVEL=INFO
+      API_KEY: ${API_KEY:?API_KEY is required}
+      LOG_LEVEL: INFO
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -19,122 +17,43 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: "2"
           memory: 2G
-        reservations:
-          cpus: '1'
-          memory: 1G
-    networks:
-      - mlsec-internal
-    restart: unless-stopped
-
-  hf-scanner:
-    build:
-      context: .
-      dockerfile: products/hf_scanner/Dockerfile
-    environment:
-      - API_KEY=${API_KEY:?API_KEY is required}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
+    networks: [mlsec-internal]
     restart: unless-stopped
 
   mcp-gateway:
-    build:
-      context: .
-      dockerfile: products/mcp_gateway/Dockerfile
+    image: ${MCP_GATEWAY_IMAGE:?MCP_GATEWAY_IMAGE must reference the real MCP gateway image}
     environment:
-      - API_KEY=${API_KEY:?API_KEY is required}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-    restart: unless-stopped
-
-  adv-ml:
-    build:
-      context: .
-      dockerfile: products/adv_ml/Dockerfile
-    environment:
-      - API_KEY=${API_KEY:?API_KEY is required}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 4G
+      MCP_ENV: production
+      MCP_API_KEY: ${API_KEY:?API_KEY is required}
+      MCP_ALLOW_ANONYMOUS: "false"
+      MCP_ALLOWED_SERVERS: ${MCP_ALLOWED_SERVERS:?MCP_ALLOWED_SERVERS is required}
+      MCP_WAL_PATH: /var/lib/mcp/wal.jsonl
+      MCP_AUDIT_PATH: /var/lib/mcp/audit.jsonl
+    volumes:
+      - mcp-state:/var/lib/mcp
+    networks: [mlsec-internal]
     restart: unless-stopped
 
   llm-redteam:
-    build:
-      context: .
-      dockerfile: products/llm_redteam/Dockerfile
+    image: ${LLM_REDTEAM_IMAGE:?LLM_REDTEAM_IMAGE must reference the real LLM red-team service image}
     environment:
-      - API_KEY=${API_KEY:?API_KEY is required}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 2G
+      REDTEAM_API_KEY: ${API_KEY:?API_KEY is required}
+    networks: [mlsec-internal]
     restart: unless-stopped
 
   dataset-poison:
-    build:
-      context: .
-      dockerfile: products/dataset_poison/Dockerfile
+    image: ${DATASET_POISON_IMAGE:?DATASET_POISON_IMAGE must reference the real dataset detector image}
     environment:
-      - API_KEY=${API_KEY:?API_KEY is required}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-    restart: unless-stopped
-
-  model-privacy:
-    build:
-      context: .
-      dockerfile: products/model_privacy/Dockerfile
-    environment:
-      - API_KEY=${API_KEY:?API_KEY is required}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-    restart: unless-stopped
-
-  pulsenet:
-    build:
-      context: .
-      dockerfile: products/pulsenet/Dockerfile
-    environment:
-      - API_KEY=${API_KEY:?API_KEY is required}
-      - PULSENET_JWT_SECRET=${PULSENET_JWT_SECRET:?PULSENET_JWT_SECRET is required}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
+      API_KEY: ${API_KEY:?API_KEY is required}
+    networks: [mlsec-internal]
     restart: unless-stopped
 
 networks:
   mlsec-internal:
     driver: bridge
-    internal: true  # No external access except through gateway
+    internal: true
+
+volumes:
+  mcp-state:
