@@ -2,7 +2,7 @@
 
 > Version: 1.0.0 | Last updated: 2026-08-24
 
-This document describes the production architecture of the Unified ML Security
+This document describes the hardened reference architecture of the Unified ML Security
 Platform, including service topology, data flows, deployment models, and
 security boundaries.
 
@@ -158,10 +158,10 @@ Client ──► Gateway ──► Target Service ──► Response ──► G
 
 ```yaml
 # docker-compose.yml — development with hot reload
-# docker-compose.prod.yml — production hardened
+# docker-compose.prod.yml — hardened reference compose
 ```
 
-Production compose (`docker-compose.prod.yml`) characteristics:
+Hardened reference compose (`docker-compose.prod.yml`) characteristics:
 - **Internal network only**: `mlsec-internal` bridge with `internal: true`
 - **Single ingress**: Only the gateway exposes ports (8000, 8443)
 - **Resource limits**: CPU and memory constraints per service
@@ -169,7 +169,7 @@ Production compose (`docker-compose.prod.yml`) characteristics:
 - **Fail-fast secrets**: `API_KEY` is required (`${API_KEY:?}` syntax)
 - **Restart policy**: `unless-stopped` for all services
 
-### 4.2 Kubernetes (Production Target)
+### 4.2 Kubernetes (Future Deployment Target)
 
 ```
 ┌─────────────────────────────────────────────────────┐
