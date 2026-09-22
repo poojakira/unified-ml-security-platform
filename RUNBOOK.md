@@ -45,7 +45,7 @@ In the Docker Compose deployment, all product services run `spec_service.py` (a 
 - Only the gateway binds to host ports 8000 and 8443.
 - Product services are only reachable from within the Docker network via their service names (e.g., `http://hf-scanner:8001`).
 
-## Bring Up Services (Production)
+## Bring Up the Hardened Reference Compose Stack
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d --build
@@ -117,7 +117,7 @@ docker compose -f docker-compose.prod.yml down
 docker compose -f docker-compose.prod.yml down --rmi local
 ```
 
-## Resource Limits (Production)
+## Resource Limits in the Hardened Reference Stack
 
 | Service | CPU Limit | Memory Limit |
 |---------|-----------|--------------|
