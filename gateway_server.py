@@ -37,18 +37,21 @@ MAX_PROXY_BODY_BYTES = int(os.environ.get("GATEWAY_MAX_BODY_BYTES", str(2 * 1024
 
 # Product service URLs (internal Docker network).
 # Only route repositories that expose a real long-running HTTP contract.
-# Batch evaluators (HF scanner CLI, adversarial ML, privacy assessment) are
-# intentionally excluded until they have their own durable job/service layer.
+# Batch evaluators without an HTTP contract (HF scanner CLI and adversarial ML)
+# remain outside the synchronous proxy. Model privacy is routed because it now
+# exposes an authenticated, bounded assessment service.
 SERVICE_URLS = {
     "mcp_gateway": "http://mcp-gateway:8080",
     "llm_redteam": "http://llm-redteam:8000",
     "dataset_poison": "http://dataset-poison:8000",
+    "model_privacy": "http://model-privacy:8006",
 }
 
 SERVICE_KEY_ENV = {
     "mcp_gateway": "MCP_GATEWAY_API_KEY",
     "llm_redteam": "LLM_REDTEAM_API_KEY",
     "dataset_poison": "DATASET_POISON_API_KEY",
+    "model_privacy": "MODEL_PRIVACY_API_KEY",
 }
 
 def _service_key(service: str) -> str:
