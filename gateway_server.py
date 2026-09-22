@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Unified Gateway Server - Entry Point
-Requires API_KEY environment variable. Fails fast if missing.
+Requires distinct gateway and per-service credentials. Fails fast if missing.
 """
 
 import hmac
@@ -20,7 +20,7 @@ from fastapi.security import APIKeyHeader
 # External caller authentication is intentionally separate from service-to-service
 # credentials. Reusing one universal key across every backend turns compromise of
 # any single service into compromise of the whole platform.
-GATEWAY_API_KEY = os.environ.get("GATEWAY_API_KEY") or os.environ.get("API_KEY")
+GATEWAY_API_KEY = os.environ.get("GATEWAY_API_KEY")
 if not GATEWAY_API_KEY:
     print("FATAL: GATEWAY_API_KEY environment variable is required", file=sys.stderr)
     sys.exit(1)
@@ -33,6 +33,7 @@ API_KEY_NAME = "X-API-Key"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 GATEWAY_VERSION = "1.0.0"
+MAX_PROXY_BODY_BYTES = int(os.environ.get("GATEWAY_MAX_BODY_BYTES", str(2 * 1024 * 1024)))
 
 # Product service URLs (internal Docker network).
 # Only route repositories that expose a real long-running HTTP contract.
@@ -63,6 +64,27 @@ for _service_name in SERVICE_URLS:
     _service_key(_service_name)
 
 SERVICES = SERVICE_URLS
+
+
+async def _read_bounded_body(request: Request) -> bytes:
+    """Read a request body without allowing unbounded proxy buffering."""
+    declared = request.headers.get("content-length")
+    if declared:
+        try:
+            if int(declared) > MAX_PROXY_BODY_BYTES:
+                raise HTTPException(status_code=413, detail="Request body too large")
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail="Invalid Content-Length header") from exc
+
+    chunks: list[bytes] = []
+    total = 0
+    async for chunk in request.stream():
+        total += len(chunk)
+        if total > MAX_PROXY_BODY_BYTES:
+            raise HTTPException(status_code=413, detail="Request body too large")
+        chunks.append(chunk)
+    return b"".join(chunks)
+
 
 # Only explicitly approved request headers cross the trust boundary. The
 # gateway's own API key is never forwarded from the external caller.
@@ -144,7 +166,7 @@ async def proxy(
     client: httpx.AsyncClient = request.app.state.http_client
 
     try:
-        body = await request.body()
+        body = await _read_bounded_body(request)
         headers = {
             key: value
             for key, value in request.headers.items()
