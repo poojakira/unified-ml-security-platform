@@ -150,19 +150,19 @@ jobs:
           pip install pytest pytest-asyncio httpx docker
           pip install -r requirements.txt
 
-      - name: Build production images only
+      - name: Build integration topology
         env:
           API_KEY: integration-test-api-key-32-bytes-minimum
           PULSENET_JWT_SECRET: integration-test-pulsenet-secret-32-bytes-minimum
         run: |
-          docker compose -f docker-compose.prod.yml build --parallel
+          docker compose -f docker-compose.yml build --parallel
 
-      - name: Start production services
+      - name: Start integration topology
         env:
           API_KEY: integration-test-api-key-32-bytes-minimum
           PULSENET_JWT_SECRET: integration-test-pulsenet-secret-32-bytes-minimum
         run: |
-          docker compose -f docker-compose.prod.yml up -d
+          docker compose -f docker-compose.yml up -d
           sleep 30
 
       - name: Run integration tests
@@ -172,7 +172,7 @@ jobs:
       - name: Collect logs on failure
         if: failure()
         run: |
-          docker compose -f docker-compose.prod.yml logs --tail=100 > integration-logs.txt
+          docker compose -f docker-compose.yml logs --tail=100 > integration-logs.txt
 
       - name: Upload logs
         if: failure()
@@ -284,16 +284,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push products
+      - name: Do not publish stub product images
         run: |
-          # pulsenet removed from deployment loop because it is archived.
-          for product in hf_scanner mcp_gateway adv_ml llm_redteam dataset_poison model_privacy; do
-            tag_args=()
-            for tag in $DOCKER_METADATA_OUTPUT_TAG_NAMES; do
-              tag_args+=("--tag" "${REGISTRY}/${IMAGE_NAME}-${product}:${tag}")
-            done
-            docker buildx build --file "products/${product}/Dockerfile" --push "${tag_args[@]}" .
-          done
+          echo "Product images are built and released by their owning repositories."
+          echo "This repository publishes only the gateway; local products/ are integration-contract stubs."
       - name: Sign images with Cosign
         if: env.COSIGN_PRIVATE_KEY != ''
         uses: sigstore/cosign-installer@v3
@@ -327,9 +321,15 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
-      - name: Validate production deployment placeholder
-        run: |
-          echo "No production deployment is configured in this repository. Add reviewed manifests before enabling deploy."
+      - name: Validate production compose contract
+        env:
+          GATEWAY_IMAGE: ghcr.io/example/gateway@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          MCP_GATEWAY_IMAGE: ghcr.io/example/mcp@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+          LLM_REDTEAM_IMAGE: ghcr.io/example/llm@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+          DATASET_POISON_IMAGE: ghcr.io/example/dataset@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+          API_KEY: validation-only-key-that-is-at-least-32-characters
+          MCP_ALLOWED_SERVERS: github
+        run: docker compose -f docker-compose.prod.yml config >/dev/null
 
   release:
     name: Release
