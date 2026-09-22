@@ -200,6 +200,10 @@ async def proxy(
                 if key.lower() not in {"content-length", "transfer-encoding", "connection"}
             },
         )
+    except HTTPException:
+        # Preserve local validation/authentication decisions such as 413 rather
+        # than translating them into an upstream 502.
+        raise
     except httpx.TimeoutException:
         raise HTTPException(status_code=504, detail="Service timeout")
     except Exception as e:
