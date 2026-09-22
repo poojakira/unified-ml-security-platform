@@ -1,5 +1,5 @@
-# docker-compose.prod.yml - Production deployment ONLY
-# DOES NOT include kali, wireshark, exfil containers
+# docker-compose.yml - LOCAL TOPOLOGY / INTEGRATION TESTING ONLY
+# Product containers in this file are contract stubs. Do not deploy this file as production.
 services:
   gateway:
     build:
