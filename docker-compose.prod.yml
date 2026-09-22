@@ -11,6 +11,7 @@ services:
       MCP_GATEWAY_API_KEY: ${MCP_GATEWAY_API_KEY:?MCP_GATEWAY_API_KEY is required}
       LLM_REDTEAM_API_KEY: ${LLM_REDTEAM_API_KEY:?LLM_REDTEAM_API_KEY is required}
       DATASET_POISON_API_KEY: ${DATASET_POISON_API_KEY:?DATASET_POISON_API_KEY is required}
+      MODEL_PRIVACY_API_KEY: ${MODEL_PRIVACY_API_KEY:?MODEL_PRIVACY_API_KEY is required}
       LOG_LEVEL: INFO
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -28,6 +29,8 @@ services:
       llm-redteam:
         condition: service_healthy
       dataset-poison:
+        condition: service_healthy
+      model-privacy:
         condition: service_healthy
     networks: [mlsec-internal]
     restart: unless-stopped
@@ -78,6 +81,20 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    networks: [mlsec-internal]
+    restart: unless-stopped
+
+  model-privacy:
+    image: ${MODEL_PRIVACY_IMAGE:?MODEL_PRIVACY_IMAGE must reference the real privacy assessment service image}
+    environment:
+      API_KEY: ${MODEL_PRIVACY_API_KEY:?MODEL_PRIVACY_API_KEY is required}
+      PRIVACY_MAX_REQUEST_BYTES: ${PRIVACY_MAX_REQUEST_BYTES:-4194304}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8006/ready', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks: [mlsec-internal]
     restart: unless-stopped
 
