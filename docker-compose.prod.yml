@@ -22,6 +22,13 @@ services:
         limits:
           cpus: "2"
           memory: 2G
+    depends_on:
+      mcp-gateway:
+        condition: service_healthy
+      llm-redteam:
+        condition: service_healthy
+      dataset-poison:
+        condition: service_healthy
     networks: [mlsec-internal]
     restart: unless-stopped
 
@@ -36,6 +43,12 @@ services:
       MCP_AUDIT_PATH: /var/lib/mcp/audit.jsonl
     volumes:
       - mcp-state:/var/lib/mcp
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/v1/ready', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks: [mlsec-internal]
     restart: unless-stopped
 
@@ -43,6 +56,12 @@ services:
     image: ${LLM_REDTEAM_IMAGE:?LLM_REDTEAM_IMAGE must reference the real LLM red-team HTTP image}
     environment:
       REDTEAM_API_KEY: ${LLM_REDTEAM_API_KEY:?LLM_REDTEAM_API_KEY is required}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks: [mlsec-internal]
     restart: unless-stopped
 
@@ -50,6 +69,15 @@ services:
     image: ${DATASET_POISON_IMAGE:?DATASET_POISON_IMAGE must reference the real dataset detector HTTP image}
     environment:
       API_KEY: ${DATASET_POISON_API_KEY:?DATASET_POISON_API_KEY is required}
+      POISON_BASELINE_PATH: /etc/mlsec/baseline.npz
+    volumes:
+      - ${DATASET_BASELINE_FILE:?DATASET_BASELINE_FILE must point to a known-clean NPZ baseline}:/etc/mlsec/baseline.npz:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     networks: [mlsec-internal]
     restart: unless-stopped
 
