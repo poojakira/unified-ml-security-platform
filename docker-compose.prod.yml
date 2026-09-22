@@ -59,6 +59,9 @@ services:
     image: ${LLM_REDTEAM_IMAGE:?LLM_REDTEAM_IMAGE must reference the real LLM red-team HTTP image}
     environment:
       REDTEAM_API_KEY: ${LLM_REDTEAM_API_KEY:?LLM_REDTEAM_API_KEY is required}
+      REDTEAM_ENFORCEMENT_MODE: "block"
+      REDTEAM_SCAN_TIMEOUT_SECONDS: ${REDTEAM_SCAN_TIMEOUT_SECONDS:-30}
+      REDTEAM_MAX_CONCURRENT_SCANS: ${REDTEAM_MAX_CONCURRENT_SCANS:-8}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
       interval: 15s
@@ -72,7 +75,11 @@ services:
     image: ${DATASET_POISON_IMAGE:?DATASET_POISON_IMAGE must reference the real dataset detector HTTP image}
     environment:
       API_KEY: ${DATASET_POISON_API_KEY:?DATASET_POISON_API_KEY is required}
+      POISON_ENVIRONMENT: "production"
       POISON_BASELINE_PATH: /etc/mlsec/baseline.npz
+      POISON_REDIS_URL: ${POISON_REDIS_URL:?POISON_REDIS_URL is required}
+      POISON_SCORE_TIMEOUT_SECONDS: ${POISON_SCORE_TIMEOUT_SECONDS:-30}
+      POISON_MAX_INFLIGHT_SCORING: ${POISON_MAX_INFLIGHT_SCORING:-16}
     volumes:
       - ${DATASET_BASELINE_FILE:?DATASET_BASELINE_FILE must point to a known-clean NPZ baseline}:/etc/mlsec/baseline.npz:ro
     healthcheck:
@@ -89,6 +96,8 @@ services:
     environment:
       API_KEY: ${MODEL_PRIVACY_API_KEY:?MODEL_PRIVACY_API_KEY is required}
       PRIVACY_MAX_REQUEST_BYTES: ${PRIVACY_MAX_REQUEST_BYTES:-4194304}
+      PRIVACY_ASSESS_TIMEOUT_SECONDS: ${PRIVACY_ASSESS_TIMEOUT_SECONDS:-30}
+      PRIVACY_MAX_CONCURRENT_ASSESSMENTS: ${PRIVACY_MAX_CONCURRENT_ASSESSMENTS:-4}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8006/ready', timeout=3).read()"]
       interval: 15s
