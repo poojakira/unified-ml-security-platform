@@ -1,5 +1,5 @@
-# docker-compose.yml - LOCAL TOPOLOGY / INTEGRATION TESTING ONLY
-# Product containers in this file are contract stubs. Do not deploy this file as production.
+# LOCAL CONTRACT/ROUTING TEST TOPOLOGY ONLY.
+# Product containers are minimal health stubs. Never deploy this file as production.
 services:
   gateway:
     build:
@@ -7,133 +7,45 @@ services:
       dockerfile: Dockerfile.gateway
     ports:
       - "8000:8000"
-      - "8443:8443"
     environment:
-      - GATEWAY_API_KEY=${API_KEY:-}
-      - MCP_GATEWAY_API_KEY=${API_KEY:-}
-      - LLM_REDTEAM_API_KEY=${API_KEY:-}
-      - DATASET_POISON_API_KEY=${API_KEY:-}
-      - LOG_LEVEL=INFO
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
-        reservations:
-          cpus: '1'
-          memory: 1G
-    networks:
-      - mlsec-internal
-    restart: unless-stopped
-
-    build:
-      context: .
-      dockerfile: products/hf_scanner/Dockerfile
-    environment:
-      - API_KEY=${API_KEY:-}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-    restart: unless-stopped
+      GATEWAY_API_KEY: ${API_KEY:-development-key-that-is-at-least-32-characters}
+      MCP_GATEWAY_API_KEY: ${API_KEY:-development-key-that-is-at-least-32-characters}
+      LLM_REDTEAM_API_KEY: ${API_KEY:-development-key-that-is-at-least-32-characters}
+      DATASET_POISON_API_KEY: ${API_KEY:-development-key-that-is-at-least-32-characters}
+      MODEL_PRIVACY_API_KEY: ${API_KEY:-development-key-that-is-at-least-32-characters}
+      LOG_LEVEL: INFO
+    depends_on:
+      - mcp-gateway
+      - llm-redteam
+      - dataset-poison
+      - model-privacy
+    networks: [mlsec-internal]
 
   mcp-gateway:
     build:
       context: .
       dockerfile: products/mcp_gateway/Dockerfile
-    environment:
-      - API_KEY=${API_KEY:-}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-    restart: unless-stopped
-
-    build:
-      context: .
-      dockerfile: products/adv_ml/Dockerfile
-    environment:
-      - API_KEY=${API_KEY:-}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 4G
-    restart: unless-stopped
+    networks: [mlsec-internal]
 
   llm-redteam:
     build:
       context: .
       dockerfile: products/llm_redteam/Dockerfile
-    environment:
-      - API_KEY=${API_KEY:-}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 2G
-    restart: unless-stopped
+    networks: [mlsec-internal]
 
   dataset-poison:
     build:
       context: .
       dockerfile: products/dataset_poison/Dockerfile
-    environment:
-      - API_KEY=${API_KEY:-}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-    restart: unless-stopped
+    networks: [mlsec-internal]
 
+  model-privacy:
     build:
       context: .
       dockerfile: products/model_privacy/Dockerfile
-    environment:
-      - API_KEY=${API_KEY:-}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-    restart: unless-stopped
-
-    build:
-      context: .
-      dockerfile: products/pulsenet/Dockerfile
-    environment:
-      - API_KEY=${API_KEY:-}
-      - PULSENET_JWT_SECRET=${PULSENET_JWT_SECRET:-}
-    networks:
-      - mlsec-internal
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-    restart: unless-stopped
+    networks: [mlsec-internal]
 
 networks:
   mlsec-internal:
     driver: bridge
-    internal: true  # No external access except through gateway
+    internal: true
