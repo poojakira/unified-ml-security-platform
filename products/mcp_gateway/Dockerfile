@@ -8,10 +8,10 @@ RUN groupadd -r mlsec && useradd -r -g mlsec mlsec
 USER mlsec
 
 ENV SERVICE_NAME=mcp_gateway
-ENV PORT=8002
-EXPOSE 8002
+ENV PORT=8080
+EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8002/health', timeout=5).read()" || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=5).read()" || exit 1
 
 CMD ["python", "spec_service.py"]
