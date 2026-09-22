@@ -6,7 +6,7 @@ A deployment control plane for the long-running HTTP security services that actu
 
 ## The Core Problem
 
-You have built separate tools for model scanning, adversarial testing, dataset poisoning detection, LLM red-teaming, and privacy attacks. Each lives in its own repository with its own deployment story. A security analyst now asks: "Can I scan a model for supply chain backdoors, run adversarial robustness tests, and check for membership inference vulnerabilities from one authenticated endpoint?" Without an integration layer, the answer involves stitching together 7 different APIs, managing 7 sets of credentials, and hoping no service falls over silently.
+The account contains both long-running security services and batch security gates. The production problem is not to force every tool behind one synchronous API; it is to give runtime services a consistent authenticated control plane while keeping batch/admission evaluators independently releasable and evidence-producing.
 
 This repository is that integration layer. It defines how the services compose, what their health contracts look like, how traffic routes between them, and what CI must pass before anything ships.
 
@@ -22,7 +22,7 @@ ML security is not a single tool. Scanning models for pickle RCE is different fr
 
 But operators need them to behave as one system. This repository exists to answer:
 
-- How do 7 independent ML security services talk to each other and to the outside world?
+- How do independently released runtime services expose one authenticated control-plane boundary without pretending batch tools are HTTP services?
 - What is the minimum viable contract each service must satisfy to participate in the platform?
 - How do you validate that all services start, respond to health checks, and stay within resource limits before deploying?
 - How do you enforce network isolation so internal services never expose themselves directly?
@@ -81,11 +81,11 @@ Batch/release gates are intentionally outside the synchronous proxy:
 
 6. **Shared detection contract**: Any service can use the `attacks/attack_v19_detector.py` module to classify findings against MITRE ATT&CK v19 (Enterprise, Mobile, ICS matrices). The detector uses regex-based pattern matching with 22 seed rules and returns structured detections with tactic, technique, sub-technique, confidence, evidence, and recommended actions.
 
-7. **CI validation**: On every push, GitHub Actions runs lint (Ruff), type checking (Pyright), unit tests (pytest with coverage), product health tests (per-service at 60% coverage threshold), integration tests (full docker-compose build and health check), and security scans (Bandit, Safety, Trivy, Grype).
+7. **CI validation**: On every push, GitHub Actions runs lint, type checking, unit tests, local contract-stub tests, topology integration tests, and blocking security/dependency scans. Those local stub checks prove routing/topology contracts only, never downstream product functionality.
 
 ## Design Decisions and Trade-offs
 
-**Stub services instead of vendored code**: Product services are built from per-product Dockerfiles in `products/`, but this repo does not vendor the full implementation of each product. The `spec_service.py` provides a minimal HTTP server that responds to `/health` with status "ok" and returns 501 for all other routes. This means the integration tests validate that services start and respond, but do not test business logic. The trade-off: you can validate the compose topology without needing all 7 repos checked out, but you cannot run end-to-end functional tests from this repo alone.
+**Contract stubs are test-only**: `products/` contains minimal health-contract containers for the three synchronous routes. They are used only by `docker-compose.yml` and CI topology tests. `docker-compose.prod.yml` never builds or references them; it requires externally released real product images.
 
 **Internal bridge network with no egress**: All services sit on `mlsec-internal` with `internal: true`. Only the gateway exposes ports 8000 and 8443. This prevents any compromised service from reaching the internet directly, but it means services cannot fetch external resources (like model registries) without explicit proxy configuration.
 
@@ -122,7 +122,7 @@ Batch/release gates are intentionally outside the synchronous proxy:
 - Docker 20.10+ and Docker Compose v2
 - Python 3.11+ (for local development)
 - 8 GB RAM minimum (16 GB recommended for all services)
-- Ports 8000 and 8443 available (only the gateway binds to the host; all product services are internal-only on the `mlsec-internal` network)
+- Port 8000 available (only the gateway binds to the host; product services remain internal on `mlsec-internal`)
 
 ### Compose topology demo
 
@@ -132,21 +132,18 @@ git clone https://github.com/poojakira/unified-ml-security-platform.git
 cd unified-ml-security-platform
 
 # Point production at immutable product images (prefer digest-pinned references)
-export HF_SCANNER_IMAGE="ghcr.io/your-org/hf-scanner@sha256:..."
-export GATEWAY_IMAGE="ghcr.io/your-org/ml-security-control-plane@sha256:..."\nexport MCP_GATEWAY_IMAGE="ghcr.io/your-org/mcp-gateway@sha256:..."
-export ADV_ML_IMAGE="ghcr.io/your-org/adv-ml@sha256:..."
+export GATEWAY_IMAGE="ghcr.io/your-org/ml-security-control-plane@sha256:..."
+export MCP_GATEWAY_IMAGE="ghcr.io/your-org/mcp-gateway@sha256:..."
 export LLM_REDTEAM_IMAGE="ghcr.io/your-org/llm-redteam@sha256:..."
 export DATASET_POISON_IMAGE="ghcr.io/your-org/dataset-poison@sha256:..."
-export MODEL_PRIVACY_IMAGE="ghcr.io/your-org/model-privacy@sha256:..."
 
 # Configure separate credentials. Use a secrets manager in a real environment.
 export GATEWAY_API_KEY="..."
-export HF_SCANNER_API_KEY="..."
 export MCP_GATEWAY_API_KEY="..."
-export ADV_ML_API_KEY="..."
 export LLM_REDTEAM_API_KEY="..."
-export DATASET_POISON_API_KEY="..."\nexport MCP_ALLOWED_SERVERS="github"
-export MODEL_PRIVACY_API_KEY="..."
+export DATASET_POISON_API_KEY="..."
+export MCP_ALLOWED_SERVERS="github"
+export DATASET_BASELINE_FILE="/absolute/path/to/known-clean-baseline.npz"
 
 # Start the production topology; product images are not built from local stubs.
 docker compose -f docker-compose.prod.yml up -d
@@ -214,7 +211,7 @@ from measured load-test evidence rather than copying synthetic defaults.
 
 ## Security Considerations
 
-**Network isolation**: The `mlsec-internal` bridge network is configured with `internal: true`, preventing any container from initiating outbound connections. Only the gateway container binds to host ports.
+**Network isolation**: `mlsec-internal` is an internal bridge and only the gateway binds to the host. Services that require external resources must receive an explicit, reviewed egress path rather than inheriting unrestricted host networking.
 
 **Authentication**: All routes except `/health` require the external `GATEWAY_API_KEY`. The gateway fails fast if that key or any required per-service credential is missing/too short. Caller-controlled `Authorization`, `Cookie`, and `X-API-Key` headers are not forwarded to backends; the gateway injects the service-specific credential.
 
@@ -272,20 +269,20 @@ It provides 22 seed detection rules with regex patterns, covering techniques fro
 
 | Criterion | Status | Notes |
 |-----------|--------|-------|
-| Health checks | ✅ Working | Gateway and all services respond 200 on `/health` |
+| Health/readiness contracts | Configured | MCP uses `/v1/ready`; dataset screening uses `/ready` and requires a mounted known-clean baseline; LLM uses `/health` |
 | API key authentication | ✅ Working | Gateway enforces X-API-Key on all non-health routes |
 | Service routing | ✅ Working | Gateway proxies `/{service}/{path}` to correct internal host |
 | Product business logic | External ownership | Local stubs return 501 by design; production Compose points at independently released real product images |
-| Resource limits | ✅ Configured | CPU and memory limits on all services in prod compose |
+| Resource limits | Partial | Gateway ceiling is specified; downstream service resource policy must come from measured deployment evidence |
 | Restart policy | ✅ Configured | `unless-stopped` on all services |
 | Non-root container | ✅ Configured | Gateway runs as `mlsec` user |
 | Network isolation | ✅ Configured | Internal bridge, no egress |
-| CI/CD pipeline | ✅ Working | Lint, type check, test, security scan, build, push |
+| CI/CD pipeline | Configured | Lint, type check, tests, security scans, gateway image build/push, release creation; a successful current run must be verified per commit before claiming pass |
 | Secret management | ⚠️ Partial | Env vars with required syntax, but no vault integration |
 | Logging | ⚠️ Partial | Structured error logging in gateway, no centralized aggregation |
 | Monitoring/alerting | ❌ Missing | No Prometheus metrics, no alerting rules |
 | Multi-host deployment | ❌ Missing | Single docker-compose host only |
-| TLS termination | ⚠️ Partial | Port 8443 exposed but TLS cert provisioning not automated |
+| TLS termination | Deployment responsibility | The control plane currently exposes HTTP; terminate TLS at the ingress/load balancer or service mesh |
 | Rate limiting | ❌ Missing | No request rate limiting on the gateway |
 | Horizontal scaling | ❌ Missing | Single instance per service |
 | Backup/recovery | ❌ Missing | No persistent volumes, no backup strategy |
