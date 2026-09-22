@@ -17,14 +17,16 @@ from fastapi import Body, Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import APIKeyHeader
 
-# Fail fast if API_KEY not set.
-API_KEY = os.environ.get("API_KEY")
-if not API_KEY:
-    print("FATAL: API_KEY environment variable is required", file=sys.stderr)
+# External caller authentication is intentionally separate from service-to-service
+# credentials. Reusing one universal key across every backend turns compromise of
+# any single service into compromise of the whole platform.
+GATEWAY_API_KEY = os.environ.get("GATEWAY_API_KEY") or os.environ.get("API_KEY")
+if not GATEWAY_API_KEY:
+    print("FATAL: GATEWAY_API_KEY environment variable is required", file=sys.stderr)
     sys.exit(1)
 
-if len(API_KEY) < 32:
-    print("FATAL: API_KEY must be at least 32 characters", file=sys.stderr)
+if len(GATEWAY_API_KEY) < 32:
+    print("FATAL: GATEWAY_API_KEY must be at least 32 characters", file=sys.stderr)
     sys.exit(1)
 
 API_KEY_NAME = "X-API-Key"
@@ -33,7 +35,7 @@ api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 GATEWAY_VERSION = "1.0.0"
 
 # Product service URLs (internal Docker network).
-SERVICES = {
+SERVICE_URLS = {
     "hf_scanner": "http://hf-scanner:8001",
     "mcp_gateway": "http://mcp-gateway:8002",
     "adv_ml": "http://adv-ml:8003",
@@ -41,6 +43,29 @@ SERVICES = {
     "dataset_poison": "http://dataset-poison:8005",
     "model_privacy": "http://model-privacy:8006",
 }
+
+SERVICE_KEY_ENV = {
+    "hf_scanner": "HF_SCANNER_API_KEY",
+    "mcp_gateway": "MCP_GATEWAY_API_KEY",
+    "adv_ml": "ADV_ML_API_KEY",
+    "llm_redteam": "LLM_REDTEAM_API_KEY",
+    "dataset_poison": "DATASET_POISON_API_KEY",
+    "model_privacy": "MODEL_PRIVACY_API_KEY",
+}
+
+def _service_key(service: str) -> str:
+    env_name = SERVICE_KEY_ENV[service]
+    value = os.environ.get(env_name, "")
+    if not value or len(value) < 32:
+        raise RuntimeError(f"{env_name} must be configured with at least 32 characters")
+    return value
+
+# Validate service credentials at startup so the gateway can never come up in a
+# partially authenticated state.
+for _service_name in SERVICE_URLS:
+    _service_key(_service_name)
+
+SERVICES = SERVICE_URLS
 
 # Only explicitly approved request headers cross the trust boundary. The
 # gateway's own API key is never forwarded from the external caller.
@@ -70,7 +95,7 @@ app = FastAPI(title="MLSec Platform Gateway", version=GATEWAY_VERSION, lifespan=
 
 async def verify_api_key(api_key: str = Depends(api_key_header)):
     """Authenticate the external caller without exposing key-comparison timing."""
-    if not api_key or not hmac.compare_digest(api_key, API_KEY):
+    if not api_key or not hmac.compare_digest(api_key, GATEWAY_API_KEY):
         raise HTTPException(status_code=401, detail="Invalid API key")
     return api_key
 
@@ -86,8 +111,8 @@ async def status(api_key: str = Depends(verify_api_key)):
     """Authenticated service inventory for operators."""
     return {
         "status": "operational",
-        "services": sorted(SERVICES),
-        "total": len(SERVICES),
+        "services": sorted(SERVICE_URLS),
+        "total": len(SERVICE_URLS),
     }
 
 
@@ -115,10 +140,10 @@ async def scan_model(
 async def proxy(
     service: str, path: str, request: Request, api_key: str = Depends(verify_api_key)
 ):
-    if service not in SERVICES:
+    if service not in SERVICE_URLS:
         raise HTTPException(status_code=404, detail=f"Unknown service: {service}")
 
-    target_url = f"{SERVICES[service]}/{path}"
+    target_url = f"{SERVICE_URLS[service]}/{path}"
     client: httpx.AsyncClient = request.app.state.http_client
 
     try:
@@ -132,7 +157,7 @@ async def proxy(
         # Propagate the authenticated gateway identity explicitly. This keeps
         # service authentication separate from caller-supplied Authorization or
         # Cookie headers, neither of which crosses this boundary implicitly.
-        headers[API_KEY_NAME] = API_KEY
+        headers[API_KEY_NAME] = _service_key(service)
 
         resp = await client.request(
             method=request.method,
