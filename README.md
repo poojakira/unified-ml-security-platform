@@ -208,7 +208,7 @@ Total: 10 CPU cores, 13 GB memory for the full stack.
 
 **Non-root execution**: The gateway Dockerfile creates a dedicated `mlsec` user and group. The application runs as this non-root user.
 
-**Multi-stage build**: The production Dockerfile uses a builder stage for compilation and a minimal runtime stage, reducing the attack surface by excluding build tools from the final image.
+**Multi-stage build reference**: The hardened Dockerfile uses a builder stage and a smaller runtime stage. This is a packaging control demonstrated by the repository, not evidence of a deployed production image.
 
 **Error opacity**: The gateway does not expose internal exception details to clients. Upstream errors return an opaque `request_id` for server-side correlation.
 
@@ -220,7 +220,7 @@ Total: 10 CPU cores, 13 GB memory for the full stack.
 
 **Dependabot**: Automated dependency update PRs via `.github/dependabot.yml`.
 
-**Secrets management**: API keys and JWT secrets are passed via environment variables with required-value syntax (`${API_KEY:?}`) in the production compose file. No secrets are hardcoded.
+**Secrets configuration**: API keys and JWT secrets are passed via required environment variables in the hardened compose reference. This demonstrates configuration hygiene; it is not evidence of an external secrets-management deployment.
 
 ## Evaluation Methods, Results, and Limitations
 
@@ -290,7 +290,7 @@ Based on the architecture docs and current gaps:
 5. **Multi-host deployment**: Provide Kubernetes manifests or ECS task definitions for horizontal scaling.
 6. **TLS automation**: Integrate cert-manager or ACME for automated certificate provisioning on port 8443.
 7. **ATT&CK detector expansion**: Move beyond seed regex rules to ML-based detection with measured precision/recall.
-8. **Staging environment**: The CI has placeholder jobs for staging/production deployment validation that need real manifests.
+8. **Deployment environment**: CI validates deployment plans/reference configuration, but the repository does not provide evidence of a running staging or production environment.
 
 ## References
 
