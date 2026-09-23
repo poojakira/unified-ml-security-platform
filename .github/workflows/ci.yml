@@ -336,6 +336,7 @@ jobs:
           MODEL_PRIVACY_API_KEY: validation-privacy-service-key-at-least-32-chars
           MCP_ALLOWED_SERVERS: github
           DATASET_BASELINE_FILE: /tmp/validation-baseline.npz
+          POISON_REDIS_URL: redis://validation-redis:6379/0
         run: docker compose -f docker-compose.prod.yml config >/dev/null
 
   release:
