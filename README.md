@@ -1,6 +1,6 @@
 # Unified ML Security Platform
 
-**Repository owner & maintainer:** Pooja Kiran ([@poojakira](https://github.com/poojakira)) — I own and maintain this repository and drive its design, engineering, validation, documentation, and evidence-backed releases.
+**Maintainer:** Pooja Kiran ([@poojakira](https://github.com/poojakira))
 
 A deployment control plane for the long-running HTTP security services that actually expose stable runtime contracts today: MCP tool-call enforcement, LLM prompt scanning, and dataset-poisoning screening. `docker-compose.yml` is a local contract-test topology using stubs for those three routes; `docker-compose.prod.yml` accepts only externally built product images. Adversarial robustness, model-privacy assessment, and model-provenance scanning remain independently released batch/admission tools and are not falsely proxied as HTTP microservices.
 
@@ -10,9 +10,9 @@ The account contains both long-running security services and batch security gate
 
 This repository is that integration layer. It defines how the services compose, what their health contracts look like, how traffic routes between them, and what CI must pass before anything ships.
 
-## Executive Summary
+## Overview
 
-This platform is for ML security engineers and platform teams who operate multiple ML security tools and need them to work together as a single, observable system. It solves the problem of multi-service orchestration for ML security: instead of deploying and monitoring each tool independently, this workspace provides a single gateway, a unified authentication model, shared network isolation, resource governance, and a common threat detection contract based on MITRE ATT&CK v19.
+This platform targets ML security engineers and platform teams who operate multiple ML security tools and need them to work together as one observable system. It handles multi-service orchestration for ML security: instead of deploying and monitoring each tool independently, this workspace provides a single gateway, a unified authentication model, shared network isolation, resource governance, and a common threat detection contract based on MITRE ATT&CK v19.
 
 The production contract composes independently released product images. Each product repository owns its code, tests, image build, and release evidence. This repository owns gateway routing, service isolation, credential boundaries, compose validation, and cross-service integration contracts. Local stub containers are never published as product images.
 
