@@ -1,9 +1,17 @@
 # Runbook — Unified ML Security Platform
 
+> **Reference for self-hosting, not an operated service.** This runbook documents
+> how to run the single-host Docker Compose deployment described in
+> `ARCHITECTURE.md`. There is no operated production deployment behind this
+> repository, no on-call rotation, no SLA, and no live monitoring of a running
+> instance. "Production" below refers to the hardened Compose profile
+> (`docker-compose.prod.yml`) that a self-hoster runs, not a service operated by
+> the maintainer.
+
 ## Scope
 
-This runbook covers the production control plane and the three synchronous HTTP
-services it currently routes:
+This runbook covers the hardened Compose control plane and the three synchronous
+HTTP services it routes when a self-hoster runs it:
 
 | Service | Internal address | Role |
 |---|---|---|

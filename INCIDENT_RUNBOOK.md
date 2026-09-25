@@ -1,6 +1,12 @@
 # Incident Runbook — Unified ML Security Platform
 
-## Current production topology
+> **Template for self-hosters, not an operated service.** This is a reference
+> incident playbook for someone running the Docker Compose stack themselves.
+> There is no operated production deployment, on-call rotation, SLA, or live
+> monitoring behind this repository. The topology below describes the Compose
+> profile a self-hoster runs, not a service operated by the maintainer.
+
+## Compose topology
 
 ```
 Clients -> gateway:8000 -> mcp-gateway:8080
