@@ -1,5 +1,18 @@
 # Unified ML Security Platform
 
+<!-- security-systems-poster -->
+## Research Poster
+
+**Security Systems / 07 — A Unified Control Plane for Machine-Learning Security Services**
+
+[![Research poster](poster/poster.png)](poster/poster_36x48.pdf)
+
+> Technical research poster (36 x 48 in). Click the image for the print-resolution **[PDF](poster/poster_36x48.pdf)**.
+> Every metric on it is evidence-backed; historical/projected numbers are labeled and separated from current results.
+> Part of the *Pooja Kiran - Security Systems* engineering poster collection.
+<!-- security-systems-poster -->
+
+
 **Maintainer:** Pooja Kiran ([@poojakira](https://github.com/poojakira))
 
 A deployment control plane for the long-running HTTP security services that expose a stable, authenticated runtime contract: MCP tool-call enforcement, LLM prompt scanning, dataset-poisoning screening, and model-privacy assessment. `docker-compose.yml` is a local contract-test topology using health-contract stubs for those four routes; `docker-compose.prod.yml` accepts only externally built product images. Adversarial robustness and model-provenance scanning remain independently released batch/admission tools and are not falsely proxied as HTTP microservices.
