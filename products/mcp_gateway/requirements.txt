@@ -1,3 +1,4 @@
 git+https://github.com/poojakira/mcp-agent-security-gateway.git@main
 fastapi>=0.111
-uvicorn[standard]>=0.29pydantic>=2,<3
+uvicorn[standard]>=0.29
+pydantic>=2,<3
