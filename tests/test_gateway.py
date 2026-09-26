@@ -270,3 +270,104 @@ async def test_status_with_valid_key_async(app):
         data = response.json()
         assert data["status"] == "operational"
         assert "services" in data
+
+
+# ---------------------------------------------------------------------------
+# Correlation endpoint tests
+# ---------------------------------------------------------------------------
+
+
+class TestCorrelateEndpoint:
+    """/correlate fans out to every service /scan and aggregates findings."""
+
+    def _mock_scan(self, per_service_findings):
+        """Build an AsyncMock http-client .post that returns per-service findings.
+
+        `per_service_findings` maps a service base-url substring -> findings list.
+        """
+
+        def _post(url, **kwargs):
+            findings = []
+            for key, val in per_service_findings.items():
+                if key in url:
+                    findings = val
+                    break
+            return SimpleNamespace(
+                status_code=200,
+                headers={"content-type": "application/json"},
+                json=lambda f=findings: {"source": "svc", "finding_count": len(f), "findings": f},
+            )
+
+        return AsyncMock(side_effect=_post)
+
+    def test_correlate_requires_auth(self, client):
+        assert client.post("/correlate", json={"content": "x"}).status_code == 401
+
+    def test_correlate_rejects_empty_content(self, client, auth_headers):
+        assert (
+            client.post("/correlate", json={"content": ""}, headers=auth_headers).status_code
+            == 422
+        )
+
+    def test_correlate_aggregates_and_dedupes(self, client, gateway, auth_headers):
+        shared = {
+            "rule_id": "T1059.001",
+            "technique": "Command and Scripting Interpreter T1059",
+            "title": "Command and Scripting Interpreter T1059",
+            "severity": "high",
+            "source": "dataset_poison",
+            "evidence": ["powershell"],
+        }
+        unique = {
+            "rule_id": "T1566",
+            "technique": "Phishing T1566",
+            "title": "Phishing T1566",
+            "severity": "medium",
+            "source": "llm_redteam",
+            "evidence": ["phishing"],
+        }
+        # Two services report the SAME finding; one reports an extra unique one.
+        mock_post = self._mock_scan(
+            {
+                "mcp-gateway": [dict(shared, source="mcp_gateway")],
+                "llm-redteam": [dict(shared, source="llm_redteam"), unique],
+                "dataset-poison": [dict(shared, source="dataset_poison")],
+                "model-privacy": [],
+            }
+        )
+        with patch.object(gateway.app.state.http_client, "post", mock_post):
+            resp = client.post(
+                "/correlate",
+                json={"content": "powershell.exe -enc; phishing"},
+                headers=auth_headers,
+            )
+        assert resp.status_code == 200
+        data = resp.json()
+        # shared finding merged into ONE entry; unique stays separate => 2 total.
+        assert data["correlated_finding_count"] == 2
+        assert data["services_queried"] == 4
+        top = data["findings"][0]  # highest severity first
+        assert top["rule_id"] == "T1059.001"
+        # merged finding observed by all three reporting services.
+        assert sorted(set(top["observed_by"])) == ["dataset_poison", "llm_redteam", "mcp_gateway"]
+
+    def test_correlate_partial_result_on_unavailable_service(
+        self, client, gateway, auth_headers
+    ):
+        import httpx as _httpx
+
+        def _post(url, **kwargs):
+            if "model-privacy" in url:
+                raise _httpx.ConnectError("down")
+            return SimpleNamespace(
+                status_code=200,
+                headers={"content-type": "application/json"},
+                json=lambda: {"source": "svc", "finding_count": 0, "findings": []},
+            )
+
+        with patch.object(gateway.app.state.http_client, "post", AsyncMock(side_effect=_post)):
+            resp = client.post(
+                "/correlate", json={"content": "benign"}, headers=auth_headers
+            )
+        assert resp.status_code == 200
+        assert resp.json()["service_status"]["model_privacy"] == "unavailable"

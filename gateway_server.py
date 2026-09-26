@@ -138,6 +138,76 @@ async def status(api_key: str = Depends(verify_api_key)):
     }
 
 
+# Severity ordering for correlated aggregation (highest first).
+_SEVERITY_RANK = {"critical": 4, "high": 3, "medium": 2, "low": 1, "info": 0}
+
+
+@app.post("/correlate")
+async def correlate(
+    request: Request,
+    payload: dict = Body(default_factory=dict),
+    api_key: str = Depends(verify_api_key),
+):
+    """Fan out submitted content to every routed service's /scan, then
+    aggregate and de-duplicate the normalized findings into one correlated
+    report. This is the cross-service correlation surface: identical findings
+    reported by multiple services are merged and annotated with every source
+    that observed them.
+    """
+    content = payload.get("content")
+    if not isinstance(content, str) or not content or len(content) > 200_000:
+        raise HTTPException(status_code=422, detail="content must be a non-empty string <= 200000 chars")
+
+    client: httpx.AsyncClient = request.app.state.http_client
+    merged: dict[str, dict] = {}
+    service_status: dict[str, str] = {}
+
+    for service, base_url in SERVICE_URLS.items():
+        try:
+            resp = await client.post(
+                f"{base_url}/scan",
+                json={"content": content},
+                headers={API_KEY_NAME: _service_key(service)},
+                timeout=15.0,
+            )
+        except httpx.HTTPError:
+            # A single service being unavailable must not fail the whole
+            # correlation; record it and continue (partial-result, fail-open
+            # for availability but every finding is still authenticated).
+            service_status[service] = "unavailable"
+            continue
+
+        if resp.status_code != 200:
+            service_status[service] = f"error_{resp.status_code}"
+            continue
+        service_status[service] = "ok"
+
+        for finding in resp.json().get("findings", []):
+            # De-duplicate on the identifying fields; merge observing sources.
+            key = "|".join(
+                str(finding.get(f)) for f in ("rule_id", "technique", "title")
+            )
+            if key in merged:
+                merged[key]["observed_by"].append(finding.get("source"))
+            else:
+                entry = dict(finding)
+                entry["observed_by"] = [finding.get("source")]
+                merged[key] = entry
+
+    findings = sorted(
+        merged.values(),
+        key=lambda f: (_SEVERITY_RANK.get(f.get("severity"), 0), len(f["observed_by"])),
+        reverse=True,
+    )
+    return {
+        "content_scanned": True,
+        "services_queried": len(SERVICE_URLS),
+        "service_status": service_status,
+        "correlated_finding_count": len(findings),
+        "findings": findings,
+    }
+
+
 @app.post("/scan/iam")
 async def scan_iam(
     payload: dict = Body(default_factory=dict),

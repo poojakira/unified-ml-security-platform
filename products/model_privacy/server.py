@@ -1,15 +1,29 @@
-"""Minimal health-check server for model_privacy product."""
+"""model_privacy product service: authenticated scan endpoint returning
+normalized ATT&CK findings over submitted model/privacy-assessment content."""
+
 from __future__ import annotations
 
-import os
+from fastapi import Depends, FastAPI
 
-from fastapi import FastAPI
+from attacks.attack_v19_detector import analyze_attack_v19
+from products.common.auth import require_api_key
+from products.common.findings import (
+    ScanRequest,
+    ScanResponse,
+    findings_from_attack_analysis,
+)
 
-MLSEC_API_KEY = os.environ.get("MLSEC_API_KEY", "")
-
-app = FastAPI(title="model_privacy", docs_url=None, redoc_url=None)
+SOURCE = "model_privacy"
+app = FastAPI(title=SOURCE, docs_url=None, redoc_url=None)
 
 
 @app.get("/health")
-async def health():
-    return {"status": "healthy", "product": "model_privacy"}
+async def health() -> dict[str, str]:
+    return {"status": "healthy", "product": SOURCE}
+
+
+@app.post("/scan", response_model=ScanResponse, dependencies=[Depends(require_api_key)])
+async def scan(request: ScanRequest) -> ScanResponse:
+    analysis = analyze_attack_v19(request.content)
+    findings = findings_from_attack_analysis(SOURCE, analysis)
+    return ScanResponse(source=SOURCE, finding_count=len(findings), findings=findings)
