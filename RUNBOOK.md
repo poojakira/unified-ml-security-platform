@@ -20,7 +20,7 @@ HTTP services it routes when a self-hoster runs it:
 | LLM Red Team | `llm-redteam:8000` | Prompt-security scanning; shadow mode by default |
 | Dataset Poison | `dataset-poison:8000` | Training-data screening; requires trusted baseline |
 
-The HF provenance scanner, adversarial ML lab, and model-privacy project are
+The HF provenance scanner and adversarial ML lab are
 batch/admission tools. They are not synchronous gateway backends.
 
 ## Required production configuration

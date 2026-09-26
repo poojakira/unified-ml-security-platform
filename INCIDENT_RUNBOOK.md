@@ -14,12 +14,12 @@ Clients -> gateway:8000 -> mcp-gateway:8080
                         -> dataset-poison:8000
 ```
 
-The HF provenance scanner, adversarial ML lab, and model-privacy project are
+The HF provenance scanner and adversarial ML lab are
 batch/admission tools and are not gateway backends.
 
-The gateway requires `GATEWAY_API_KEY` and three separate backend credentials:
-`MCP_GATEWAY_API_KEY`, `LLM_REDTEAM_API_KEY`, and
-`DATASET_POISON_API_KEY`.
+The gateway requires `GATEWAY_API_KEY` and four separate backend credentials:
+`MCP_GATEWAY_API_KEY`, `LLM_REDTEAM_API_KEY`, `DATASET_POISON_API_KEY`, and
+`MODEL_PRIVACY_API_KEY`.
 
 ## First checks
 

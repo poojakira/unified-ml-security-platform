@@ -2,7 +2,7 @@
 
 **Maintainer:** Pooja Kiran ([@poojakira](https://github.com/poojakira))
 
-A deployment control plane for the long-running HTTP security services that actually expose stable runtime contracts today: MCP tool-call enforcement, LLM prompt scanning, and dataset-poisoning screening. `docker-compose.yml` is a local contract-test topology using stubs for those three routes; `docker-compose.prod.yml` accepts only externally built product images. Adversarial robustness, model-privacy assessment, and model-provenance scanning remain independently released batch/admission tools and are not falsely proxied as HTTP microservices.
+A deployment control plane for the long-running HTTP security services that expose a stable, authenticated runtime contract: MCP tool-call enforcement, LLM prompt scanning, dataset-poisoning screening, and model-privacy assessment. `docker-compose.yml` is a local contract-test topology using health-contract stubs for those four routes; `docker-compose.prod.yml` accepts only externally built product images. Adversarial robustness and model-provenance scanning remain independently released batch/admission tools and are not falsely proxied as HTTP microservices.
 
 ## The Core Problem
 
@@ -42,16 +42,15 @@ But operators need them to behave as one system. This repository exists to answe
                          |
           +--------------+--------------+
           |              |              |
-          v              v              v
-   mcp-gateway       llm-redteam    dataset-poison
-      :8080             :8000           :8000
-   tool-call         prompt scan      data screening
-   enforcement
+          v              v              v              v
+   mcp-gateway       llm-redteam    dataset-poison   model-privacy
+      :8080             :8000           :8000            :8006
+   tool-call         prompt scan      data screening   privacy
+   enforcement                                         assessment
 
 Batch/release gates are intentionally outside the synchronous proxy:
   hf-model-provenance-scanner   -> model admission / CI job
   adversarial-ml-lab            -> robustness evaluation job
-  model-privacy-attacks         -> privacy assessment job
 ```
 
 ### Component Responsibilities
@@ -62,9 +61,9 @@ Batch/release gates are intentionally outside the synchronous proxy:
 | mcp-gateway | MCP/JSON-RPC tool-call inspection and enforcement | `poojakira/mcp-agent-security-gateway` |
 | llm-redteam | Authenticated prompt-security scanning API | `poojakira/llm-redteam-framework` |
 | dataset-poison | Authenticated training-data screening API | `poojakira/dataset-poisoning-detector` |
+| model-privacy | Authenticated privacy-assessment service (routed; exposes a health/readiness contract) | `poojakira/model-privacy-attacks` |
 | hf-model-provenance-scanner | Batch/model-admission scanner; not synchronously proxied | `poojakira/hf-model-provenance-scanner` |
 | adversarial-ml-lab | Batch robustness gate; not synchronously proxied | `poojakira/adversarial-ml-lab` |
-| model-privacy-attacks | Batch privacy gate; not synchronously proxied | `poojakira/model-privacy-attacks` |
 | attacks/ | Shared ATT&CK-oriented seed detection module used by this repo | This repository |
 
 ## End-to-End Workflow
@@ -154,7 +153,7 @@ curl http://localhost:8000/health
 
 # Check authenticated service status
 curl -H "X-API-Key: $GATEWAY_API_KEY" http://localhost:8000/status
-# {"status":"operational","services":["dataset_poison","llm_redteam","mcp_gateway"],"total":3}
+# {"status":"operational","services":["dataset_poison","llm_redteam","mcp_gateway","model_privacy"],"total":4}
 ```
 
 ### Local Development

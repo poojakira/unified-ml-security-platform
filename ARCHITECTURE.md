@@ -43,10 +43,13 @@ pretended to be long-running gateway microservices:
 
 - `hf-model-provenance-scanner` — model artifact admission / supply-chain scan
 - `adversarial-ml-lab` — adversarial robustness evaluation job
-- `model-privacy-attacks` — privacy assessment job
 
 They should run in CI, release pipelines, or scheduled assessment jobs and
 produce evidence consumed by humans or policy automation.
+
+`model-privacy-attacks` is routed synchronously through the gateway: it exposes
+an authenticated service with a health/readiness contract (see `SERVICE_URLS`
+in `gateway_server.py`).
 
 ## Trust boundaries
 
