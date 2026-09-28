@@ -1,5 +1,7 @@
 # Research Brief — Poster 07
 
+> Evidence status: This is a dated repository snapshot at the commit identified below. `VERIFIED_AT_SNAPSHOT` means verified for that commit and environment; it does not assert the same result on the latest `main`. Compare newer claims with the repository evidence before reuse.
+
 ## Repository
 `github.com/poojakira/unified-ml-security-platform` (public, default branch `main`, primary language Python). Apache-2.0 • Python 3.12 • HEAD cbcdd43 • verified 2026-09-26
 
@@ -34,10 +36,10 @@ O4 — Internal-only backend network
 ## Methodology
 1 Receive (HTTP) -> 2 Auth (X-API-Key) -> 3 Allowlist (headers) -> 4 Limit (body size) -> 5 Route (backend) -> 6·7 Map (timeout/error)
 
-## Current Verified Evidence + Claim Ledger
-- **VERIFIED_CURRENT** — 59 test functions across suite — Counted def test_ in tests/ (HEAD cbcdd43).
-- **VERIFIED_CURRENT** — One authenticated FastAPI gateway fronts 3 real backends — ARCHITECTURE.md runtime boundary: X-API-Key, header allowlist, body-size limit, timeout/error map; backends internal-only.
-- **VERIFIED_CURRENT** — Only gateway publishes a host port — ARCHITECTURE.md: production Docker network internal-only.
+## Evidence at Poster Snapshot + Claim Ledger
+- **VERIFIED_AT_SNAPSHOT** — 59 test functions across suite — Counted def test_ in tests/ (HEAD cbcdd43).
+- **VERIFIED_AT_SNAPSHOT** — One authenticated FastAPI gateway fronts 3 real backends — ARCHITECTURE.md runtime boundary: X-API-Key, header allowlist, body-size limit, timeout/error map; backends internal-only.
+- **VERIFIED_AT_SNAPSHOT** — Only gateway publishes a host port — ARCHITECTURE.md: production Docker network internal-only.
 - **UNSUPPORTED (disclaimed)** — Async orchestration / backend accuracy / production SLO — ARCHITECTURE.md: synchronous control plane; accuracy is per-backend; no SLO claimed.
 
 ## Important Negative / Honest Results

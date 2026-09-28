@@ -8,6 +8,7 @@
 [![Research poster](poster/poster.png)](poster/poster_36x48.pdf)
 
 > Technical research poster (36 x 48 in). Click the image for the print-resolution **[PDF](poster/poster_36x48.pdf)**.
+> Poster measurements are dated snapshots at their printed commits. Use the repository evidence files for newer results; do not read the poster as a verification of the latest `main`.
 > Every metric on it is evidence-backed; historical/projected numbers are labeled and separated from current results.
 > Part of the *Pooja Kiran - Security Systems* engineering poster collection.
 <!-- security-systems-poster -->
@@ -16,6 +17,8 @@
 **Maintainer:** Pooja Kiran ([@poojakira](https://github.com/poojakira))
 
 A deployment control plane for the long-running HTTP security services that expose a stable, authenticated runtime contract: MCP tool-call enforcement, LLM prompt scanning, dataset-poisoning screening, and model-privacy assessment. `docker-compose.yml` is a local contract-test topology using health-contract stubs for those four routes; `docker-compose.prod.yml` accepts only externally built product images. Adversarial robustness and model-provenance scanning remain independently released batch/admission tools and are not falsely proxied as HTTP microservices.
+
+**Public evidence boundary:** The linked `model-privacy-attacks` and `PulseNet-RUL-Forecasting` source repositories are private. The local Compose topology uses contract stubs; production Compose requires separately built product images. Public readers can assess this integration layer but cannot inspect those private dependencies.
 
 ## Verified Snapshot
 
