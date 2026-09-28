@@ -17,11 +17,21 @@
 
 A deployment control plane for the long-running HTTP security services that expose a stable, authenticated runtime contract: MCP tool-call enforcement, LLM prompt scanning, dataset-poisoning screening, and model-privacy assessment. `docker-compose.yml` is a local contract-test topology using health-contract stubs for those four routes; `docker-compose.prod.yml` accepts only externally built product images. Adversarial robustness and model-provenance scanning remain independently released batch/admission tools and are not falsely proxied as HTTP microservices.
 
-## The Core Problem
+## Verified Snapshot
 
-The account contains both long-running security services and batch security gates. The production problem is not to force every tool behind one synchronous API; it is to give runtime services a consistent authenticated control plane while keeping batch/admission evaluators independently releasable and evidence-producing.
+Reproduced on current `main` (Python 3.12).
 
-This repository is that integration layer. It defines how the services compose, what their health contracts look like, how traffic routes between them, and what CI must pass before anything ships.
+| Metric | Current verified result |
+|---|---:|
+| Tests | 111+ passing (unit + local contract-stub health tests) |
+| Statement coverage | ~52% |
+| HTTP scan services | 4 (mcp_gateway, llm_redteam, dataset_poison, model_privacy) |
+| Health-only stub services | 2 (hf_scanner, adv_ml) — batch tools, not proxied |
+| Shared auth | constant-time API key, fail-closed (401/503) |
+
+## Security Problem
+
+The account contains both long-running security services and batch security gates. The production problem is not to force every tool behind one synchronous API; it is to give runtime services a consistent authenticated control plane while keeping batch/admission evaluators independently releasable and evidence-producing. This repository is that integration layer: it defines how services compose, their health contracts, traffic routing, credential boundaries, and what CI must pass before anything ships.
 
 ## Overview
 
@@ -42,7 +52,7 @@ But operators need them to behave as one system. This repository exists to answe
 - What shared threat taxonomy do all services report against?
 - How do you run security scans (Bandit, Trivy, Grype, Safety) and integration tests in CI before merging?
 
-## Architecture Overview
+## Architecture
 
 ```
                     External caller
@@ -78,6 +88,19 @@ Batch/release gates are intentionally outside the synchronous proxy:
 | hf-model-provenance-scanner | Batch/model-admission scanner; not synchronously proxied | `poojakira/hf-model-provenance-scanner` |
 | adversarial-ml-lab | Batch robustness gate; not synchronously proxied | `poojakira/adversarial-ml-lab` |
 | attacks/ | Shared ATT&CK-oriented seed detection module used by this repo | This repository |
+
+## Threat Model & Scope
+
+**In scope:** a single authenticated control-plane boundary (constant-time API key, fail-closed) in front of the four long-running HTTP scan services, with service isolation, credential boundaries, resource governance, and compose validation gated in CI.
+
+**Out of scope / not claimed:** It does not reimplement the product tools — each product repo owns its code, tests, image, and release evidence. Local `docker-compose.yml` uses health-contract **stubs** that are never published as product images; two services (hf_scanner, adv_ml) are health-only stubs because their real tools are batch/admission evaluators, not HTTP microservices. Multi-replica deployments still require external shared rate limiting and a deliberate state-distribution strategy.
+
+## Core Capabilities
+
+- Single authenticated gateway (constant-time API-key auth, fail-closed 401/503) routing to four HTTP scan services
+- Normalized cross-service `Finding` schema with deterministic fingerprinting and MITRE ATT&CK v19 mapping
+- Local contract-test topology (health-contract stubs) + production compose that accepts only externally built images
+- Service isolation, resource governance, and CI compose validation + security scans (Bandit, Trivy, Grype, Safety)
 
 ## End-to-End Workflow
 
