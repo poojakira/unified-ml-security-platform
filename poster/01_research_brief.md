@@ -1,7 +1,7 @@
 # Research Brief — Poster 07
 
 ## Repository
-`github.com/poojakira/unified-ml-security-platform` (public, default branch `main`, primary language Python). Apache-2.0 • Python 3.12 • HEAD 7ac348c • verified 2026-09-26
+`github.com/poojakira/unified-ml-security-platform` (public, default branch `main`, primary language Python). Apache-2.0 • Python 3.12 • HEAD cbcdd43 • verified 2026-09-26
 
 ## Academic Project Title
 **A Unified Control Plane for Machine-Learning Security Services**
@@ -35,7 +35,7 @@ O4 — Internal-only backend network
 1 Receive (HTTP) -> 2 Auth (X-API-Key) -> 3 Allowlist (headers) -> 4 Limit (body size) -> 5 Route (backend) -> 6·7 Map (timeout/error)
 
 ## Current Verified Evidence + Claim Ledger
-- **VERIFIED_CURRENT** — 59 test functions across suite — Counted def test_ in tests/ (HEAD 7ac348c).
+- **VERIFIED_CURRENT** — 59 test functions across suite — Counted def test_ in tests/ (HEAD cbcdd43).
 - **VERIFIED_CURRENT** — One authenticated FastAPI gateway fronts 3 real backends — ARCHITECTURE.md runtime boundary: X-API-Key, header allowlist, body-size limit, timeout/error map; backends internal-only.
 - **VERIFIED_CURRENT** — Only gateway publishes a host port — ARCHITECTURE.md: production Docker network internal-only.
 - **UNSUPPORTED (disclaimed)** — Async orchestration / backend accuracy / production SLO — ARCHITECTURE.md: synchronous control plane; accuracy is per-backend; no SLO claimed.
