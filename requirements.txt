@@ -1,5 +1,8 @@
 # Gateway runtime dependencies
 # Product-specific services install from products/*/requirements.txt.
-fastapi>=0.111
+fastapi>=0.142.1
 uvicorn[standard]>=0.30
 httpx>=0.27
+
+starlette>=1.7.0,<2
+anyio>=4.14.2,<5

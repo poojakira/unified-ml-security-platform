@@ -77,3 +77,12 @@ def test_scan_fails_closed_when_key_unconfigured(monkeypatch) -> None:
     monkeypatch.setenv("MLSEC_API_KEY", "short")
     resp = client.post("/scan", json={"content": "x"}, headers={"x-api-key": "short"})
     assert resp.status_code == 503
+
+
+def test_direct_service_rejects_oversized_unparsed_body():
+    from fastapi.testclient import TestClient
+    from products.dataset_poison.server import app
+
+    with TestClient(app) as client:
+        response = client.post('/scan', content=b'x' * (1024 * 1024 + 1))
+    assert response.status_code == 413

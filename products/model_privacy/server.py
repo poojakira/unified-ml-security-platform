@@ -3,6 +3,7 @@ normalized ATT&CK findings over submitted model/privacy-assessment content."""
 
 from __future__ import annotations
 
+from products.common.security import configure_security
 from fastapi import Depends, FastAPI
 
 from attacks.attack_v19_detector import analyze_attack_v19
@@ -15,6 +16,7 @@ from products.common.findings import (
 
 SOURCE = "model_privacy"
 app = FastAPI(title=SOURCE, docs_url=None, redoc_url=None)
+configure_security(app)
 
 
 @app.get("/health")

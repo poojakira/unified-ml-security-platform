@@ -1,3 +1,5 @@
 git+https://github.com/poojakira/adversarial-ml-lab.git@main
-fastapi>=0.111
+fastapi>=0.142.1
 uvicorn[standard]>=0.29
+starlette>=1.7.0,<2
+anyio>=4.14.2,<5

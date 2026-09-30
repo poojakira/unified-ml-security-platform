@@ -82,3 +82,30 @@ def test_correlate_fanout_respects_global_concurrency_budget(monkeypatch):
         assert client.max_active == 2
 
     asyncio.run(scenario())
+
+
+def test_invalid_key_rotation_cannot_reset_peer_budget(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    gateway = _load_gateway(monkeypatch, rate_limit="2")
+    with TestClient(gateway.app) as client:
+        assert client.get('/status', headers={'X-API-Key': 'first'}).status_code == 401
+        assert client.get('/status', headers={'X-API-Key': 'second'}).status_code == 401
+        assert client.get('/status', headers={'X-API-Key': 'third'}).status_code == 429
+
+
+def test_correlate_body_size_is_capped_before_json_parsing(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    gateway = _load_gateway(monkeypatch)
+    with TestClient(gateway.app) as client:
+        response = client.post('/correlate', content=b'x' * (gateway.MAX_PROXY_BODY_BYTES + 1))
+    assert response.status_code == 413
+
+
+def test_rate_state_has_a_hard_cardinality_bound(monkeypatch):
+    gateway = _load_gateway(monkeypatch)
+    for index in range(4096):
+        assert gateway._consume_rate_limit(str(index))
+    assert not gateway._consume_rate_limit('overflow')
+    assert len(gateway._rate_windows) == 4096

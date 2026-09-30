@@ -37,6 +37,7 @@ export GATEWAY_API_KEY="$(openssl rand -hex 32)"
 export MCP_GATEWAY_API_KEY="$(openssl rand -hex 32)"
 export LLM_REDTEAM_API_KEY="$(openssl rand -hex 32)"
 export DATASET_POISON_API_KEY="$(openssl rand -hex 32)"
+export MODEL_PRIVACY_API_KEY="$(openssl rand -hex 32)"
 
 export MCP_ALLOWED_SERVERS="github"
 export DATASET_BASELINE_FILE="/absolute/path/to/known-clean-baseline.npz"

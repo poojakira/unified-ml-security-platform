@@ -20,6 +20,8 @@ from fastapi import Body, Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import APIKeyHeader
 
+from products.common.body_limit import RequestBodyLimit
+
 # External caller authentication is intentionally separate from service-to-service
 # credentials. Reusing one universal key across every backend turns compromise of
 # any single service into compromise of the whole platform.
@@ -134,6 +136,11 @@ app = FastAPI(title="MLSec Platform Gateway", version=GATEWAY_VERSION, lifespan=
 def _consume_rate_limit(identity: str) -> bool:
     now = time.time()
     cutoff = now - 60.0
+    for key in list(_rate_windows):
+        if not _rate_windows[key] or _rate_windows[key][-1] <= cutoff:
+            del _rate_windows[key]
+    if identity not in _rate_windows and len(_rate_windows) >= 4096:
+        return False
     bucket = _rate_windows.setdefault(identity, [])
     bucket[:] = [ts for ts in bucket if ts > cutoff]
     if len(bucket) >= GATEWAY_RATE_LIMIT_RPM:
@@ -146,12 +153,14 @@ def _consume_rate_limit(identity: str) -> bool:
     return True
 
 
+app.add_middleware(RequestBodyLimit, max_bytes=MAX_PROXY_BODY_BYTES)
+
+
 @app.middleware("http")
 async def security_boundary(request: Request, call_next):
     if request.url.path != "/health":
         peer = request.client.host if request.client else "unknown"
-        supplied = request.headers.get(API_KEY_NAME, "")
-        identity = hashlib.sha256((supplied + "\0" + peer).encode("utf-8")).hexdigest()[:32]
+        identity = hashlib.sha256(peer.encode("utf-8")).hexdigest()[:32]
         if not _consume_rate_limit(identity):
             return JSONResponse(
                 status_code=429,
@@ -168,7 +177,7 @@ async def security_boundary(request: Request, call_next):
 
 async def verify_api_key(api_key: str = Depends(api_key_header)):
     """Authenticate the external caller without exposing key-comparison timing."""
-    if not api_key or not hmac.compare_digest(api_key, GATEWAY_API_KEY):
+    if not api_key or not hmac.compare_digest(api_key.encode("utf-8"), GATEWAY_API_KEY.encode("utf-8")):
         raise HTTPException(status_code=401, detail="Invalid API key")
     return api_key
 
