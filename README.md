@@ -174,6 +174,7 @@ export GATEWAY_IMAGE="ghcr.io/your-org/ml-security-control-plane@sha256:..."
 export MCP_GATEWAY_IMAGE="ghcr.io/your-org/mcp-gateway@sha256:..."
 export LLM_REDTEAM_IMAGE="ghcr.io/your-org/llm-redteam@sha256:..."
 export DATASET_POISON_IMAGE="ghcr.io/your-org/dataset-poison@sha256:..."
+export MODEL_PRIVACY_IMAGE="ghcr.io/poojakira/model-privacy-attacks@sha256:..."
 
 # Configure separate credentials. Use a secrets manager in a real environment.
 export GATEWAY_API_KEY="$(openssl rand -hex 32)"
