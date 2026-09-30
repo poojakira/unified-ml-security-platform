@@ -7,9 +7,9 @@
 
 | ID | Severity | Finding | Status |
 |---|---|---|---|
-| UMP-001 | High | Gateway endpoints have no request-rate limiter; `/correlate` amplifies one external request into multiple internal service calls. | Open |
-| UMP-002 | Medium | `/correlate` fans out sequentially without a gateway-wide concurrency budget, increasing resource occupancy under load. | Open |
-| UMP-003 | Medium | No browser-origin policy is configured for a deployment intended to accept requests only from an owned domain. | Open |
+| UMP-001 | High | Gateway requests are now bounded by a per-peer/API-key rate limiter before authenticated work, including `/correlate`. | Fixed |
+| UMP-002 | Medium | `/correlate` now acquires a configurable gateway-wide semaphore before fan-out, bounding simultaneous correlation workloads across callers. | Fixed |
+| UMP-003 | Medium | CORS is not used as an authentication boundary: the gateway uses an explicit `X-API-Key` and has no cookie-authenticated browser session. No repository evidence establishes a required owned-domain browser client, so adding a restrictive CORS policy would be speculative. | N/A / False positive |
 | UMP-004 | Info | Upstream targets are a fixed internal allowlist and external Authorization/Cookie headers are not forwarded. | Verified |
 
 ## Existing controls verified
