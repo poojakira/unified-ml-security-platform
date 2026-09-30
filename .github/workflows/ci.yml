@@ -104,7 +104,7 @@ jobs:
             --cov-fail-under=25
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
         with:
           files: ./coverage.xml
           fail_ci_if_error: false
@@ -309,7 +309,7 @@ jobs:
           echo "This repository publishes only the gateway; local products/ are integration-contract stubs."
       - name: Sign images with Cosign
         if: env.COSIGN_PRIVATE_KEY != ''
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
         with:
           cosign-release: 'latest'
         env:
