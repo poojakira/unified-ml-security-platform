@@ -30,20 +30,7 @@ services:
         condition: service_healthy
       dataset-poison:
         condition: service_healthy
-      redis:
-    image: redis:7-alpine
-    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - redis-data:/data
-    networks: [mlsec-internal]
-    restart: unless-stopped
-
-  model-privacy:
+      model-privacy:
         condition: service_healthy
     networks: [mlsec-internal]
     restart: unless-stopped
@@ -81,6 +68,19 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    networks: [mlsec-internal]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis-data:/data
     networks: [mlsec-internal]
     restart: unless-stopped
 
@@ -130,3 +130,4 @@ networks:
 
 volumes:
   mcp-state:
+  redis-data:
