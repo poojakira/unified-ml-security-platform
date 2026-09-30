@@ -32,6 +32,7 @@ export GATEWAY_IMAGE="ghcr.io/poojakira/unified-ml-security-platform@sha256:..."
 export MCP_GATEWAY_IMAGE="ghcr.io/poojakira/mcp-agent-security-gateway@sha256:..."
 export LLM_REDTEAM_IMAGE="ghcr.io/poojakira/llm-redteam-framework@sha256:..."
 export DATASET_POISON_IMAGE="ghcr.io/poojakira/dataset-poisoning-detector@sha256:..."
+export MODEL_PRIVACY_IMAGE="ghcr.io/poojakira/model-privacy-attacks@sha256:..."
 
 export GATEWAY_API_KEY="$(openssl rand -hex 32)"
 export MCP_GATEWAY_API_KEY="$(openssl rand -hex 32)"
