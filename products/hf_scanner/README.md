@@ -63,7 +63,7 @@ hf-scanner ./my-model-dir --mode local --fail-on high
 hf-scanner meta-llama/Llama-3-8B --mode remote --format json
 
 # Gated repo (needs token)
-export HF_TOKEN=hf_xxx
+export HF_TOKEN="<your-own-hugging-face-token>"
 hf-scanner my-org/private-model --mode remote
 ```
 
