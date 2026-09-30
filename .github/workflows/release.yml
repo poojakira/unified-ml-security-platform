@@ -145,7 +145,7 @@ jobs:
       contents: read
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093.3.0
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: dist
           path: dist/
@@ -233,7 +233,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
 
       - name: Sign container image
         env:
@@ -243,7 +243,7 @@ jobs:
             "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${DIGEST}"
 
       - name: Generate container attestation
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@ef244123eb79f2f7a7e75d99086184180e6d0018 # v1
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.push.outputs.digest }}
@@ -265,7 +265,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download signed artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093.3.0
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: dist-signed
           path: dist/
@@ -342,7 +342,7 @@ jobs:
       actions: read
       id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@5a775b367a56d5bd118a224a811bba288150a563 # v2.0.0
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"
       upload-assets: true
