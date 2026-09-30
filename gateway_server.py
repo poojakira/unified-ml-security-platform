@@ -4,6 +4,7 @@ Unified Gateway Server - Entry Point
 Requires distinct gateway and per-service credentials. Fails fast if missing.
 """
 
+import asyncio
 import hashlib
 import hmac
 import logging
@@ -37,11 +38,18 @@ api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 GATEWAY_VERSION = "1.0.0"
 MAX_PROXY_BODY_BYTES = int(os.environ.get("GATEWAY_MAX_BODY_BYTES", str(2 * 1024 * 1024)))
 GATEWAY_RATE_LIMIT_RPM = int(os.environ.get("GATEWAY_RATE_LIMIT_RPM", "300"))
+GATEWAY_MAX_CONCURRENT_CORRELATIONS = int(
+    os.environ.get("GATEWAY_MAX_CONCURRENT_CORRELATIONS", "8")
+)
 _rate_windows: dict[str, list[float]] = {}
 if MAX_PROXY_BODY_BYTES < 1024 or MAX_PROXY_BODY_BYTES > 16 * 1024 * 1024:
     raise RuntimeError("GATEWAY_MAX_BODY_BYTES must be between 1 KiB and 16 MiB")
 if GATEWAY_RATE_LIMIT_RPM < 1 or GATEWAY_RATE_LIMIT_RPM > 10000:
     raise RuntimeError("GATEWAY_RATE_LIMIT_RPM must be between 1 and 10000")
+if GATEWAY_MAX_CONCURRENT_CORRELATIONS < 1 or GATEWAY_MAX_CONCURRENT_CORRELATIONS > 128:
+    raise RuntimeError("GATEWAY_MAX_CONCURRENT_CORRELATIONS must be between 1 and 128")
+
+_correlate_slots = asyncio.Semaphore(GATEWAY_MAX_CONCURRENT_CORRELATIONS)
 
 # Product service URLs (internal Docker network).
 # Only route repositories that expose a real long-running HTTP contract.
@@ -201,54 +209,58 @@ async def correlate(
     if not isinstance(content, str) or not content or len(content) > 200_000:
         raise HTTPException(status_code=422, detail="content must be a non-empty string <= 200000 chars")
 
-    client: httpx.AsyncClient = request.app.state.http_client
-    merged: dict[str, dict] = {}
-    service_status: dict[str, str] = {}
+    await _correlate_slots.acquire()
+    try:
+        client: httpx.AsyncClient = request.app.state.http_client
+        merged: dict[str, dict] = {}
+        service_status: dict[str, str] = {}
 
-    for service, base_url in SERVICE_URLS.items():
-        try:
-            resp = await client.post(
-                f"{base_url}/scan",
-                json={"content": content},
-                headers={API_KEY_NAME: _service_key(service)},
-                timeout=15.0,
-            )
-        except httpx.HTTPError:
-            # A single service being unavailable must not fail the whole
-            # correlation; record it and continue (partial-result, fail-open
-            # for availability but every finding is still authenticated).
-            service_status[service] = "unavailable"
-            continue
+        for service, base_url in SERVICE_URLS.items():
+            try:
+                resp = await client.post(
+                    f"{base_url}/scan",
+                    json={"content": content},
+                    headers={API_KEY_NAME: _service_key(service)},
+                    timeout=15.0,
+                )
+            except httpx.HTTPError:
+                # A single service being unavailable must not fail the whole
+                # correlation; record it and continue (partial-result, fail-open
+                # for availability but every finding is still authenticated).
+                service_status[service] = "unavailable"
+                continue
 
-        if resp.status_code != 200:
-            service_status[service] = f"error_{resp.status_code}"
-            continue
-        service_status[service] = "ok"
+            if resp.status_code != 200:
+                service_status[service] = f"error_{resp.status_code}"
+                continue
+            service_status[service] = "ok"
 
-        for finding in resp.json().get("findings", []):
-            # De-duplicate on the identifying fields; merge observing sources.
-            key = "|".join(
-                str(finding.get(f)) for f in ("rule_id", "technique", "title")
-            )
-            if key in merged:
-                merged[key]["observed_by"].append(finding.get("source"))
-            else:
-                entry = dict(finding)
-                entry["observed_by"] = [finding.get("source")]
-                merged[key] = entry
+            for finding in resp.json().get("findings", []):
+                # De-duplicate on the identifying fields; merge observing sources.
+                key = "|".join(
+                    str(finding.get(f)) for f in ("rule_id", "technique", "title")
+                )
+                if key in merged:
+                    merged[key]["observed_by"].append(finding.get("source"))
+                else:
+                    entry = dict(finding)
+                    entry["observed_by"] = [finding.get("source")]
+                    merged[key] = entry
 
-    findings = sorted(
-        merged.values(),
-        key=lambda f: (_SEVERITY_RANK.get(f.get("severity"), 0), len(f["observed_by"])),
-        reverse=True,
-    )
-    return {
-        "content_scanned": True,
-        "services_queried": len(SERVICE_URLS),
-        "service_status": service_status,
-        "correlated_finding_count": len(findings),
-        "findings": findings,
-    }
+        findings = sorted(
+            merged.values(),
+            key=lambda f: (_SEVERITY_RANK.get(f.get("severity"), 0), len(f["observed_by"])),
+            reverse=True,
+        )
+        return {
+            "content_scanned": True,
+            "services_queried": len(SERVICE_URLS),
+            "service_status": service_status,
+            "correlated_finding_count": len(findings),
+            "findings": findings,
+        }
+    finally:
+        _correlate_slots.release()
 
 
 @app.post("/scan/iam")
