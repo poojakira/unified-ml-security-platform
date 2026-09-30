@@ -386,3 +386,10 @@ The hardest part of building a multi-service security platform is not writing an
 - **Security note:** Cross-service health/integration evidence is repository test evidence; it does not establish external production deployment.
 - **Evidence boundary:** This update records repository and GitHub Actions evidence observed during the pass. It is not a claim of independent penetration testing, production deployment, or zero residual risk.
 <!-- repo-verification:end -->
+
+## Verification checkpoint — 2026-09-30
+
+- **Snapshot commit:** `1bc2eccdfb9127124b0b526e08437c6a350c1041`
+- **Status:** VERIFIED GREEN
+- **Evidence:** Security Hygiene, Documentation Integrity, Production Gate, and CI/CD Pipeline all completed successfully on the current main revision.
+- This checkpoint is intentionally date-bounded. It does not claim zero vulnerabilities or universal production readiness.
