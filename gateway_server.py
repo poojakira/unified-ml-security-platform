@@ -4,10 +4,12 @@ Unified Gateway Server - Entry Point
 Requires distinct gateway and per-service credentials. Fails fast if missing.
 """
 
+import hashlib
 import hmac
 import logging
 import os
 import sys
+import time
 import uuid
 from contextlib import asynccontextmanager
 
@@ -34,6 +36,12 @@ api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 GATEWAY_VERSION = "1.0.0"
 MAX_PROXY_BODY_BYTES = int(os.environ.get("GATEWAY_MAX_BODY_BYTES", str(2 * 1024 * 1024)))
+GATEWAY_RATE_LIMIT_RPM = int(os.environ.get("GATEWAY_RATE_LIMIT_RPM", "300"))
+_rate_windows: dict[str, list[float]] = {}
+if MAX_PROXY_BODY_BYTES < 1024 or MAX_PROXY_BODY_BYTES > 16 * 1024 * 1024:
+    raise RuntimeError("GATEWAY_MAX_BODY_BYTES must be between 1 KiB and 16 MiB")
+if GATEWAY_RATE_LIMIT_RPM < 1 or GATEWAY_RATE_LIMIT_RPM > 10000:
+    raise RuntimeError("GATEWAY_RATE_LIMIT_RPM must be between 1 and 10000")
 
 # Product service URLs (internal Docker network).
 # Only route repositories that expose a real long-running HTTP contract.
@@ -113,6 +121,41 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="MLSec Platform Gateway", version=GATEWAY_VERSION, lifespan=lifespan)
+
+
+def _consume_rate_limit(identity: str) -> bool:
+    now = time.time()
+    cutoff = now - 60.0
+    bucket = _rate_windows.setdefault(identity, [])
+    bucket[:] = [ts for ts in bucket if ts > cutoff]
+    if len(bucket) >= GATEWAY_RATE_LIMIT_RPM:
+        return False
+    bucket.append(now)
+    if len(_rate_windows) > 4096:
+        stale = [key for key, values in _rate_windows.items() if not values or values[-1] <= cutoff]
+        for key in stale[:1024]:
+            _rate_windows.pop(key, None)
+    return True
+
+
+@app.middleware("http")
+async def security_boundary(request: Request, call_next):
+    if request.url.path != "/health":
+        peer = request.client.host if request.client else "unknown"
+        supplied = request.headers.get(API_KEY_NAME, "")
+        identity = hashlib.sha256((supplied + "\0" + peer).encode("utf-8")).hexdigest()[:32]
+        if not _consume_rate_limit(identity):
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Rate limit exceeded"},
+                headers={"Retry-After": "60"},
+            )
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 async def verify_api_key(api_key: str = Depends(api_key_header)):
@@ -233,7 +276,9 @@ async def proxy(
     service: str, path: str, request: Request, api_key: str = Depends(verify_api_key)
 ):
     if service not in SERVICE_URLS:
-        raise HTTPException(status_code=404, detail=f"Unknown service: {service}")
+        raise HTTPException(status_code=404, detail="Unknown service")
+    if ".." in path.split("/") or "://" in path or "\\" in path:
+        raise HTTPException(status_code=400, detail="Invalid proxy path")
 
     target_url = f"{SERVICE_URLS[service]}/{path}"
     client: httpx.AsyncClient = request.app.state.http_client
@@ -267,7 +312,7 @@ async def proxy(
             headers={
                 key: value
                 for key, value in resp.headers.items()
-                if key.lower() not in {"content-length", "transfer-encoding", "connection"}
+                if key.lower() in {"content-type", "cache-control", "retry-after", "x-request-id"}
             },
         )
     except HTTPException:
