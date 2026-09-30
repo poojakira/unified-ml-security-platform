@@ -393,7 +393,7 @@ The hardest part of building a multi-service security platform is not writing an
 
 - **Snapshot commit:** `1bc2eccdfb9127124b0b526e08437c6a350c1041`
 - **Status:** VERIFIED GREEN
-- **Evidence:** Security Hygiene, Documentation Integrity, Production Gate, and CI/CD Pipeline all completed successfully on the current main revision.
+- **Evidence:** Security Hygiene, Documentation Integrity, Production Gate, and CI/CD Pipeline all completed successfully for the cited snapshot revision.
 - This checkpoint is intentionally date-bounded. It does not claim zero vulnerabilities or universal production readiness.
 
 
