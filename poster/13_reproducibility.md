@@ -1,12 +1,19 @@
-# Reproduce the Work — Poster 07
+# Reproduce the Work - Poster 07
 
-> Evidence status: This is a dated repository snapshot at the commit identified below. `VERIFIED_AT_SNAPSHOT` means verified for that commit and environment; it does not assert the same result on the latest `main`. Compare newer claims with the repository evidence before reuse.
+**Repository:** `github.com/poojakira/unified-ml-security-platform`  
+**Verified code snapshot:** `01e58ba257764e47e230a3eecd5a821bb85e7985`  
+**CI/CD run:** `36783840279`
 
-**Repository:** `github.com/poojakira/unified-ml-security-platform` · Apache-2.0 • Python 3.12 • HEAD cbcdd43 • verified 2026-09-26
-
+```bash
+git clone https://github.com/poojakira/unified-ml-security-platform.git
+cd unified-ml-security-platform
+git checkout 01e58ba257764e47e230a3eecd5a821bb85e7985
+python -m pip install -e ".[dev]"
+pytest tests/ -q
+docker compose config
+docker compose -f docker-compose.prod.yml config
 ```
-docker compose up -d
-pytest tests/
-```
 
-Evidence artifacts: ARCHITECTURE.md, INTEGRATION_MAP.md, tests/
+Expected core unit evidence: **67 passed**, **56.89% statement coverage**.
+
+Interpretation rule: local stub health checks validate the gateway/topology contract only. They do not establish downstream product functionality.

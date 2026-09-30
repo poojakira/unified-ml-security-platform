@@ -1,70 +1,67 @@
-# Research Brief — Poster 07
+# Research Brief - Poster 07
 
-> Evidence status: This is a dated repository snapshot at the commit identified below. `VERIFIED_AT_SNAPSHOT` means verified for that commit and environment; it does not assert the same result on the latest `main`. Compare newer claims with the repository evidence before reuse.
+> Evidence status: Refreshed against current code snapshot `01e58ba257764e47e230a3eecd5a821bb85e7985` and successful CI/CD run `36783840279` on 2026-09-30.
 
 ## Repository
-`github.com/poojakira/unified-ml-security-platform` (public, default branch `main`, primary language Python). Apache-2.0 • Python 3.12 • HEAD cbcdd43 • verified 2026-09-26
+
+`github.com/poojakira/unified-ml-security-platform` - public, default branch `main`.
 
 ## Academic Project Title
+
 **A Unified Control Plane for Machine-Learning Security Services**
 
 ### Subtitle
-An Authenticated Gateway Fronting Heterogeneous ML Security Products
+
+An Authenticated Gateway for Independently Released ML Security Products
 
 ## One-Sentence Contribution
-A synchronous authenticated control plane that fronts three real ML security services (MCP gateway, LLM red-team, dataset-poison) with consistent auth, header allowlisting, body-size limits, and uniform error mapping on an internal-only Docker network.
 
-## Problem Statement
-Each ML security tool ships its own HTTP service, auth model, and error semantics. Wiring them into a product means every caller re-implements auth, header handling, body limits, and timeouts — inconsistently. A single gateway normalizes the entry boundary for the three real backend services.
+A real authenticated FastAPI control plane with **four production HTTP service slots**, a local contract-test topology built from stubs, and a production Compose contract that requires externally released product images instead of pretending the stubs are product implementations.
 
-## Threat Model
-Chain: EXTERNAL CALLER -> API-KEY BOUNDARY -> HEADER ALLOWLIST -> TIMEOUT / ERROR MAP -> BACKEND SERVICE.
-Adversary capability: sends crafted requests to the public port; Assumptions: only gateway is exposed; backends internal-only; Out of scope: backend detector accuracy; per-tool enforcement depth; Residual risk: gateway is single entry; auth key hygiene.
+## Method
 
-## Research / Engineering Question
-> Can heterogeneous ML security services be fronted by one authenticated control plane with consistent auth, limits, and error handling?
+1. Authenticate external callers at the gateway.
+2. Strip caller-controlled sensitive headers and inject per-service credentials.
+3. Route four synchronous service prefixes over an internal-only network.
+4. Use local health-contract stubs to test topology without misrepresenting product logic.
+5. Require explicit external product images in production Compose.
+6. Validate unit, security, integration, image-build, and deployment-contract behavior in CI.
 
-## Objective
-Determine whether one FastAPI gateway can provide consistent auth, allowlisting, limits, and error mapping across three ML security backends.
+## Current Verified Evidence
 
-## Engineering Sub-Objectives
-O1 — X-API-Key caller auth
-O2 — Header allowlist + body-size limit
-O3 — Timeout + uniform error mapping
-O4 — Internal-only backend network
+Current-main Python 3.12 unit-test job reports:
 
-## Methodology
-1 Receive (HTTP) -> 2 Auth (X-API-Key) -> 3 Allowlist (headers) -> 4 Limit (body size) -> 5 Route (backend) -> 6·7 Map (timeout/error)
+- **67 tests passed**.
+- **56.89% statement coverage**.
+- Separate local contract-stub health jobs for MCP, LLM red-team, dataset-poison, and model-privacy completed successfully.
+- Integration topology tests completed successfully.
+- Security scan, dependency audit, production Compose validation, and gateway image build/push job completed successfully.
 
-## Evidence at Poster Snapshot + Claim Ledger
-- **VERIFIED_AT_SNAPSHOT** — 59 test functions across suite — Counted def test_ in tests/ (HEAD cbcdd43).
-- **VERIFIED_AT_SNAPSHOT** — One authenticated FastAPI gateway fronts 3 real backends — ARCHITECTURE.md runtime boundary: X-API-Key, header allowlist, body-size limit, timeout/error map; backends internal-only.
-- **VERIFIED_AT_SNAPSHOT** — Only gateway publishes a host port — ARCHITECTURE.md: production Docker network internal-only.
-- **UNSUPPORTED (disclaimed)** — Async orchestration / backend accuracy / production SLO — ARCHITECTURE.md: synchronous control plane; accuracy is per-backend; no SLO claimed.
+## Critical Claim Correction
 
-## Important Negative / Honest Results
-See RESULTS panel: Controls implemented at the gateway entry. Backend enforcement depth is per-tool, not shown here.
+The previous poster said the gateway fronted "three real backends." That is not an accurate description of the current repository. The correct boundary is:
+
+- local Compose uses **contract stubs**;
+- production Compose defines **four externally supplied real product image slots**;
+- stub health checks prove routing/topology contracts only, not downstream product functionality.
 
 ## Limitations
-1. Gateway normalizes entry, not backend accuracy.
-2. Synchronous control plane; not an async orchestrator.
-3. Single public entry point (blast-radius consideration).
-4. Local tests ≠ production reliability.
-5. Per-tool enforcement depth varies (documented).
 
-## Future Work
-• Async / queued orchestration mode.
-• Per-backend rate limiting.
-• Distributed multi-replica state strategy.
-• End-to-end integration benchmark.
-• mTLS between gateway and backends.
+- Product business logic is owned by external repositories/images.
+- No production deployment, uptime, or load SLO is established.
+- Multi-replica shared rate limiting/state distribution requires deployment-specific infrastructure.
+- Batch tools such as HF provenance scanning and adversarial robustness are intentionally not forced behind synchronous HTTP routes.
 
 ## Reproducibility
-```
-docker compose up -d
-pytest tests/
-```
-Evidence: ARCHITECTURE.md, INTEGRATION_MAP.md, tests/
 
-## References
-[1] OWASP API Security Top 10 · [2] FastAPI docs · [3] OWASP Top 10 for LLM Apps · [4] MITRE ATLAS · [5] NIST AI RMF 1.0 · [6] Docker network security
+```bash
+git clone https://github.com/poojakira/unified-ml-security-platform.git
+cd unified-ml-security-platform
+git checkout 01e58ba257764e47e230a3eecd5a821bb85e7985
+python -m pip install -e ".[dev]"
+pytest tests/ -q --cov=. --cov-report=term
+docker compose config
+docker compose -f docker-compose.prod.yml config
+```
+
+Expected core Python evidence: **67 passed**, **56.89% coverage**.
