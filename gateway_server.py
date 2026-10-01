@@ -38,7 +38,9 @@ API_KEY_NAME = "X-API-Key"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 GATEWAY_VERSION = "1.0.0"
-MAX_PROXY_BODY_BYTES = int(os.environ.get("GATEWAY_MAX_BODY_BYTES", str(2 * 1024 * 1024)))
+MAX_PROXY_BODY_BYTES = int(
+    os.environ.get("GATEWAY_MAX_BODY_BYTES", str(2 * 1024 * 1024))
+)
 GATEWAY_RATE_LIMIT_RPM = int(os.environ.get("GATEWAY_RATE_LIMIT_RPM", "300"))
 GATEWAY_MAX_CONCURRENT_CORRELATIONS = int(
     os.environ.get("GATEWAY_MAX_CONCURRENT_CORRELATIONS", "8")
@@ -72,12 +74,14 @@ SERVICE_KEY_ENV = {
     "model_privacy": "MODEL_PRIVACY_API_KEY",
 }
 
+
 def _service_key(service: str) -> str:
     env_name = SERVICE_KEY_ENV[service]
     value = os.environ.get(env_name, "")
     if not value or len(value) < 32:
         raise RuntimeError(f"{env_name} must be configured with at least 32 characters")
     return value
+
 
 # Validate service credentials at startup so the gateway can never come up in a
 # partially authenticated state.
@@ -95,7 +99,9 @@ async def _read_bounded_body(request: Request) -> bytes:
             if int(declared) > MAX_PROXY_BODY_BYTES:
                 raise HTTPException(status_code=413, detail="Request body too large")
         except ValueError as exc:
-            raise HTTPException(status_code=400, detail="Invalid Content-Length header") from exc
+            raise HTTPException(
+                status_code=400, detail="Invalid Content-Length header"
+            ) from exc
 
     chunks: list[bytes] = []
     total = 0
@@ -130,7 +136,9 @@ async def lifespan(app: FastAPI):
     await app.state.http_client.aclose()
 
 
-app = FastAPI(title="MLSec Platform Gateway", version=GATEWAY_VERSION, lifespan=lifespan)
+app = FastAPI(
+    title="MLSec Platform Gateway", version=GATEWAY_VERSION, lifespan=lifespan
+)
 
 
 def _consume_rate_limit(identity: str) -> bool:
@@ -147,18 +155,21 @@ def _consume_rate_limit(identity: str) -> bool:
         return False
     bucket.append(now)
     if len(_rate_windows) > 4096:
-        stale = [key for key, values in _rate_windows.items() if not values or values[-1] <= cutoff]
+        stale = [
+            key
+            for key, values in _rate_windows.items()
+            if not values or values[-1] <= cutoff
+        ]
         for key in stale[:1024]:
             _rate_windows.pop(key, None)
     return True
 
 
-app.add_middleware(RequestBodyLimit, max_bytes=MAX_PROXY_BODY_BYTES)
-
-
 @app.middleware("http")
 async def security_boundary(request: Request, call_next):
     if request.url.path != "/health":
+        # Consume the peer budget before credential validation so rotating
+        # invalid API keys cannot evade the outer abuse-control boundary.
         peer = request.client.host if request.client else "unknown"
         identity = hashlib.sha256(peer.encode("utf-8")).hexdigest()[:32]
         if not _consume_rate_limit(identity):
@@ -167,6 +178,14 @@ async def security_boundary(request: Request, call_next):
                 content={"detail": "Rate limit exceeded"},
                 headers={"Retry-After": "60"},
             )
+
+        # Authenticate after the peer abuse budget is consumed. Route
+        # dependencies retain the same key check as defense in depth.
+        supplied_key = request.headers.get(API_KEY_NAME, "")
+        if not supplied_key or not hmac.compare_digest(
+            supplied_key.encode("utf-8"), GATEWAY_API_KEY.encode("utf-8")
+        ):
+            return JSONResponse(status_code=401, content={"detail": "Invalid API key"})
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
@@ -175,9 +194,17 @@ async def security_boundary(request: Request, call_next):
     return response
 
 
+# Added after the HTTP security middleware so Starlette places the byte-limit
+# middleware outermost. Oversized bodies are rejected before authentication,
+# JSON parsing, rate-window mutation, or downstream proxy buffering.
+app.add_middleware(RequestBodyLimit, max_bytes=MAX_PROXY_BODY_BYTES)
+
+
 async def verify_api_key(api_key: str = Depends(api_key_header)):
     """Authenticate the external caller without exposing key-comparison timing."""
-    if not api_key or not hmac.compare_digest(api_key.encode("utf-8"), GATEWAY_API_KEY.encode("utf-8")):
+    if not api_key or not hmac.compare_digest(
+        api_key.encode("utf-8"), GATEWAY_API_KEY.encode("utf-8")
+    ):
         raise HTTPException(status_code=401, detail="Invalid API key")
     return api_key
 
@@ -216,7 +243,9 @@ async def correlate(
     """
     content = payload.get("content")
     if not isinstance(content, str) or not content or len(content) > 200_000:
-        raise HTTPException(status_code=422, detail="content must be a non-empty string <= 200000 chars")
+        raise HTTPException(
+            status_code=422, detail="content must be a non-empty string <= 200000 chars"
+        )
 
     await _correlate_slots.acquire()
     try:
@@ -258,7 +287,10 @@ async def correlate(
 
         findings = sorted(
             merged.values(),
-            key=lambda f: (_SEVERITY_RANK.get(f.get("severity"), 0), len(f["observed_by"])),
+            key=lambda f: (
+                _SEVERITY_RANK.get(f.get("severity"), 0),
+                len(f["observed_by"]),
+            ),
             reverse=True,
         )
         return {
@@ -333,7 +365,8 @@ async def proxy(
             headers={
                 key: value
                 for key, value in resp.headers.items()
-                if key.lower() in {"content-type", "cache-control", "retry-after", "x-request-id"}
+                if key.lower()
+                in {"content-type", "cache-control", "retry-after", "x-request-id"}
             },
         )
     except HTTPException:
