@@ -18,8 +18,8 @@ import pytest
 from httpx import AsyncClient, ASGITransport
 
 # A known, valid API key used consistently across this module's fixtures.
-VALID_API_KEY = "test-api-key-that-is-at-least-32-characters-long"
-INVALID_API_KEY = "invalid-key-definitely-wrong-and-short"
+VALID_API_KEY = "test-valid-key-" + ("x" * 32)
+INVALID_API_KEY = "test-invalid-key-" + ("y" * 32)
 
 
 def _load_gateway(monkeypatch):

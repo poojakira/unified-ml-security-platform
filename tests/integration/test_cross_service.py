@@ -16,7 +16,7 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 
-TEST_API_KEY = "test-integration-key-32-chars-long!!"
+TEST_API_KEY = "test-cross-service-key-" + ("x" * 32)
 
 
 @pytest.fixture()
@@ -65,7 +65,7 @@ class TestAuthenticationEnforcement:
     def test_rejects_invalid_api_key(self, client, method, path):
         """Every protected endpoint returns 401 with wrong API key."""
         response = client.request(
-            method, path, headers={"X-API-Key": "wrong-key-12345678901234567890"}
+            method, path, headers={"X-API-Key": ("test-invalid-cross-service-key-" + ("y" * 32))}
         )
         assert response.status_code == 401
 

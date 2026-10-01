@@ -119,7 +119,7 @@ Batch/release gates are intentionally outside the synchronous proxy:
 
 6. **Shared detection contract**: Any service can use the `attacks/attack_v19_detector.py` module to classify findings against MITRE ATT&CK v19 (Enterprise, Mobile, ICS matrices). The detector uses regex-based pattern matching with 22 seed rules and returns structured detections with tactic, technique, sub-technique, confidence, evidence, and recommended actions.
 
-7. **CI validation**: On every push, GitHub Actions runs lint, type checking, unit tests, local contract-stub tests, topology integration tests, and blocking security/dependency scans. Those local stub checks prove routing/topology contracts only, never downstream product functionality.
+7. **CI validation**: GitHub Actions is manual-dispatch only for zero-cost operation. When explicitly started, it runs lint, type checking, unit tests, local contract-stub tests, topology integration tests, and blocking security/dependency scans. Those local stub checks prove routing/topology contracts only, never downstream product functionality.
 
 ## Design Decisions and Trade-offs
 
