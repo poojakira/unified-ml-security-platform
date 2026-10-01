@@ -1,9 +1,6 @@
 name: Signed Release
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
       version:
