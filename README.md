@@ -24,7 +24,7 @@ A deployment control plane for the long-running HTTP security services that expo
 
 Reproduced on current `main` (Python 3.12).
 
-| Metric | Current verified result |
+| Metric | Verified snapshot value |
 |---|---:|
 | Core unit tests | 76 passing in current Python 3.12 CI; separate contract-stub and integration topology jobs also green |
 | Statement coverage | 95.78% in current Python 3.12 unit-test job |
