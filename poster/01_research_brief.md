@@ -27,9 +27,9 @@ A real authenticated FastAPI control plane with **four production HTTP service s
 5. Require explicit external product images in production Compose.
 6. Validate unit, security, integration, image-build, and deployment-contract behavior in CI.
 
-## Current Verified Evidence
+## Verified Evidence at Poster Snapshot
 
-Current-main Python 3.12 unit-test job reports:
+The cited Python 3.12 unit-test snapshot reports:
 
 - **76 tests passed**.
 - **95.78% statement coverage**.
