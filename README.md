@@ -26,8 +26,8 @@ Reproduced on current `main` (Python 3.12).
 
 | Metric | Current verified result |
 |---|---:|
-| Core unit tests | 67 passing in current Python 3.12 CI; separate contract-stub and integration topology jobs also green |
-| Statement coverage | 56.89% in current Python 3.12 unit-test job |
+| Core unit tests | 76 passing in current Python 3.12 CI; separate contract-stub and integration topology jobs also green |
+| Statement coverage | 95.78% in current Python 3.12 unit-test job |
 | HTTP scan services | 4 (mcp_gateway, llm_redteam, dataset_poison, model_privacy) |
 | Health-only stub services | 2 (hf_scanner, adv_ml) — batch tools, not proxied |
 | Shared auth | constant-time API key, fail-closed (401/503) |
@@ -129,7 +129,7 @@ Batch/release gates are intentionally outside the synchronous proxy:
 
 **Separate external and service credentials**: the gateway authenticates external callers with `GATEWAY_API_KEY` and injects a distinct credential for each routed backend (`MCP_GATEWAY_API_KEY`, `LLM_REDTEAM_API_KEY`, `DATASET_POISON_API_KEY`). Caller `Authorization`, `Cookie`, and `X-API-Key` headers are not trusted across the upstream boundary.
 
-**Coverage threshold at 25% (unit) and 60% (product)**: The repository is primarily an integration spec, not a product implementation. The 25% overall threshold reflects that much of the code is stubs. Individual product test directories are held to 60%.
+**Coverage threshold at 95% (application code) and 60% (product contract suites)**: The repository is primarily an integration spec, not a product implementation. Application coverage excludes test modules and now enforces a 95% floor across the measured application surface. Individual product contract suites remain held to 60%.
 
 **PulseNet is not part of the active production compose contract**: its archived research repository remains independently reviewable, but it is not routed as an active platform service.
 

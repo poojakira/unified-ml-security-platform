@@ -1,6 +1,6 @@
 # Research Brief - Poster 07
 
-> Evidence status: Refreshed against current code snapshot `01e58ba257764e47e230a3eecd5a821bb85e7985` and successful CI/CD run `36783840279` on 2026-09-30.
+> Evidence status: Refreshed against current code snapshot `26aace469f65e46cbbf38525aa0a36f6eca6d53b` and successful CI/CD run `36944325113` on 2026-09-30.
 
 ## Repository
 
@@ -31,8 +31,8 @@ A real authenticated FastAPI control plane with **four production HTTP service s
 
 Current-main Python 3.12 unit-test job reports:
 
-- **67 tests passed**.
-- **56.89% statement coverage**.
+- **76 tests passed**.
+- **95.78% statement coverage**.
 - Separate local contract-stub health jobs for MCP, LLM red-team, dataset-poison, and model-privacy completed successfully.
 - Integration topology tests completed successfully.
 - Security scan, dependency audit, production Compose validation, and gateway image build/push job completed successfully.
@@ -57,11 +57,11 @@ The previous poster said the gateway fronted "three real backends." That is not 
 ```bash
 git clone https://github.com/poojakira/unified-ml-security-platform.git
 cd unified-ml-security-platform
-git checkout 01e58ba257764e47e230a3eecd5a821bb85e7985
+git checkout 26aace469f65e46cbbf38525aa0a36f6eca6d53b
 python -m pip install -e ".[dev]"
 pytest tests/ -q --cov=. --cov-report=term
 docker compose config
 docker compose -f docker-compose.prod.yml config
 ```
 
-Expected core Python evidence: **67 passed**, **56.89% coverage**.
+Expected core Python evidence: **76 passed**, **95.78% coverage**.
