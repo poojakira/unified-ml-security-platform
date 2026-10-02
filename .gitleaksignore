@@ -1,4 +1,7 @@
-# Fingerprint-scoped historical triage only. Do not add broad path or rule exclusions.
+# Exact historical findings reviewed during the 2026-10-01 production-hardening audit.
+# These fingerprints are limited to verified test/example/dependency fixtures.
+# mlsec-dashboards also includes the explicitly revoked legacy local dashboard key.
+# New findings, new commits, or changed lines are not suppressed.
 189b77335523ca94a9a7d09e56cb4104fa0bd781:RUNBOOK.md:curl-auth-header:111
 189b77335523ca94a9a7d09e56cb4104fa0bd781:RUNBOOK.md:curl-auth-header:119
 189b77335523ca94a9a7d09e56cb4104fa0bd781:RUNBOOK.md:curl-auth-header:241
