@@ -1,0 +1,9 @@
+# Fingerprint-scoped historical triage only. Do not add broad path or rule exclusions.
+189b77335523ca94a9a7d09e56cb4104fa0bd781:RUNBOOK.md:curl-auth-header:111
+189b77335523ca94a9a7d09e56cb4104fa0bd781:RUNBOOK.md:curl-auth-header:119
+189b77335523ca94a9a7d09e56cb4104fa0bd781:RUNBOOK.md:curl-auth-header:241
+3fe8d69d41618b5c75f3a1e39ec01c2f3245b952:README.md:curl-auth-header:36
+77915d32f6905ad8cdf6462e6c7595d92bf8a82c:tests/test_gateway.py:generic-api-key:20
+8d2a130dafe01eaf57c4430b6293db64922a14e7:tests/test_gateway.py:generic-api-key:24
+afa5f1050ac1f3435820a70191012cf98e5a6902:tests/integration/test_cross_service.py:generic-api-key:62
+bc812c168a698f24bc68c63fea597061d0c60fe3:.github/workflows/ci.yml:generic-api-key:93
