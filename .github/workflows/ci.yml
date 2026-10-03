@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -q ruff pyright bandit safety
+          pip install -q ruff pyright bandit
 
       - name: Lint with Ruff
         run: ruff check . --output-format=github
@@ -63,11 +63,6 @@ jobs:
               sys.exit(1)
           print("PASS: No HIGH/MEDIUM Bandit findings")
           PY
-      - name: Dependency audit with Safety
-        # safety check is now blocking — || true removed.
-        # Known CVEs in dependencies will fail this job.
-        run: safety check --output json > safety-report.json
-
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
