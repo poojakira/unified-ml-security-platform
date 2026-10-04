@@ -1,0 +1,35 @@
+{
+  "schema_version": "upstream-product-registry-v1",
+  "generated_for": "unified-ml-security-platform",
+  "products": [
+    {
+      "service": "mcp_gateway",
+      "repository": "poojakira/mcp-agent-security-gateway",
+      "revision": "2c7d0b83fccb6621da653b43f469bfcbeafc114a",
+      "contract": "authenticated HTTP runtime gateway",
+      "bundled": false
+    },
+    {
+      "service": "llm_redteam",
+      "repository": "poojakira/llm-redteam-framework",
+      "revision": "64efeae0fc7188ab47b35e2d5b967823172892c4",
+      "contract": "authenticated /scan service",
+      "bundled": false
+    },
+    {
+      "service": "dataset_poison",
+      "repository": "poojakira/dataset-poisoning-detector",
+      "revision": "6addce132925072d5c6a79a3257ef29d45b7eac4",
+      "contract": "authenticated /scan service",
+      "bundled": false
+    },
+    {
+      "service": "model_privacy",
+      "repository": "poojakira/model-privacy-attacks",
+      "revision": "ea856de3cc6eb6b99296f81cc295434231785b1e",
+      "contract": "authenticated bounded assessment service",
+      "bundled": false
+    }
+  ],
+  "claim_boundary": "Registry pins intended upstream source revisions. It does not prove those revisions are deployed behind the gateway."
+}
