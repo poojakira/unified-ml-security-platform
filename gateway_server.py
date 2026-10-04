@@ -21,6 +21,7 @@ from fastapi.responses import JSONResponse
 from fastapi.security import APIKeyHeader
 
 from products.common.body_limit import RequestBodyLimit
+from product_registry import release_inventory
 
 # External caller authentication is intentionally separate from service-to-service
 # credentials. Reusing one universal key across every backend turns compromise of
@@ -89,6 +90,9 @@ for _service_name in SERVICE_URLS:
     _service_key(_service_name)
 
 SERVICES = SERVICE_URLS
+_PRODUCT_RELEASES = release_inventory(
+    require_pinned=os.environ.get("PLATFORM_ENV", "").lower() == "production"
+)
 
 
 async def _read_bounded_body(request: Request) -> bytes:
@@ -222,6 +226,7 @@ async def status(api_key: str = Depends(verify_api_key)):
         "status": "operational",
         "services": sorted(SERVICE_URLS),
         "total": len(SERVICE_URLS),
+        "product_releases": _PRODUCT_RELEASES,
     }
 
 
