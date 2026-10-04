@@ -344,6 +344,8 @@ class TestCorrelateEndpoint:
         assert resp.status_code == 200
         data = resp.json()
         # shared finding merged into ONE entry; unique stays separate => 2 total.
+        assert data["complete"] is True
+        assert data["correlation_mode"] == "fail_closed"
         assert data["correlated_finding_count"] == 2
         assert data["services_queried"] == 4
         top = data["findings"][0]  # highest severity first
@@ -369,5 +371,45 @@ class TestCorrelateEndpoint:
             resp = client.post(
                 "/correlate", json={"content": "benign"}, headers=auth_headers
             )
+        assert resp.status_code == 503
+        body = resp.json()
+        assert body["complete"] is False
+        assert body["correlation_mode"] == "fail_closed"
+        assert body["service_status"]["model_privacy"] == "unavailable"
+
+
+    def test_best_effort_mode_marks_partial_result_without_hiding_gap(
+        self, client, gateway, auth_headers
+    ):
+        import httpx as _httpx
+
+        def _post(url, **kwargs):
+            if "model-privacy" in url:
+                raise _httpx.ConnectError("down")
+            return SimpleNamespace(
+                status_code=200,
+                headers={"content-type": "application/json"},
+                json=lambda: {"source": "svc", "finding_count": 0, "findings": []},
+            )
+
+        original = gateway._CORRELATION_MODE
+        gateway._CORRELATION_MODE = "best_effort"
+        try:
+            with patch.object(
+                gateway.app.state.http_client,
+                "post",
+                AsyncMock(side_effect=_post),
+            ):
+                resp = client.post(
+                    "/correlate",
+                    json={"content": "benign"},
+                    headers=auth_headers,
+                )
+        finally:
+            gateway._CORRELATION_MODE = original
+
         assert resp.status_code == 200
-        assert resp.json()["service_status"]["model_privacy"] == "unavailable"
+        body = resp.json()
+        assert body["complete"] is False
+        assert body["correlation_mode"] == "best_effort"
+        assert body["service_status"]["model_privacy"] == "unavailable"
