@@ -46,6 +46,9 @@ GATEWAY_RATE_LIMIT_RPM = int(os.environ.get("GATEWAY_RATE_LIMIT_RPM", "300"))
 GATEWAY_MAX_CONCURRENT_CORRELATIONS = int(
     os.environ.get("GATEWAY_MAX_CONCURRENT_CORRELATIONS", "8")
 )
+_CORRELATION_MODE = os.environ.get(
+    "GATEWAY_CORRELATION_MODE", "fail_closed"
+).strip().lower()
 _rate_windows: dict[str, list[float]] = {}
 if MAX_PROXY_BODY_BYTES < 1024 or MAX_PROXY_BODY_BYTES > 16 * 1024 * 1024:
     raise RuntimeError("GATEWAY_MAX_BODY_BYTES must be between 1 KiB and 16 MiB")
@@ -53,6 +56,10 @@ if GATEWAY_RATE_LIMIT_RPM < 1 or GATEWAY_RATE_LIMIT_RPM > 10000:
     raise RuntimeError("GATEWAY_RATE_LIMIT_RPM must be between 1 and 10000")
 if GATEWAY_MAX_CONCURRENT_CORRELATIONS < 1 or GATEWAY_MAX_CONCURRENT_CORRELATIONS > 128:
     raise RuntimeError("GATEWAY_MAX_CONCURRENT_CORRELATIONS must be between 1 and 128")
+if _CORRELATION_MODE not in {"fail_closed", "best_effort"}:
+    raise RuntimeError(
+        "GATEWAY_CORRELATION_MODE must be 'fail_closed' or 'best_effort'"
+    )
 
 _correlate_slots = asyncio.Semaphore(GATEWAY_MAX_CONCURRENT_CORRELATIONS)
 
@@ -267,9 +274,8 @@ async def correlate(
                     timeout=15.0,
                 )
             except httpx.HTTPError:
-                # A single service being unavailable must not fail the whole
-                # correlation; record it and continue (partial-result, fail-open
-                # for availability but every finding is still authenticated).
+                # Preserve partial evidence, but never silently present it as a
+                # complete security decision. fail_closed is the default.
                 service_status[service] = "unavailable"
                 continue
 
@@ -298,13 +304,22 @@ async def correlate(
             ),
             reverse=True,
         )
-        return {
+        complete = (
+            len(service_status) == len(SERVICE_URLS)
+            and all(value == "ok" for value in service_status.values())
+        )
+        result = {
             "content_scanned": True,
+            "complete": complete,
+            "correlation_mode": _CORRELATION_MODE,
             "services_queried": len(SERVICE_URLS),
             "service_status": service_status,
             "correlated_finding_count": len(findings),
             "findings": findings,
         }
+        if not complete and _CORRELATION_MODE == "fail_closed":
+            return JSONResponse(status_code=503, content=result)
+        return result
     finally:
         _correlate_slots.release()
 
