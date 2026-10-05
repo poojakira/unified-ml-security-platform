@@ -26,8 +26,8 @@ Reproduced on current `main` (Python 3.12).
 
 | Metric | Verified snapshot value |
 |---|---:|
-| Core unit tests | 76 passing in current Python 3.12 CI; separate contract-stub and integration topology jobs also green |
-| Statement coverage | 95.78% in current Python 3.12 unit-test job |
+| Core unit tests | 82 passing in current Python 3.12 CI; separate contract-stub and integration topology jobs also green |
+| Statement coverage | 95.96% in current Python 3.12 unit-test job |
 | HTTP scan services | 4 (mcp_gateway, llm_redteam, dataset_poison, model_privacy) |
 | Health-only stub services | 2 (hf_scanner, adv_ml) — batch tools, not proxied |
 | Shared auth | constant-time API key, fail-closed (401/503) |

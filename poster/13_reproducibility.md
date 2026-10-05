@@ -1,19 +1,19 @@
 # Reproduce the Work - Poster 07
 
 **Repository:** `github.com/poojakira/unified-ml-security-platform`
-**Verified code snapshot:** `26aace469f65e46cbbf38525aa0a36f6eca6d53b`
-**CI/CD run:** `36944325113`
+**Verified code snapshot:** `d54336b5f5f058a4d756bf2c7a023ad8510bbd6f`
+**CI/CD run:** `37173681100`
 
 ```bash
 git clone https://github.com/poojakira/unified-ml-security-platform.git
 cd unified-ml-security-platform
-git checkout 26aace469f65e46cbbf38525aa0a36f6eca6d53b
+git checkout d54336b5f5f058a4d756bf2c7a023ad8510bbd6f
 python -m pip install -e ".[dev]"
 pytest tests/ -q
 docker compose config
 docker compose -f docker-compose.prod.yml config
 ```
 
-Expected core unit evidence: **76 passed**, **95.78% statement coverage**.
+Expected core unit evidence: **82 passed**, **95.96% statement coverage**.
 
 Interpretation rule: local stub health checks validate the gateway/topology contract only. They do not establish downstream product functionality.
