@@ -1,6 +1,6 @@
 # Research Brief - Poster 07
 
-> Evidence status: Refreshed against verified code snapshot `26aace469f65e46cbbf38525aa0a36f6eca6d53b` and successful CI/CD run `36944325113` on 2026-09-30.
+> Evidence status: Refreshed against verified code snapshot `d54336b5f5f058a4d756bf2c7a023ad8510bbd6f` and successful CI/CD run `37173681100` on 2026-10-04.
 
 ## Repository
 
@@ -57,7 +57,7 @@ The previous poster said the gateway fronted "three real backends." That is not 
 ```bash
 git clone https://github.com/poojakira/unified-ml-security-platform.git
 cd unified-ml-security-platform
-git checkout 26aace469f65e46cbbf38525aa0a36f6eca6d53b
+git checkout d54336b5f5f058a4d756bf2c7a023ad8510bbd6f
 python -m pip install -e ".[dev]"
 pytest tests/ -q --cov=. --cov-report=term
 docker compose config
