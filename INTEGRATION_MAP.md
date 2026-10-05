@@ -10,4 +10,4 @@
 | Model privacy | `poojakira/model-privacy-attacks` | Attack configuration input, privacy-risk report output |
 | Secure RUL forecasting | `poojakira/PulseNet-RUL-Forecasting` | Forecast request input, authenticated prediction and audit output |
 
-No repository is vendored here. A future runnable integration layer must pin service versions and prove health checks in CI before claiming platform readiness.
+No repository is vendored here. The current integration layer uses explicit service contracts and CI-validated health/topology checks; production use still requires immutable product-image revisions and each product's own release evidence before claiming end-to-end readiness.
