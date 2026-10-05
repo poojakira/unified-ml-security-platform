@@ -14,6 +14,6 @@ docker compose config
 docker compose -f docker-compose.prod.yml config
 ```
 
-Expected core unit evidence: **76 passed**, **95.78% statement coverage**.
+Expected core unit evidence: **82 passed**, **95.96% statement coverage**.
 
 Interpretation rule: local stub health checks validate the gateway/topology contract only. They do not establish downstream product functionality.
