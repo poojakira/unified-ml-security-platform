@@ -1,6 +1,6 @@
 # Claim Ledger - Poster 07
 
-> Verified code snapshot: `26aace469f65e46cbbf38525aa0a36f6eca6d53b`; successful CI/CD run `36944325113`, 2026-09-30.
+> Verified code snapshot: `d54336b5f5f058a4d756bf2c7a023ad8510bbd6f`; successful CI/CD run `37173681100`, 2026-10-04.
 
 | # | Claim | Classification | Evidence |
 |---|---|---|---|
