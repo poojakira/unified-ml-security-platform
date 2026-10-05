@@ -31,8 +31,8 @@ A real authenticated FastAPI control plane with **four production HTTP service s
 
 The cited Python 3.12 unit-test snapshot reports:
 
-- **76 tests passed**.
-- **95.78% statement coverage**.
+- **82 tests passed**.
+- **95.96% statement coverage**.
 - Separate local contract-stub health jobs for MCP, LLM red-team, dataset-poison, and model-privacy completed successfully.
 - Integration topology tests completed successfully.
 - Security scan, dependency audit, production Compose validation, and gateway image build/push job completed successfully.
@@ -64,4 +64,4 @@ docker compose config
 docker compose -f docker-compose.prod.yml config
 ```
 
-Expected core Python evidence: **76 passed**, **95.78% coverage**.
+Expected core Python evidence: **76 passed**, **95.96% coverage**.
