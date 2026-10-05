@@ -5,8 +5,8 @@
 
 | Metric | Verified snapshot value |
 |---|---:|
-| Core Python tests passed | **76** |
-| Core statement coverage | **95.78%** |
+| Core Python tests passed | **82** |
+| Core statement coverage | **95.96%** |
 | Production synchronous service slots | **4** |
 | Local product topology | **Contract stubs** |
 | Production product images | **Externally supplied; stubs not published** |
