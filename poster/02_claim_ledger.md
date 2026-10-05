@@ -4,8 +4,8 @@
 
 | # | Claim | Classification | Evidence |
 |---|---|---|---|
-| 1 | 76 core Python tests pass | VERIFIED_AT_SNAPSHOT | Cited Python 3.12 unit-test snapshot. |
-| 2 | 95.78% statement coverage | VERIFIED_AT_SNAPSHOT | Same unit job. |
+| 1 | 82 core Python tests pass | VERIFIED_AT_SNAPSHOT | Cited Python 3.12 unit-test snapshot. |
+| 2 | 95.96% statement coverage | VERIFIED_AT_SNAPSHOT | Same unit job. |
 | 3 | Authenticated gateway routes four production HTTP service slots | VERIFIED_AT_SNAPSHOT | Gateway/README/production Compose contract at the cited snapshot. |
 | 4 | Local Compose product containers are contract stubs | VERIFIED_AT_SNAPSHOT | `docker-compose.yml`, README, CI stub-health jobs. |
 | 5 | Production Compose requires externally supplied product images | VERIFIED_AT_SNAPSHOT | `docker-compose.prod.yml`; local stubs are not built there. |
