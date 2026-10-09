@@ -29,9 +29,7 @@ class Handler(BaseHTTPRequestHandler):
                 },
             )
             return
-        self._send(
-            501, {"error": "implementation_not_bundled", "service": SERVICE_NAME}
-        )
+        self._send(501, {"error": "implementation_not_bundled", "service": SERVICE_NAME})
 
     def log_message(self, format: str, *args: object) -> None:
         return

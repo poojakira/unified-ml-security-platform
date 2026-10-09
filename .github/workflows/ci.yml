@@ -33,10 +33,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -q ruff pyright bandit
+          pip install -q ruff==0.8.4 pyright bandit
 
       - name: Lint with Ruff
-        run: ruff check . --output-format=github
+        run: |
+          ruff check . --output-format=github
+          ruff format --check .
 
       - name: Type check with Pyright
         run: pyright

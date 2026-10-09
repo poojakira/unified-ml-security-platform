@@ -50,9 +50,7 @@ class AttackV19DetectorTests(unittest.TestCase):
 
         self.assertEqual(0, exit_code)
         result = json.loads(stdout.getvalue())
-        self.assertEqual(
-            "Network Service Discovery T1046", result["detections"][0]["technique"]
-        )
+        self.assertEqual("Network Service Discovery T1046", result["detections"][0]["technique"])
 
     def test_main_text_reads_file(self):
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:

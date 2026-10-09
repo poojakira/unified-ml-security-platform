@@ -39,16 +39,12 @@ API_KEY_NAME = "X-API-Key"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 GATEWAY_VERSION = "1.0.0"
-MAX_PROXY_BODY_BYTES = int(
-    os.environ.get("GATEWAY_MAX_BODY_BYTES", str(2 * 1024 * 1024))
-)
+MAX_PROXY_BODY_BYTES = int(os.environ.get("GATEWAY_MAX_BODY_BYTES", str(2 * 1024 * 1024)))
 GATEWAY_RATE_LIMIT_RPM = int(os.environ.get("GATEWAY_RATE_LIMIT_RPM", "300"))
 GATEWAY_MAX_CONCURRENT_CORRELATIONS = int(
     os.environ.get("GATEWAY_MAX_CONCURRENT_CORRELATIONS", "8")
 )
-_CORRELATION_MODE = os.environ.get(
-    "GATEWAY_CORRELATION_MODE", "fail_closed"
-).strip().lower()
+_CORRELATION_MODE = os.environ.get("GATEWAY_CORRELATION_MODE", "fail_closed").strip().lower()
 _rate_windows: dict[str, list[float]] = {}
 if MAX_PROXY_BODY_BYTES < 1024 or MAX_PROXY_BODY_BYTES > 16 * 1024 * 1024:
     raise RuntimeError("GATEWAY_MAX_BODY_BYTES must be between 1 KiB and 16 MiB")
@@ -57,9 +53,7 @@ if GATEWAY_RATE_LIMIT_RPM < 1 or GATEWAY_RATE_LIMIT_RPM > 10000:
 if GATEWAY_MAX_CONCURRENT_CORRELATIONS < 1 or GATEWAY_MAX_CONCURRENT_CORRELATIONS > 128:
     raise RuntimeError("GATEWAY_MAX_CONCURRENT_CORRELATIONS must be between 1 and 128")
 if _CORRELATION_MODE not in {"fail_closed", "best_effort"}:
-    raise RuntimeError(
-        "GATEWAY_CORRELATION_MODE must be 'fail_closed' or 'best_effort'"
-    )
+    raise RuntimeError("GATEWAY_CORRELATION_MODE must be 'fail_closed' or 'best_effort'")
 
 _correlate_slots = asyncio.Semaphore(GATEWAY_MAX_CONCURRENT_CORRELATIONS)
 
@@ -110,9 +104,7 @@ async def _read_bounded_body(request: Request) -> bytes:
             if int(declared) > MAX_PROXY_BODY_BYTES:
                 raise HTTPException(status_code=413, detail="Request body too large")
         except ValueError as exc:
-            raise HTTPException(
-                status_code=400, detail="Invalid Content-Length header"
-            ) from exc
+            raise HTTPException(status_code=400, detail="Invalid Content-Length header") from exc
 
     chunks: list[bytes] = []
     total = 0
@@ -147,9 +139,7 @@ async def lifespan(app: FastAPI):
     await app.state.http_client.aclose()
 
 
-app = FastAPI(
-    title="MLSec Platform Gateway", version=GATEWAY_VERSION, lifespan=lifespan
-)
+app = FastAPI(title="MLSec Platform Gateway", version=GATEWAY_VERSION, lifespan=lifespan)
 
 
 def _consume_rate_limit(identity: str) -> bool:
@@ -166,11 +156,7 @@ def _consume_rate_limit(identity: str) -> bool:
         return False
     bucket.append(now)
     if len(_rate_windows) > 4096:
-        stale = [
-            key
-            for key, values in _rate_windows.items()
-            if not values or values[-1] <= cutoff
-        ]
+        stale = [key for key, values in _rate_windows.items() if not values or values[-1] <= cutoff]
         for key in stale[:1024]:
             _rate_windows.pop(key, None)
     return True
@@ -286,9 +272,7 @@ async def correlate(
 
             for finding in resp.json().get("findings", []):
                 # De-duplicate on the identifying fields; merge observing sources.
-                key = "|".join(
-                    str(finding.get(f)) for f in ("rule_id", "technique", "title")
-                )
+                key = "|".join(str(finding.get(f)) for f in ("rule_id", "technique", "title"))
                 if key in merged:
                     merged[key]["observed_by"].append(finding.get("source"))
                 else:
@@ -304,9 +288,8 @@ async def correlate(
             ),
             reverse=True,
         )
-        complete = (
-            len(service_status) == len(SERVICE_URLS)
-            and all(value == "ok" for value in service_status.values())
+        complete = len(service_status) == len(SERVICE_URLS) and all(
+            value == "ok" for value in service_status.values()
         )
         result = {
             "content_scanned": True,
@@ -342,12 +325,8 @@ async def scan_model(
     raise HTTPException(status_code=503, detail="model_scanner_not_bundled")
 
 
-@app.api_route(
-    "/{service}/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
-)
-async def proxy(
-    service: str, path: str, request: Request, api_key: str = Depends(verify_api_key)
-):
+@app.api_route("/{service}/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def proxy(service: str, path: str, request: Request, api_key: str = Depends(verify_api_key)):
     if service not in SERVICE_URLS:
         raise HTTPException(status_code=404, detail="Unknown service")
     if ".." in path.split("/") or "://" in path or "\\" in path:
@@ -385,8 +364,7 @@ async def proxy(
             headers={
                 key: value
                 for key, value in resp.headers.items()
-                if key.lower()
-                in {"content-type", "cache-control", "retry-after", "x-request-id"}
+                if key.lower() in {"content-type", "cache-control", "retry-after", "x-request-id"}
             },
         )
     except HTTPException:

@@ -32,7 +32,15 @@ CHECKS: tuple[Check, ...] = (
         repo_id="repo1-mcp-agent-security-gateway",
         repo_dir="repo1-mcp",
         purpose="Prompt-injection normalization and BCC header bypass regression tests.",
-        command=["py", "-3.12", "-m", "pytest", "tests/test_normalization_pipeline.py", "tests/test_bcc_normalization.py", "-q"],
+        command=[
+            "py",
+            "-3.12",
+            "-m",
+            "pytest",
+            "tests/test_normalization_pipeline.py",
+            "tests/test_bcc_normalization.py",
+            "-q",
+        ],
     ),
     Check(
         repo_id="repo2-hf-model-provenance-scanner",
@@ -44,14 +52,30 @@ CHECKS: tuple[Check, ...] = (
         repo_id="repo3-PulseNet-RUL-Forecasting",
         repo_dir="repo3-pulsenet",
         purpose="JWT secret hardening and audit-log integrity regression tests.",
-        command=["py", "-3.12", "-m", "pytest", "tests/test_auth_secret.py", "tests/test_extra_coverage.py::TestAuditLogger", "-q"],
+        command=[
+            "py",
+            "-3.12",
+            "-m",
+            "pytest",
+            "tests/test_auth_secret.py",
+            "tests/test_extra_coverage.py::TestAuditLogger",
+            "-q",
+        ],
         env={"PULSENET_JWT_SECRET": "portfolio-measurement-secret-32bytes-minimum"},
     ),
     Check(
         repo_id="repo4-dataset-poisoning-detector",
         repo_dir="repo4-poison",
         purpose="False-positive budget and slow-drift poisoning detection regression tests.",
-        command=["py", "-3.12", "-m", "pytest", "tests/test_drift.py", "tests/test_fp_budget.py", "-q"],
+        command=[
+            "py",
+            "-3.12",
+            "-m",
+            "pytest",
+            "tests/test_drift.py",
+            "tests/test_fp_budget.py",
+            "-q",
+        ],
     ),
     Check(
         repo_id="repo5-llm-redteam-framework",
@@ -69,7 +93,15 @@ CHECKS: tuple[Check, ...] = (
         repo_id="repo7-adversarial-ml-lab",
         repo_dir="repo7-adv",
         purpose="Benchmark signing and verification integrity tests.",
-        command=["py", "-3.12", "-m", "pytest", "tests/test_ci_signing.py", "tests/test_benchmark_verify.py", "-q"],
+        command=[
+            "py",
+            "-3.12",
+            "-m",
+            "pytest",
+            "tests/test_ci_signing.py",
+            "tests/test_benchmark_verify.py",
+            "-q",
+        ],
     ),
     Check(
         repo_id="repo8-unified-ml-security-platform",
@@ -86,7 +118,9 @@ CHECKS: tuple[Check, ...] = (
     ),
 )
 
-PYTEST_RE = re.compile(r"(?P<summary>(?:\d+\s+passed|\d+\s+failed|\d+\s+skipped|\d+\s+warnings?)[^\n]*)", re.IGNORECASE)
+PYTEST_RE = re.compile(
+    r"(?P<summary>(?:\d+\s+passed|\d+\s+failed|\d+\s+skipped|\d+\s+warnings?)[^\n]*)", re.IGNORECASE
+)
 
 
 def repo_python_command(repo_path: Path, command: list[str]) -> list[str]:
@@ -146,7 +180,9 @@ def run_check(root: Path, check: Check) -> dict[str, object]:
         stderr = exc.stderr or ""
     duration_ms = int((time.perf_counter() - started) * 1000)
     combined = f"{stdout}\n{stderr}"
-    summaries = [match.group("summary").strip("= ").strip() for match in PYTEST_RE.finditer(combined)]
+    summaries = [
+        match.group("summary").strip("= ").strip() for match in PYTEST_RE.finditer(combined)
+    ]
 
     return {
         "repo_id": check.repo_id,
@@ -201,46 +237,61 @@ def write_report(results: list[dict[str, object]], report_path: Path, json_path:
             )
         )
 
-    lines.extend([
-        "",
-        "## Commands Executed",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Commands Executed",
+            "",
+        ]
+    )
     for item in results:
         command = " ".join(str(part) for part in item["command"])
-        lines.extend([
-            f"### {item['repo_id']}",
-            "",
-            f"Working directory: `../{item['repo_dir']}`",
-            "",
-            "```powershell",
-            command,
-            "```",
-            "",
-            f"Exit code: `{item['returncode']}`",
-            "",
-        ])
+        lines.extend(
+            [
+                f"### {item['repo_id']}",
+                "",
+                f"Working directory: `../{item['repo_dir']}`",
+                "",
+                "```powershell",
+                command,
+                "```",
+                "",
+                f"Exit code: `{item['returncode']}`",
+                "",
+            ]
+        )
         if item["stdout_tail"]:
             lines.extend(["Stdout tail:", "", "```text", str(item["stdout_tail"]), "```", ""])
         if item["stderr_tail"]:
             lines.extend(["Stderr tail:", "", "```text", str(item["stderr_tail"]), "```", ""])
 
-    lines.extend([
-        "## Honest Interpretation",
-        "",
-        "Passing these checks means the local branches satisfy focused regression gates selected for this remediation pass. It does not prove the products are unhackable or better than mature commercial platforms.",
-        "",
-        "A legitimate commercial comparison still requires independent benchmark corpora, latency and false-positive measurements on production-like benign traffic, SIEM/telemetry verification, supply-chain evidence, and repeated runs across clean environments.",
-        "",
-    ])
+    lines.extend(
+        [
+            "## Honest Interpretation",
+            "",
+            "Passing these checks means the local branches satisfy focused regression gates selected for this remediation pass. It does not prove the products are unhackable or better than mature commercial platforms.",
+            "",
+            "A legitimate commercial comparison still requires independent benchmark corpora, latency and false-positive measurements on production-like benign traffic, SIEM/telemetry verification, supply-chain evidence, and repeated runs across clean environments.",
+            "",
+        ]
+    )
     report_path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run focused ML-security portfolio measurements.")
-    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[2], help="Directory containing repo1-mcp through repo8-platform.")
-    parser.add_argument("--json", type=Path, default=Path("evidence/portfolio_measurement_2026-07-21.json"))
-    parser.add_argument("--report", type=Path, default=Path("docs/MEASUREMENT_REPORT_2026-07-21.md"))
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=Path(__file__).resolve().parents[2],
+        help="Directory containing repo1-mcp through repo8-platform.",
+    )
+    parser.add_argument(
+        "--json", type=Path, default=Path("evidence/portfolio_measurement_2026-07-21.json")
+    )
+    parser.add_argument(
+        "--report", type=Path, default=Path("docs/MEASUREMENT_REPORT_2026-07-21.md")
+    )
     args = parser.parse_args()
 
     repo8 = Path(__file__).resolve().parents[1]
@@ -268,4 +319,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

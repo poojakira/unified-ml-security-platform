@@ -188,7 +188,7 @@ class TestProxyBehavior:
             status_code=200,
             headers={"content-type": "application/json"},
             json=lambda: {"ok": True},
-            text="{\"ok\":true}",
+            text='{"ok":true}',
         )
         mock_request = AsyncMock(return_value=fake_response)
         with patch.object(gateway.app.state.http_client, "request", mock_request):
@@ -211,8 +211,6 @@ class TestProxyBehavior:
         assert forwarded["x-request-id"] == "req-123"
         assert "authorization" not in forwarded
         assert "cookie" not in forwarded
-
-
 
     def test_oversized_proxy_body_rejected_before_upstream(self, client, auth_headers, gateway):
         body = b"A" * (gateway.MAX_PROXY_BODY_BYTES + 1)
@@ -252,9 +250,7 @@ async def test_auth_rejection_async(app):
     """Verify invalid API key is rejected via async client."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        response = await ac.get(
-            "/status", headers={"X-API-Key": "bad-key-not-valid"}
-        )
+        response = await ac.get("/status", headers={"X-API-Key": "bad-key-not-valid"})
         assert response.status_code == 401
 
 
@@ -263,9 +259,7 @@ async def test_status_with_valid_key_async(app):
     """Verify authenticated status endpoint via async client."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        response = await ac.get(
-            "/status", headers={"X-API-Key": VALID_API_KEY}
-        )
+        response = await ac.get("/status", headers={"X-API-Key": VALID_API_KEY})
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "operational"
@@ -305,8 +299,7 @@ class TestCorrelateEndpoint:
 
     def test_correlate_rejects_empty_content(self, client, auth_headers):
         assert (
-            client.post("/correlate", json={"content": ""}, headers=auth_headers).status_code
-            == 422
+            client.post("/correlate", json={"content": ""}, headers=auth_headers).status_code == 422
         )
 
     def test_correlate_aggregates_and_dedupes(self, client, gateway, auth_headers):
@@ -353,9 +346,7 @@ class TestCorrelateEndpoint:
         # merged finding observed by all three reporting services.
         assert sorted(set(top["observed_by"])) == ["dataset_poison", "llm_redteam", "mcp_gateway"]
 
-    def test_correlate_partial_result_on_unavailable_service(
-        self, client, gateway, auth_headers
-    ):
+    def test_correlate_partial_result_on_unavailable_service(self, client, gateway, auth_headers):
         import httpx as _httpx
 
         def _post(url, **kwargs):
@@ -368,15 +359,12 @@ class TestCorrelateEndpoint:
             )
 
         with patch.object(gateway.app.state.http_client, "post", AsyncMock(side_effect=_post)):
-            resp = client.post(
-                "/correlate", json={"content": "benign"}, headers=auth_headers
-            )
+            resp = client.post("/correlate", json={"content": "benign"}, headers=auth_headers)
         assert resp.status_code == 503
         body = resp.json()
         assert body["complete"] is False
         assert body["correlation_mode"] == "fail_closed"
         assert body["service_status"]["model_privacy"] == "unavailable"
-
 
     def test_best_effort_mode_marks_partial_result_without_hiding_gap(
         self, client, gateway, auth_headers
