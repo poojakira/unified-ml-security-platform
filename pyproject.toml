@@ -19,7 +19,7 @@ dev = [
     "anyio>=4.14.2,<5",
     "fastapi>=0.142.1",
     "uvicorn[standard]>=0.30",
-    "ruff>=0.8",
+    "ruff==0.8.4",
     "pyright>=1.1",
 ]
 
@@ -58,4 +58,5 @@ testpaths = [
 addopts = "-ra -q --strict-markers --strict-config --cov=. --cov-report=xml --cov-report=term-missing --cov-fail-under=95"
 
 [tool.ruff]
-include = ["attacks/attack_v19_detector.py", "tests/test_attack_v19_detector.py"]
+# Check all maintained Python, including product services and integration tests.
+line-length = 100

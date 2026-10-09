@@ -5,8 +5,6 @@ independent of test-ordering (sibling health tests set a short placeholder key
 via os.environ.setdefault, which must not weaken these assertions).
 """
 
-import os
-
 import pytest
 from fastapi.testclient import TestClient
 
@@ -84,5 +82,5 @@ def test_direct_service_rejects_oversized_unparsed_body():
     from products.dataset_poison.server import app
 
     with TestClient(app) as client:
-        response = client.post('/scan', content=b'x' * (1024 * 1024 + 1))
+        response = client.post("/scan", content=b"x" * (1024 * 1024 + 1))
     assert response.status_code == 413

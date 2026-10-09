@@ -1,5 +1,7 @@
 """Health check test for dataset_poison product."""
+
 import os
+
 os.environ.setdefault("MLSEC_API_KEY", "test-key-ci")
 
 from fastapi.testclient import TestClient

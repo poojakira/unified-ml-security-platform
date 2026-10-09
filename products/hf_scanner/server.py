@@ -1,4 +1,5 @@
 """Minimal health-check server for hf_scanner product."""
+
 from __future__ import annotations
 
 import os

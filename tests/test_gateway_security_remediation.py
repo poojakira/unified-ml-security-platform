@@ -8,21 +8,11 @@ from types import SimpleNamespace
 
 
 def _load_gateway(monkeypatch, *, rate_limit: str = "300", correlations: str = "2"):
-    monkeypatch.setenv(
-        "GATEWAY_API_KEY", "gateway-test-key-that-is-at-least-32-characters"
-    )
-    monkeypatch.setenv(
-        "MCP_GATEWAY_API_KEY", "mcp-service-key-that-is-at-least-32-characters"
-    )
-    monkeypatch.setenv(
-        "LLM_REDTEAM_API_KEY", "llm-service-key-that-is-at-least-32-characters"
-    )
-    monkeypatch.setenv(
-        "DATASET_POISON_API_KEY", "dataset-service-key-that-is-at-least-32-chars"
-    )
-    monkeypatch.setenv(
-        "MODEL_PRIVACY_API_KEY", "privacy-service-key-that-is-at-least-32-chars"
-    )
+    monkeypatch.setenv("GATEWAY_API_KEY", "gateway-test-key-that-is-at-least-32-characters")
+    monkeypatch.setenv("MCP_GATEWAY_API_KEY", "mcp-service-key-that-is-at-least-32-characters")
+    monkeypatch.setenv("LLM_REDTEAM_API_KEY", "llm-service-key-that-is-at-least-32-characters")
+    monkeypatch.setenv("DATASET_POISON_API_KEY", "dataset-service-key-that-is-at-least-32-chars")
+    monkeypatch.setenv("MODEL_PRIVACY_API_KEY", "privacy-service-key-that-is-at-least-32-chars")
     monkeypatch.setenv("GATEWAY_RATE_LIMIT_RPM", rate_limit)
     monkeypatch.setenv("GATEWAY_MAX_CONCURRENT_CORRELATIONS", correlations)
     import gateway_server
@@ -89,9 +79,9 @@ def test_invalid_key_rotation_cannot_reset_peer_budget(monkeypatch):
 
     gateway = _load_gateway(monkeypatch, rate_limit="2")
     with TestClient(gateway.app) as client:
-        assert client.get('/status', headers={'X-API-Key': 'first'}).status_code == 401
-        assert client.get('/status', headers={'X-API-Key': 'second'}).status_code == 401
-        assert client.get('/status', headers={'X-API-Key': 'third'}).status_code == 429
+        assert client.get("/status", headers={"X-API-Key": "first"}).status_code == 401
+        assert client.get("/status", headers={"X-API-Key": "second"}).status_code == 401
+        assert client.get("/status", headers={"X-API-Key": "third"}).status_code == 429
 
 
 def test_correlate_body_size_is_capped_before_json_parsing(monkeypatch):
@@ -99,7 +89,7 @@ def test_correlate_body_size_is_capped_before_json_parsing(monkeypatch):
 
     gateway = _load_gateway(monkeypatch)
     with TestClient(gateway.app) as client:
-        response = client.post('/correlate', content=b'x' * (gateway.MAX_PROXY_BODY_BYTES + 1))
+        response = client.post("/correlate", content=b"x" * (gateway.MAX_PROXY_BODY_BYTES + 1))
     assert response.status_code == 413
 
 
@@ -107,5 +97,5 @@ def test_rate_state_has_a_hard_cardinality_bound(monkeypatch):
     gateway = _load_gateway(monkeypatch)
     for index in range(4096):
         assert gateway._consume_rate_limit(str(index))
-    assert not gateway._consume_rate_limit('overflow')
+    assert not gateway._consume_rate_limit("overflow")
     assert len(gateway._rate_windows) == 4096

@@ -10,8 +10,6 @@ Run with: py -m pytest tests/integration/ -v
 from __future__ import annotations
 
 import importlib
-import json
-import os
 
 import pytest
 from fastapi.testclient import TestClient
@@ -122,9 +120,7 @@ class TestIAMScannerIntegration:
         """Wildcard action on bedrock should be flagged."""
         policy = {
             "Version": "2012-10-17",
-            "Statement": [
-                {"Effect": "Allow", "Action": "bedrock:*", "Resource": "*"}
-            ],
+            "Statement": [{"Effect": "Allow", "Action": "bedrock:*", "Resource": "*"}],
         }
         response = client.post(
             "/scan/iam",
@@ -160,9 +156,7 @@ class TestIAMScannerIntegration:
         """iam:PassRole without conditions is a critical finding."""
         policy = {
             "Version": "2012-10-17",
-            "Statement": [
-                {"Effect": "Allow", "Action": "iam:PassRole", "Resource": "*"}
-            ],
+            "Statement": [{"Effect": "Allow", "Action": "iam:PassRole", "Resource": "*"}],
         }
         response = client.post(
             "/scan/iam",
@@ -227,7 +221,7 @@ class TestServiceProxy:
         if response.status_code >= 500:
             body = response.text
             assert "Traceback" not in body
-            assert "File \"/" not in body
+            assert 'File "/' not in body
             assert "site-packages" not in body
 
 
@@ -265,9 +259,7 @@ class TestAttackScenarios:
         # 1MB payload - should be rejected or handled gracefully
         large_policy = {
             "Version": "2012-10-17",
-            "Statement": [
-                {"Effect": "Allow", "Action": "s3:*", "Resource": "x" * 1_000_000}
-            ],
+            "Statement": [{"Effect": "Allow", "Action": "s3:*", "Resource": "x" * 1_000_000}],
         }
         response = client.post(
             "/scan/iam",

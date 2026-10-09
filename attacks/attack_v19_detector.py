@@ -401,8 +401,7 @@ def render_text(result: AnalysisResult) -> str:
                     f"Sub-technique: {item['sub_technique'] or 'None'}",
                     f"Matrix: {item['matrix']}",
                     f"Confidence: {item['confidence']}",
-                    "Evidence: "
-                    + " | ".join(f'"{quote}"' for quote in item["evidence"]),
+                    "Evidence: " + " | ".join(f'"{quote}"' for quote in item["evidence"]),
                     f"Recommended action: {item['recommended_action']}",
                 ]
             )
@@ -414,12 +413,8 @@ def render_text(result: AnalysisResult) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Analyze input against ATT&CK v19 seed rules."
-    )
-    parser.add_argument(
-        "input_file", nargs="?", help="File to analyze. Reads stdin when omitted."
-    )
+    parser = argparse.ArgumentParser(description="Analyze input against ATT&CK v19 seed rules.")
+    parser.add_argument("input_file", nargs="?", help="File to analyze. Reads stdin when omitted.")
     parser.add_argument("--format", choices=("text", "json"), default="text")
     args = parser.parse_args(argv)
 
@@ -437,9 +432,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"error: input file not found: {args.input_file}", file=sys.stderr)
             return 2
         except PermissionError:
-            print(
-                f"error: permission denied reading: {args.input_file}", file=sys.stderr
-            )
+            print(f"error: permission denied reading: {args.input_file}", file=sys.stderr)
             return 2
         except UnicodeDecodeError:
             print(

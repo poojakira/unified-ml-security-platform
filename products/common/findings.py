@@ -44,9 +44,7 @@ class Finding(BaseModel):
     matrix: str | None = None
     evidence: list[str] = Field(default_factory=list)
     recommended_action: str | None = None
-    detected_at: str = Field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    detected_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     @property
     def fingerprint(self) -> str:

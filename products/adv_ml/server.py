@@ -1,4 +1,5 @@
 """Minimal health-check server for adv_ml product."""
+
 from __future__ import annotations
 
 import os

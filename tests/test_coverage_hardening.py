@@ -59,18 +59,14 @@ def test_run_check_failure_and_timeout(tmp_path, monkeypatch):
     monkeypatch.setattr(
         subprocess,
         "run",
-        lambda *_args, **_kwargs: SimpleNamespace(
-            returncode=2, stdout="", stderr="boom"
-        ),
+        lambda *_args, **_kwargs: SimpleNamespace(returncode=2, stdout="", stderr="boom"),
     )
     failed = pm.run_check(tmp_path, check)
     assert failed["status"] == "FAIL"
     assert failed["returncode"] == 2
 
     def timeout(*_args, **_kwargs):
-        raise subprocess.TimeoutExpired(
-            cmd=["cmd"], timeout=1, output="partial", stderr="late"
-        )
+        raise subprocess.TimeoutExpired(cmd=["cmd"], timeout=1, output="partial", stderr="late")
 
     monkeypatch.setattr(subprocess, "run", timeout)
     timed = pm.run_check(tmp_path, check)
