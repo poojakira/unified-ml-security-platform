@@ -1,18 +1,5 @@
 # Unified ML Security Platform
 
-<!-- security-systems-poster -->
-## Research Poster
-
-**Security Systems / 07 — A Unified Control Plane for Machine-Learning Security Services**
-
-[![Research poster](poster/poster.png)](poster/poster_36x48.pdf)
-
-> Technical research poster (36 x 48 in). Click the image for the print-resolution **[PDF](poster/poster_36x48.pdf)**.
-> Poster measurements are dated snapshots at their printed commits. Use the repository evidence files for newer results; do not read the poster as a verification of the latest `main`.
-> Every metric on it is evidence-backed; historical/projected numbers are labeled and separated from current results.
-> Part of the *Pooja Kiran - Security Systems* engineering poster collection.
-<!-- security-systems-poster -->
-
 
 **Maintainer:** Pooja Kiran ([@poojakira](https://github.com/poojakira))
 
@@ -366,6 +353,19 @@ Based on the architecture docs and current gaps:
 ## Additional Documentation
 
 - [INCIDENT_RUNBOOK.md](INCIDENT_RUNBOOK.md) - gateway operational incident response
+
+<!-- security-systems-poster -->
+## Research Poster
+
+**Security Systems / 07 — A Unified Control Plane for Machine-Learning Security Services**
+
+[![Research poster](poster/poster.png)](poster/poster_36x48.pdf)
+
+> Technical research poster (36 x 48 in). Click the image for the print-resolution **[PDF](poster/poster_36x48.pdf)**.
+> Poster measurements are dated snapshots at their printed commits. Use the repository evidence files for newer results; do not read the poster as a verification of the latest `main`.
+> Every metric on it is evidence-backed; historical/projected numbers are labeled and separated from current results.
+> Part of the *Pooja Kiran - Security Systems* engineering poster collection.
+<!-- security-systems-poster -->
 
 ## License and Author
 
