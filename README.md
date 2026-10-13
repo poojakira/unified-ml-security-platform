@@ -1,3 +1,5 @@
+> **READ THIS LICENSE BEFORE USING THIS REPOSITORY.** Owner-controlled new releases are subject to the [proprietary All Rights Reserved LICENSE](LICENSE): copying, modification, and redistribution require written authorization except where law or GitHub's Terms allow. Previously granted Apache-2.0 rights remain valid for versions covered by that license; see the [historical license](docs/license-history/LICENSE-BEFORE-2026-10-13.txt). Third-party rights remain unaffected.
+
 # Unified ML Security Platform
 
 
@@ -369,7 +371,7 @@ Based on the architecture docs and current gaps:
 
 ## License and Author
 
-**License**: Apache License 2.0
+**License**: Proprietary / All Rights Reserved (previously Apache-2.0; historical grants preserved)
 
 **Author**: [poojakira](https://github.com/poojakira)
 
