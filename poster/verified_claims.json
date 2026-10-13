@@ -1,0 +1,54 @@
+{
+  "repository": "unified-ml-security-platform",
+  "title": "A Unified Control Plane for Machine-Learning Security Services",
+  "subtitle": "An Authenticated Gateway with Configurable ML Security Service Endpoints",
+  "license": "Apache-2.0",
+  "source_commit": "d3991135d20970a5c4c8a36fb49c5d254d282edd",
+  "test_commit": "d54336b5f5f058a4d756bf2c7a023ad8510bbd6f",
+  "ci_run": 37173681100,
+  "ci_date": "2026-10-04",
+  "cards": [
+    {
+      "value": "82",
+      "label": "tests passed in cited CI"
+    },
+    {
+      "value": "95.96%",
+      "label": "statement coverage at cited CI"
+    },
+    {
+      "value": "4",
+      "label": "synchronous service slots in configured topology"
+    },
+    {
+      "value": "Stubs",
+      "label": "local contract topology, not production products"
+    }
+  ],
+  "contribution": "A real authenticated FastAPI control plane with four production HTTP service slots, a local contract-test topology built from stubs, and a production Compose contract that requires externally released product images instead of pretending the stubs are product implementations.",
+  "methods": [
+    "Authenticate external callers at the gateway.",
+    "Strip caller-controlled sensitive headers and inject per-service credentials.",
+    "Route four synchronous service prefixes over an internal-only network.",
+    "Use local health-contract stubs to test topology without misrepresenting product logic.",
+    "Require explicit external product images in production Compose.",
+    "Validate unit, security, integration, image-build, and deployment-contract behavior in CI."
+  ],
+  "evidence": [
+    "Cited Python 3.12 CI: 82 passed; 95.96% statement coverage, same test job.",
+    "Source implements an authenticated gateway and four synchronous service slots. Local Compose exercises contract stubs.",
+    "Cited CI includes successful stub health and integration jobs; production product images must be supplied externally.",
+    "Image signing, attestation and release steps were skipped in the cited run. No deployed service, uptime or load SLO is established."
+  ],
+  "limitations": [
+    "Product business logic is owned by external repositories/images.",
+    "No production deployment, uptime, or load SLO is established.",
+    "Multi-replica shared rate limiting/state distribution requires deployment-specific infrastructure.",
+    "Batch tools such as HF provenance scanning and adversarial robustness are intentionally not forced behind synchronous HTTP routes."
+  ],
+  "reproduction": [
+    "git checkout d54336b5f5f058a4d756bf2c7a023ad8510bbd6f",
+    "Install the documented development dependencies; run python -m pytest tests/ -q. Use the cited job configuration when reproducing coverage.",
+    "Benchmark data, adapters and environment requirements are separate; consult poster/13_reproducibility.md and the claim ledger."
+  ]
+}
