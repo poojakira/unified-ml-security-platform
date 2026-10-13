@@ -15,8 +15,8 @@ Reproduced on current `main` (Python 3.12).
 
 | Metric | Verified snapshot value |
 |---|---:|
-| Core unit tests | 82 passing in current Python 3.12 CI; separate contract-stub and integration topology jobs also green |
-| Statement coverage | 95.96% in current Python 3.12 unit-test job |
+| Core unit tests | 99 passed locally on Python 3.12; network integration topology not executed |
+| Statement coverage | 95.96% locally under configured exclusions |
 | HTTP scan services | 4 (mcp_gateway, llm_redteam, dataset_poison, model_privacy) |
 | Health-only stub services | 2 (hf_scanner, adv_ml) — batch tools, not proxied |
 | Shared auth | constant-time API key, fail-closed (401/503) |
@@ -108,7 +108,7 @@ Batch/release gates are intentionally outside the synchronous proxy:
 
 6. **Shared detection contract**: Any service can use the `attacks/attack_v19_detector.py` module to classify findings against MITRE ATT&CK v19 (Enterprise, Mobile, ICS matrices). The detector uses regex-based pattern matching with 22 seed rules and returns structured detections with tactic, technique, sub-technique, confidence, evidence, and recommended actions.
 
-7. **CI validation**: GitHub Actions is manual-dispatch only for zero-cost operation. When explicitly started, it runs lint, type checking, unit tests, local contract-stub tests, topology integration tests, and blocking security/dependency scans. Those local stub checks prove routing/topology contracts only, never downstream product functionality.
+7. **CI validation**: GitHub Actions CI supports pushes, pull requests, and manual dispatch. It configures lint, type checking, unit tests, local contract-stub tests, topology integration tests, and blocking security/dependency scans. Those local stub checks prove routing/topology contracts only, never downstream product functionality.
 
 ## Design Decisions and Trade-offs
 
@@ -312,7 +312,7 @@ It provides 22 seed detection rules with regex patterns, covering techniques fro
 | Monitoring/alerting | ❌ Missing | No Prometheus metrics, no alerting rules |
 | Multi-host deployment | ❌ Missing | Single docker-compose host only |
 | TLS termination | Deployment responsibility | The control plane currently exposes HTTP; terminate TLS at the ingress/load balancer or service mesh |
-| Rate limiting | ❌ Missing | No request rate limiting on the gateway |
+| Rate limiting | Implemented | Bounded in-memory per-peer request windows; shared enforcement across replicas remains external |
 | Horizontal scaling | ❌ Missing | Single instance per service |
 | Backup/recovery | ❌ Missing | No persistent volumes, no backup strategy |
 | Incident runbook | ✅ Available | `RUNBOOK.md` with troubleshooting table |
@@ -381,22 +381,7 @@ Based on the architecture docs and current gaps:
 
 The hardest part of building a multi-service security platform is not writing any individual detector. It is making 7 independent services start together, stay healthy, fail gracefully, and produce results in a common format. This repo taught three things: (1) integration contracts matter more than implementation details at the platform layer; (2) stub services with health checks let you validate topology before implementations exist; and (3) a shared threat taxonomy (ATT&CK v19 in this case) gives every product a common language for reporting findings, even when their internals are completely different.
 
-<!-- repo-verification:start -->
-## Verification update — 2026-09-30
 
-- **Scope:** Account-wide `poojakira` repository pass covering source/configuration, CI/release workflows, security-hygiene gates, dependency/SAST controls, and documentation consistency.
-- **Remediation:** Pinned CI and release third-party actions to immutable revisions and re-ran the integrated platform gates.
-- **Verification state:** CI/CD Pipeline, Production Gate, Security Hygiene, and Documentation Integrity completed successfully after the hardening commit.
-- **Security note:** Cross-service health/integration evidence is repository test evidence; it does not establish external production deployment.
-- **Evidence boundary:** This update records repository and GitHub Actions evidence observed during the pass. It is not a claim of independent penetration testing, production deployment, or zero residual risk.
-<!-- repo-verification:end -->
-
-## Verification checkpoint — 2026-09-30
-
-- **Snapshot commit:** `1bc2eccdfb9127124b0b526e08437c6a350c1041`
-- **Status:** VERIFIED GREEN
-- **Evidence:** Security Hygiene, Documentation Integrity, Production Gate, and CI/CD Pipeline all completed successfully for the cited snapshot revision.
-- This checkpoint is intentionally date-bounded. It does not claim zero vulnerabilities or universal production readiness.
 
 
 ## Secret handling
@@ -436,3 +421,13 @@ source, tests, scripts, examples, benchmarks, validation helpers, and poster gen
 where present. Ruff's standard exclusions omit version-control metadata, virtual
 environments, and build/cache directories; generated poster HTML/PDF/PNG assets are
 not Python source. Passing these static checks does not establish runtime behavior or product effectiveness.
+
+## Current local verification — 2026-10-13
+
+Starting revision: `87e006eac0d28c8e3877eab15dddf65b36a2d102`. Python 3.12.14 on Linux; pytest 9.1.1, pytest-cov 7.1.0.
+
+- Command: `pytest --ignore=tests/integration`.
+- Result: 99 passed; 0 failed; statement coverage 95.96% under existing coverage exclusions.
+- Checks and limits: Ruff check/format, scoped Pyright and medium/high Bandit passed. Docker integration/build not run: Docker executable unavailable. Remote CI not re-run.
+- Scope: Internal service clients bypass environment proxies; malformed correlation responses produce fail-closed 503. Tests include contract stubs and do not establish downstream efficacy.
+- Earlier snapshots: [previos_runs.md](previos_runs.md). These local checks are not a complete file-by-file audit or proof of production readiness.

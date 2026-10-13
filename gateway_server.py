@@ -134,7 +134,8 @@ FORWARDED_REQUEST_HEADERS = frozenset(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage a shared httpx.AsyncClient across the application lifetime."""
-    app.state.http_client = httpx.AsyncClient(timeout=30.0)
+    # Fixed internal service URLs must not send their credentials to environment proxies.
+    app.state.http_client = httpx.AsyncClient(timeout=30.0, trust_env=False)
     yield
     await app.state.http_client.aclose()
 
@@ -268,9 +269,20 @@ async def correlate(
             if resp.status_code != 200:
                 service_status[service] = f"error_{resp.status_code}"
                 continue
+            try:
+                data = resp.json()
+                findings_payload = data.get("findings") if isinstance(data, dict) else None
+                if not isinstance(findings_payload, list) or any(
+                    not isinstance(item, dict) or not isinstance(item.get("severity", "info"), str)
+                    for item in findings_payload
+                ):
+                    raise ValueError("Invalid findings schema")
+            except ValueError:
+                service_status[service] = "invalid_response"
+                continue
             service_status[service] = "ok"
 
-            for finding in resp.json().get("findings", []):
+            for finding in findings_payload:
                 # De-duplicate on the identifying fields; merge observing sources.
                 key = "|".join(str(finding.get(f)) for f in ("rule_id", "technique", "title"))
                 if key in merged:

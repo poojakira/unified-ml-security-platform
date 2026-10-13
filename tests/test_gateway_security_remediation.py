@@ -99,3 +99,51 @@ def test_rate_state_has_a_hard_cardinality_bound(monkeypatch):
         assert gateway._consume_rate_limit(str(index))
     assert not gateway._consume_rate_limit("overflow")
     assert len(gateway._rate_windows) == 4096
+
+
+def test_correlate_malformed_upstream_fails_closed(monkeypatch):
+    import json
+
+    gateway = _load_gateway(monkeypatch)
+    monkeypatch.setattr(gateway, "SERVICE_URLS", {"mcp_gateway": "http://mcp-gateway:8080"})
+
+    class Response:
+        status_code = 200
+
+        @staticmethod
+        def json():
+            return {"findings": ["not-a-finding"]}
+
+    class Client:
+        async def post(self, *args, **kwargs):
+            return Response()
+
+    request = SimpleNamespace(app=SimpleNamespace(state=SimpleNamespace(http_client=Client())))
+    response = asyncio.run(gateway.correlate(request, {"content": "sample"}, "test-key"))
+    assert response.status_code == 503
+    body = json.loads(response.body)
+    assert body["service_status"] == {"mcp_gateway": "invalid_response"}
+    assert body["complete"] is False
+    Response.json = staticmethod(lambda: {"findings": [{"severity": []}]})
+    response = asyncio.run(gateway.correlate(request, {"content": "sample"}, "test-key"))
+    assert response.status_code == 503
+
+
+def test_internal_client_ignores_environment_proxy(monkeypatch):
+    gateway = _load_gateway(monkeypatch)
+    observed = {}
+
+    class Client:
+        def __init__(self, **kwargs):
+            observed.update(kwargs)
+
+        async def aclose(self):
+            pass
+
+    monkeypatch.setattr(gateway.httpx, "AsyncClient", Client)
+
+    async def scenario():
+        async with gateway.lifespan(gateway.app):
+            assert observed["trust_env"] is False
+
+    asyncio.run(scenario())
