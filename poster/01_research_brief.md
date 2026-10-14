@@ -64,4 +64,4 @@ docker compose config
 docker compose -f docker-compose.prod.yml config
 ```
 
-Expected core Python evidence: **76 passed**, **95.96% coverage**.
+Expected pinned CI Python 3.12 evidence: **82 passed**, **95.96% statement coverage**. The local Compose product containers are contract stubs, not real downstream products.
