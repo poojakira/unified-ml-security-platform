@@ -254,7 +254,7 @@ from measured load-test evidence rather than copying synthetic defaults.
 
 **SBOM generation**: The CI pipeline produces an SPDX JSON SBOM via Syft on every build.
 
-**Image signing**: The workflow contains optional image-signing support when signing credentials are configured; this repository does not treat signing as evidence of a deployed production release.
+**Build and release scope**: Ordinary main and pull-request CI builds the gateway image locally without registry publication. GitHub release creation requires explicit workflow dispatch on an existing version tag with `publish_release=true`; its default is false. Container publication and image signing are not performed by this validation workflow.
 
 **Dependabot**: Automated dependency update PRs via `.github/dependabot.yml`.
 
@@ -306,7 +306,7 @@ It provides 22 seed detection rules with regex patterns, covering techniques fro
 | Restart policy | ✅ Configured | `unless-stopped` on all services |
 | Non-root container | ✅ Configured | Gateway runs as `mlsec` user |
 | Network isolation | ✅ Configured | Internal bridge, no egress |
-| CI/CD pipeline | Configured | Lint, type check, tests, security scans, gateway image build/push, release creation; a successful current run must be verified per commit before claiming pass |
+| CI/CD pipeline | Configured | Lint, type check, tests, security scans, local gateway image build without publication; explicit opt-in version-tag dispatch for GitHub release creation. Verify the exact commit's successful run before claiming pass |
 | Secret management | ⚠️ Partial | Env vars with required syntax, but no vault integration |
 | Logging | ⚠️ Partial | Structured error logging in gateway, no centralized aggregation |
 | Monitoring/alerting | ❌ Missing | No Prometheus metrics, no alerting rules |

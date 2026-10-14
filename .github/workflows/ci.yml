@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: 'Publish release artifacts from a selected existing version tag'
+        type: boolean
+        default: false
+        required: false
 
 env:
   REGISTRY: ghcr.io
@@ -258,15 +264,12 @@ jobs:
           output-file: sbom.spdx.json
 
   build-and-push:
-    name: Build & Push Images
+    name: Build Gateway Image (no publish)
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    needs: [integration-tests, security-scan]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/tags/v'))
+    needs: [integration-tests, security-scan, dependency-audit, contract-stub-health-tests]
     permissions:
       contents: read
-      packages: write
-      id-token: write
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -275,54 +278,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
-      - name: Log in to Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Build and push gateway
+      - name: Build gateway image for validation
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25
         with:
           context: .
           file: Dockerfile.gateway
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          push: false
+          load: true
+          tags: local/gateway:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Do not publish stub product images
-        run: |
-          echo "Product images are built and released by their owning repositories."
-          echo "This repository publishes only the gateway; local products/ are integration-contract stubs."
-      - name: Sign images with Cosign
-        if: env.COSIGN_PRIVATE_KEY != ''
-        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
-        with:
-          cosign-release: 'latest'
-        env:
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-
-      - name: Sign and attest
-        if: env.COSIGN_PRIVATE_KEY != ''
-        run: |
-          for image in ${{ steps.meta.outputs.tags }}; do
-            cosign sign --yes "$image"
-          done
 
   validate-staging-deployment-plan:
     name: Validate Staging Deployment Plan
@@ -369,7 +334,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'workflow_dispatch' && inputs.publish_release && startsWith(github.ref, 'refs/tags/v')
     needs: [lint-and-typecheck, unit-tests, security-scan, build-and-push]
     permissions:
       contents: write
