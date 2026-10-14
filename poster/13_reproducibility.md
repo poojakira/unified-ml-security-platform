@@ -16,4 +16,6 @@ docker compose -f docker-compose.prod.yml config
 
 Expected core unit evidence: **82 passed**, **95.96% statement coverage**.
 
+Re-render the final poster PNG/PDF from this pinned source with the repository poster renderer; the separately configured pipeline validates only contract stubs and a gateway image, not deployed external products.
+
 Interpretation rule: local stub health checks validate the gateway/topology contract only. They do not establish downstream product functionality.
